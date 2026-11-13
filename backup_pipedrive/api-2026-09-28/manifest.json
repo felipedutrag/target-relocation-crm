@@ -1,0 +1,888 @@
+{
+  "atualizado_em": "2026-09-28T13:45:30.462Z",
+  "dominio": "target3",
+  "entidades": {
+    "activities": {
+      "registros": 2542,
+      "bytes": 5270579,
+      "sha256": "309cfca531e389ccb97eb1d67500510246302de7b4d286acc07002350c255f10"
+    },
+    "activityFields": {
+      "registros": 40,
+      "bytes": 20659,
+      "sha256": "52e86e9b9cd3150444b8ded748f16b95d85efdcbb32d962ad3415daa430833c2"
+    },
+    "activityTypes": {
+      "registros": 6,
+      "bytes": 1385,
+      "sha256": "fdfd070ebbed9c20a009415ca2ba7a1ce071c87dc728c7ab5916feb9ee202ba1"
+    },
+    "callLogs": {
+      "registros": 0,
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "currencies": {
+      "registros": 186,
+      "bytes": 29021,
+      "sha256": "0802ba6b1ee6dfd8df9da3d6c6a3c7c31c6a8ca28975d49653d129aec2688ade"
+    },
+    "dealFields": {
+      "registros": 79,
+      "bytes": 56791,
+      "sha256": "899523db8c2734c81534d7482ed0937d77cb3c4d4e65aaf0b1fde3c1f9d206bc"
+    },
+    "deals": {
+      "registros": 4344,
+      "bytes": 18974985,
+      "sha256": "1e1a4f36a26c25e8df7cfea558ae56aa78e9fbfe8978d8aec7601e79361de6bd"
+    },
+    "deals_excluidos": {
+      "registros": 0,
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "deals_flow": {
+      "registros": 4344,
+      "bytes": 73944231,
+      "sha256": "c174d0a55e79b92288248072c25e2d7eb7690677ab8ce197c6e3d16712706705"
+    },
+    "files": {
+      "registros": 274,
+      "bytes": 247642,
+      "sha256": "557958df975eee654f0f142812e3c8d4cc4c5cabbbc1eb5b7c527f68880713c4"
+    },
+    "filters": {
+      "registros": 80,
+      "bytes": 29287,
+      "sha256": "e843bab082facda206359f923d74985991c029fe3cbda2dde5da2f11f6bbc0d7"
+    },
+    "goals": {
+      "registros": 1,
+      "bytes": 23,
+      "sha256": "43dabd74e22429a118d3ebf7594c127505c88d73953d83f225a5efae52768533"
+    },
+    "leadLabels": {
+      "registros": 3,
+      "bytes": 536,
+      "sha256": "de39c10adc4f58976eb745305675d1c78b09bf97047973c4362afc7c5aa2c321"
+    },
+    "leads": {
+      "registros": 0,
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "leadSources": {
+      "registros": 13,
+      "bytes": 406,
+      "sha256": "7423b35877554c08334f5b5d7541487ff937800427593bba1c3db32cd807b4e6"
+    },
+    "leads_arquivados": {
+      "registros": 0,
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "mailThreads_archive": {
+      "registros": 0,
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "mailThreads_drafts": {
+      "registros": 0,
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "mailThreads_inbox": {
+      "registros": 1,
+      "bytes": 2597,
+      "sha256": "e1c2ec1e625313aa4a5d0767c1960e58facfcabe10a8c75fcbd8d9a179d18d1c"
+    },
+    "mailThreads_sent": {
+      "registros": 0,
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "noteFields": {
+      "registros": 15,
+      "bytes": 5607,
+      "sha256": "079091d316184d06d48ce4e0a97ec50f30df24390178d273ec03fe2842e94357"
+    },
+    "notes": {
+      "registros": 10966,
+      "bytes": 21863870,
+      "sha256": "6b37f1db5cd2ceaf9daaeed76258aa46755d8fb7ff1d67126315549772e4305d"
+    },
+    "organizationFields": {
+      "registros": 38,
+      "bytes": 22171,
+      "sha256": "2f61e1efb5d748826feaaa82a2404be591f1573bd536922cf4536c32b75ef804"
+    },
+    "organizations": {
+      "registros": 2973,
+      "bytes": 4946278,
+      "sha256": "4c7fa6be569528c08d68e7178b1df593dd8ee238438e892c6a57f5a53f3f3b32"
+    },
+    "permissionSets": {
+      "registros": 6,
+      "bytes": 1716,
+      "sha256": "0e392f1571e1b75b86fce3d7004fe3e4ea0463dc213d294d41ae4614aba40d4b"
+    },
+    "personFields": {
+      "registros": 26,
+      "bytes": 16395,
+      "sha256": "0007c0410e08ecb8d88ef97c7c963d2b7ec085f985d968d9df513f342daf7fd1"
+    },
+    "persons": {
+      "registros": 3369,
+      "bytes": 7927828,
+      "sha256": "93dd8c3caab088d0d596ccc039390eb8a86df8d95262941a431e868ea78fe650"
+    },
+    "pipelines": {
+      "registros": 2,
+      "bytes": 456,
+      "sha256": "8f75b94835ff839850e6369a8f39edd3c55364824c75840f51194ae1cdc7cefd"
+    },
+    "productFields": {
+      "registros": 14,
+      "bytes": 8453,
+      "sha256": "e3f9a02125d133547c53cd683332014ed934eeda1580d4c4c8296758534be18d"
+    },
+    "products": {
+      "registros": 0,
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "projects": {
+      "registros": 0,
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "projectTemplates": {
+      "registros": 0,
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "roles": {
+      "registros": 1,
+      "bytes": 335,
+      "sha256": "a54c994acfb727543ae04f7b4283050143bcab7a1d9be17377dc9012004dbbfd"
+    },
+    "stages": {
+      "registros": 16,
+      "bytes": 5187,
+      "sha256": "f0fbcb8ef1e2b8311bb178ac62c13dd8cfa63aae00eaea571cd7e3dd6c481634"
+    },
+    "users": {
+      "registros": 3,
+      "bytes": 2354,
+      "sha256": "9b13ed928d01064aeac04aab32ad71a7dac65534d80bad3b2092eb99051bec22"
+    },
+    "webhooks": {
+      "registros": 8,
+      "bytes": 5542,
+      "sha256": "5760ec32f616433be4207c7ece1d3ed71d9cbfcf5f66b2e036f980bbc58ca68d"
+    }
+  },
+  "anexos": {
+    "total_registros": 274,
+    "uploads_s3": 225,
+    "links_externos": 49,
+    "uploads_baixados": 52,
+    "uploads_faltando": [
+      {
+        "id": 109,
+        "nome": "blob"
+      },
+      {
+        "id": 110,
+        "nome": "image.png"
+      },
+      {
+        "id": 111,
+        "nome": "blob"
+      },
+      {
+        "id": 112,
+        "nome": "image.png"
+      },
+      {
+        "id": 113,
+        "nome": "image.png"
+      },
+      {
+        "id": 114,
+        "nome": "blob"
+      },
+      {
+        "id": 115,
+        "nome": "blob"
+      },
+      {
+        "id": 116,
+        "nome": "image.png"
+      },
+      {
+        "id": 117,
+        "nome": "blob"
+      },
+      {
+        "id": 118,
+        "nome": "image.png"
+      },
+      {
+        "id": 119,
+        "nome": "blob"
+      },
+      {
+        "id": 120,
+        "nome": "image.png"
+      },
+      {
+        "id": 121,
+        "nome": "blob"
+      },
+      {
+        "id": 122,
+        "nome": "image.png"
+      },
+      {
+        "id": 123,
+        "nome": "blob"
+      },
+      {
+        "id": 124,
+        "nome": "image.png"
+      },
+      {
+        "id": 125,
+        "nome": "blob"
+      },
+      {
+        "id": 126,
+        "nome": "image.png"
+      },
+      {
+        "id": 127,
+        "nome": "blob"
+      },
+      {
+        "id": 128,
+        "nome": "image.png"
+      },
+      {
+        "id": 129,
+        "nome": "blob"
+      },
+      {
+        "id": 130,
+        "nome": "image.png"
+      },
+      {
+        "id": 131,
+        "nome": "blob"
+      },
+      {
+        "id": 132,
+        "nome": "image.png"
+      },
+      {
+        "id": 133,
+        "nome": "blob"
+      },
+      {
+        "id": 134,
+        "nome": "image.png"
+      },
+      {
+        "id": 135,
+        "nome": "blob"
+      },
+      {
+        "id": 136,
+        "nome": "image.png"
+      },
+      {
+        "id": 139,
+        "nome": "image.png"
+      },
+      {
+        "id": 140,
+        "nome": "blob"
+      },
+      {
+        "id": 141,
+        "nome": "blob"
+      },
+      {
+        "id": 142,
+        "nome": "image.png"
+      },
+      {
+        "id": 143,
+        "nome": "blob"
+      },
+      {
+        "id": 144,
+        "nome": "image.png"
+      },
+      {
+        "id": 145,
+        "nome": "blob"
+      },
+      {
+        "id": 146,
+        "nome": "image.png"
+      },
+      {
+        "id": 147,
+        "nome": "blob"
+      },
+      {
+        "id": 148,
+        "nome": "image.png"
+      },
+      {
+        "id": 149,
+        "nome": "blob"
+      },
+      {
+        "id": 150,
+        "nome": "image.png"
+      },
+      {
+        "id": 151,
+        "nome": "blob"
+      },
+      {
+        "id": 152,
+        "nome": "image.png"
+      },
+      {
+        "id": 153,
+        "nome": "blob"
+      },
+      {
+        "id": 154,
+        "nome": "image.png"
+      },
+      {
+        "id": 155,
+        "nome": "blob"
+      },
+      {
+        "id": 156,
+        "nome": "image.png"
+      },
+      {
+        "id": 157,
+        "nome": "blob"
+      },
+      {
+        "id": 158,
+        "nome": "image.png"
+      },
+      {
+        "id": 159,
+        "nome": "blob"
+      },
+      {
+        "id": 160,
+        "nome": "image.png"
+      },
+      {
+        "id": 161,
+        "nome": "image.png"
+      },
+      {
+        "id": 162,
+        "nome": "blob"
+      },
+      {
+        "id": 163,
+        "nome": "blob"
+      },
+      {
+        "id": 164,
+        "nome": "image.png"
+      },
+      {
+        "id": 165,
+        "nome": "blob"
+      },
+      {
+        "id": 166,
+        "nome": "image.png"
+      },
+      {
+        "id": 167,
+        "nome": "blob"
+      },
+      {
+        "id": 168,
+        "nome": "image.png"
+      },
+      {
+        "id": 169,
+        "nome": "blob"
+      },
+      {
+        "id": 170,
+        "nome": "image.png"
+      },
+      {
+        "id": 171,
+        "nome": "blob"
+      },
+      {
+        "id": 172,
+        "nome": "image.png"
+      },
+      {
+        "id": 173,
+        "nome": "blob"
+      },
+      {
+        "id": 174,
+        "nome": "image.png"
+      },
+      {
+        "id": 175,
+        "nome": "blob"
+      },
+      {
+        "id": 176,
+        "nome": "image.png"
+      },
+      {
+        "id": 177,
+        "nome": "blob"
+      },
+      {
+        "id": 178,
+        "nome": "image.png"
+      },
+      {
+        "id": 179,
+        "nome": "image.png"
+      },
+      {
+        "id": 180,
+        "nome": "blob"
+      },
+      {
+        "id": 181,
+        "nome": "image.png"
+      },
+      {
+        "id": 182,
+        "nome": "blob"
+      },
+      {
+        "id": 183,
+        "nome": "image.png"
+      },
+      {
+        "id": 184,
+        "nome": "blob"
+      },
+      {
+        "id": 185,
+        "nome": "blob"
+      },
+      {
+        "id": 186,
+        "nome": "image.png"
+      },
+      {
+        "id": 187,
+        "nome": "blob"
+      },
+      {
+        "id": 188,
+        "nome": "image.png"
+      },
+      {
+        "id": 189,
+        "nome": "blob"
+      },
+      {
+        "id": 190,
+        "nome": "image.png"
+      },
+      {
+        "id": 191,
+        "nome": "blob"
+      },
+      {
+        "id": 192,
+        "nome": "image.png"
+      },
+      {
+        "id": 193,
+        "nome": "image.png"
+      },
+      {
+        "id": 194,
+        "nome": "blob"
+      },
+      {
+        "id": 195,
+        "nome": "blob"
+      },
+      {
+        "id": 196,
+        "nome": "image.png"
+      },
+      {
+        "id": 197,
+        "nome": "blob"
+      },
+      {
+        "id": 198,
+        "nome": "image.png"
+      },
+      {
+        "id": 199,
+        "nome": "image.png"
+      },
+      {
+        "id": 200,
+        "nome": "blob"
+      },
+      {
+        "id": 201,
+        "nome": "blob"
+      },
+      {
+        "id": 202,
+        "nome": "image.png"
+      },
+      {
+        "id": 203,
+        "nome": "blob"
+      },
+      {
+        "id": 204,
+        "nome": "image.png"
+      },
+      {
+        "id": 205,
+        "nome": "image.png"
+      },
+      {
+        "id": 206,
+        "nome": "blob"
+      },
+      {
+        "id": 207,
+        "nome": "image.png"
+      },
+      {
+        "id": 208,
+        "nome": "blob"
+      },
+      {
+        "id": 209,
+        "nome": "blob"
+      },
+      {
+        "id": 210,
+        "nome": "image.png"
+      },
+      {
+        "id": 211,
+        "nome": "image.png"
+      },
+      {
+        "id": 212,
+        "nome": "blob"
+      },
+      {
+        "id": 213,
+        "nome": "blob"
+      },
+      {
+        "id": 214,
+        "nome": "image.png"
+      },
+      {
+        "id": 215,
+        "nome": "image.png"
+      },
+      {
+        "id": 216,
+        "nome": "blob"
+      },
+      {
+        "id": 217,
+        "nome": "blob"
+      },
+      {
+        "id": 218,
+        "nome": "image.png"
+      },
+      {
+        "id": 219,
+        "nome": "blob"
+      },
+      {
+        "id": 220,
+        "nome": "image.png"
+      },
+      {
+        "id": 221,
+        "nome": "export-partial-14728458-4-1789399046809.jsonl.gz"
+      },
+      {
+        "id": 222,
+        "nome": "deals-24624701-4.xlsx"
+      },
+      {
+        "id": 223,
+        "nome": "deals-24624701-4.xlsx"
+      },
+      {
+        "id": 224,
+        "nome": "export-partial-14728458-5-1789401339247.jsonl.gz"
+      },
+      {
+        "id": 225,
+        "nome": "deals-24624701-5.xlsx"
+      },
+      {
+        "id": 226,
+        "nome": "deals-24624701-5.xlsx"
+      },
+      {
+        "id": 227,
+        "nome": "export-partial-14728458-6-1789412805582.jsonl.gz"
+      },
+      {
+        "id": 228,
+        "nome": "deals-24624701-6.xlsx"
+      },
+      {
+        "id": 229,
+        "nome": "deals-24624701-6.xlsx"
+      },
+      {
+        "id": 230,
+        "nome": "export-partial-14728458-7-1789657039500.jsonl.gz"
+      },
+      {
+        "id": 231,
+        "nome": "deals-24624701-7.xlsx"
+      },
+      {
+        "id": 232,
+        "nome": "deals-24624701-7.xlsx"
+      },
+      {
+        "id": 233,
+        "nome": "export-partial-14728458-8-1789659878622.jsonl.gz"
+      },
+      {
+        "id": 234,
+        "nome": "deals-24624701-8.xlsx"
+      },
+      {
+        "id": 235,
+        "nome": "deals-24624701-8.xlsx"
+      },
+      {
+        "id": 236,
+        "nome": "export-partial-14728458-9-1789660594032.jsonl.gz"
+      },
+      {
+        "id": 237,
+        "nome": "deals-24624701-9.xlsx"
+      },
+      {
+        "id": 238,
+        "nome": "deals-24624701-9.xlsx"
+      },
+      {
+        "id": 239,
+        "nome": "export-partial-14728458-10-1789663311256.jsonl.gz"
+      },
+      {
+        "id": 240,
+        "nome": "deals-24624701-10.xlsx"
+      },
+      {
+        "id": 241,
+        "nome": "deals-24624701-10.xlsx"
+      },
+      {
+        "id": 242,
+        "nome": "export-partial-14728458-11-1789663987250.jsonl.gz"
+      },
+      {
+        "id": 243,
+        "nome": "deals-24624701-11.xlsx"
+      },
+      {
+        "id": 244,
+        "nome": "deals-24624701-11.xlsx"
+      },
+      {
+        "id": 245,
+        "nome": "export-partial-14728458-12-1789664452253.jsonl.gz"
+      },
+      {
+        "id": 246,
+        "nome": "deals-24624701-12.xlsx"
+      },
+      {
+        "id": 247,
+        "nome": "deals-24624701-12.xlsx"
+      },
+      {
+        "id": 248,
+        "nome": "export-partial-14728458-13-1790601822055.jsonl.gz"
+      },
+      {
+        "id": 249,
+        "nome": "leads-24624701-13.csv"
+      },
+      {
+        "id": 250,
+        "nome": "export-partial-14728458-14-1790601830351.jsonl.gz"
+      },
+      {
+        "id": 251,
+        "nome": "deals-24624701-14.csv"
+      },
+      {
+        "id": 252,
+        "nome": "export-partial-14728458-15-1790601864407.jsonl.gz"
+      },
+      {
+        "id": 253,
+        "nome": "organizations-24624701-15.csv"
+      },
+      {
+        "id": 254,
+        "nome": "export-partial-14728458-16-1790601866666.jsonl.gz"
+      },
+      {
+        "id": 255,
+        "nome": "people-24624701-16.csv"
+      },
+      {
+        "id": 256,
+        "nome": "export-partial-14728458-17-1790601869493.jsonl.gz"
+      },
+      {
+        "id": 257,
+        "nome": "products-24624701-17.csv"
+      },
+      {
+        "id": 258,
+        "nome": "export-partial-14728458-18-1790601881275.jsonl.gz"
+      },
+      {
+        "id": 259,
+        "nome": "projects-24624701-18.csv"
+      },
+      {
+        "id": 260,
+        "nome": "export-partial-14728458-20-1790601891071.jsonl.gz"
+      },
+      {
+        "id": 261,
+        "nome": "files-24624701-20.csv"
+      },
+      {
+        "id": 262,
+        "nome": "leads-24624701-13.csv"
+      },
+      {
+        "id": 263,
+        "nome": "export-partial-14728458-19-1790601887814.jsonl.gz"
+      },
+      {
+        "id": 264,
+        "nome": "notes-24624701-19.csv"
+      },
+      {
+        "id": 265,
+        "nome": "deals-24624701-14.csv"
+      },
+      {
+        "id": 266,
+        "nome": "organizations-24624701-15.csv"
+      },
+      {
+        "id": 267,
+        "nome": "people-24624701-16.csv"
+      },
+      {
+        "id": 268,
+        "nome": "products-24624701-17.csv"
+      },
+      {
+        "id": 269,
+        "nome": "projects-24624701-18.csv"
+      },
+      {
+        "id": 270,
+        "nome": "notes-24624701-19.csv"
+      },
+      {
+        "id": 271,
+        "nome": "files-24624701-20.csv"
+      },
+      {
+        "id": 272,
+        "nome": "export-partial-14728458-21-1790601948449.jsonl.gz"
+      },
+      {
+        "id": 273,
+        "nome": "activities-24624701-21.csv"
+      },
+      {
+        "id": 274,
+        "nome": "export-partial-14728458-22-1790601961025.jsonl.gz"
+      },
+      {
+        "id": 275,
+        "nome": "activities-24624701-22.csv"
+      },
+      {
+        "id": 276,
+        "nome": "export-partial-14728458-23-1790601966636.jsonl.gz"
+      },
+      {
+        "id": 277,
+        "nome": "activities-24624701-23.csv"
+      },
+      {
+        "id": 278,
+        "nome": "activities-24624701-21.csv"
+      },
+      {
+        "id": 279,
+        "nome": "export-partial-14728458-24-1790601971119.jsonl.gz"
+      },
+      {
+        "id": 280,
+        "nome": "activities-24624701-24.csv"
+      },
+      {
+        "id": 281,
+        "nome": "activities-24624701-22.csv"
+      },
+      {
+        "id": 282,
+        "nome": "activities-24624701-23.csv"
+      },
+      {
+        "id": 283,
+        "nome": "activities-24624701-24.csv"
+      }
+    ]
+  },
+  "avisos": [],
+  "interrompido": "Cota diária esgotada — liberada em ~17.2 h (29/09/2026, 04:00:01)"
+}
