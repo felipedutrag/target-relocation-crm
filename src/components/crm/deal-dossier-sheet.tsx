@@ -162,6 +162,7 @@ export function DealDossierSheet({ dealId, onClose, onUpdated }: DealDossierShee
   }
 
   const deal = data?.deal;
+  const currentStage = data?.stages.find((st) => st.id === deal?.stage_id);
   const douNotes = data?.notes.filter((n) => n.note_category === "dou_authorization") || [];
   const rfNotes = data?.notes.filter((n) => n.note_category === "enrichment_score") || [];
   const emailSeqNotes = data?.notes.filter((n) => n.note_category === "email_sequence") || [];
@@ -174,7 +175,7 @@ export function DealDossierSheet({ dealId, onClose, onUpdated }: DealDossierShee
     <Sheet open={dealId !== null} onOpenChange={(open) => !open && onClose()}>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-3xl lg:max-w-4xl p-0 flex flex-col bg-background border-border"
+        className="w-full sm:max-w-2xl lg:max-w-3xl xl:max-w-4xl p-0 flex flex-col bg-background border-border overflow-hidden"
       >
         {loading && !data ? (
           <div className="p-6 space-y-4">
@@ -186,7 +187,7 @@ export function DealDossierSheet({ dealId, onClose, onUpdated }: DealDossierShee
         ) : deal ? (
           <>
             <SheetHeader className="p-5 pb-4 border-b border-border bg-card/50">
-              <div className="flex flex-wrap items-start justify-between gap-3 pr-6">
+              <div className="flex flex-wrap items-start justify-between gap-3 pr-10">
                 <div className="space-y-1.5 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="outline" className="font-mono text-xs">
@@ -260,16 +261,18 @@ export function DealDossierSheet({ dealId, onClose, onUpdated }: DealDossierShee
               </div>
 
               {/* Quick stage / status / value controls */}
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5 pt-3">
-                <div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-3">
+                <div className="min-w-0">
                   <Label className="text-[11px] text-muted-foreground">Etapa do Funil</Label>
                   <Select
                     value={String(deal.stage_id)}
                     onValueChange={(v) => patchDeal({ stage_id: Number(v) })}
                     disabled={saving}
                   >
-                    <SelectTrigger className="h-8 text-xs mt-1">
-                      <SelectValue />
+                    <SelectTrigger className="h-8 w-full text-xs mt-1">
+                      <SelectValue>
+                        {currentStage ? `${currentStage.order_nr}. ${currentStage.name}` : "Selecionar etapa"}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {data.stages.map((st) => (
@@ -281,33 +284,39 @@ export function DealDossierSheet({ dealId, onClose, onUpdated }: DealDossierShee
                   </Select>
                 </div>
 
-                <div>
+                <div className="min-w-0">
                   <Label className="text-[11px] text-muted-foreground">Status</Label>
                   <Select
                     value={deal.status}
                     onValueChange={(v) => patchDeal({ status: v })}
                     disabled={saving}
                   >
-                    <SelectTrigger className="h-8 text-xs mt-1">
-                      <SelectValue />
+                    <SelectTrigger className="h-8 w-full text-xs mt-1">
+                      <SelectValue>
+                        {deal.status === "won"
+                          ? "Ganho (Won)"
+                          : deal.status === "lost"
+                            ? "Perdido (Lost)"
+                            : "Aberto (Open)"}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="open">Aberto</SelectItem>
-                      <SelectItem value="won">Ganho</SelectItem>
-                      <SelectItem value="lost">Perdido</SelectItem>
+                      <SelectItem value="open">Aberto (Open)</SelectItem>
+                      <SelectItem value="won">Ganho (Won)</SelectItem>
+                      <SelectItem value="lost">Perdido (Lost)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div>
+                <div className="min-w-0">
                   <Label className="text-[11px] text-muted-foreground">Proprietário</Label>
                   <Select
                     value={deal.owner_name || "Klaus"}
                     onValueChange={(v) => patchDeal({ owner_name: v })}
                     disabled={saving}
                   >
-                    <SelectTrigger className="h-8 text-xs mt-1">
-                      <SelectValue />
+                    <SelectTrigger className="h-8 w-full text-xs mt-1">
+                      <SelectValue>{deal.owner_name || "Klaus"}</SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Klaus">Klaus</SelectItem>
@@ -317,19 +326,19 @@ export function DealDossierSheet({ dealId, onClose, onUpdated }: DealDossierShee
                   </Select>
                 </div>
 
-                <div>
+                <div className="min-w-0">
                   <Label className="text-[11px] text-muted-foreground">Valor ({deal.currency})</Label>
-                  <div className="flex gap-1 mt-1">
+                  <div className="flex items-center gap-1.5 mt-1 min-w-0">
                     <Input
                       type="number"
                       value={editValue}
                       onChange={(e) => setEditValue(e.target.value)}
-                      className="h-8 text-xs"
+                      className="h-8 text-xs font-mono flex-1 min-w-0"
                     />
                     <Button
                       size="sm"
                       variant="secondary"
-                      className="h-8 px-2.5 text-xs"
+                      className="h-8 px-2.5 text-xs shrink-0"
                       disabled={saving}
                       onClick={() => patchDeal({ value: Number(editValue || 0) })}
                     >
@@ -348,8 +357,8 @@ export function DealDossierSheet({ dealId, onClose, onUpdated }: DealDossierShee
               }
               className="flex-1 flex flex-col min-h-0"
             >
-              <div className="px-5 pt-2 border-b border-border bg-muted/20">
-                <TabsList className="h-9 flex-wrap">
+              <div className="px-5 py-2.5 border-b border-border bg-muted/20">
+                <TabsList className="w-full h-auto flex-wrap justify-start gap-1 bg-muted/60 p-1 rounded-lg">
                   <TabsTrigger value="intelligence" className="text-xs gap-1.5">
                     <Sparkles className="h-3.5 w-3.5" />
                     Inteligência DOU & IA
@@ -377,7 +386,8 @@ export function DealDossierSheet({ dealId, onClose, onUpdated }: DealDossierShee
                 </TabsList>
               </div>
 
-              <ScrollArea className="flex-1 p-5">
+              <ScrollArea className="flex-1 min-h-0">
+                <div className="p-5 space-y-4">
                 {/* TAB 1: INTELIGÊNCIA DOU & IA */}
                 <TabsContent value="intelligence" className="mt-0 space-y-4">
                   {/* Contato & Empresa Resumo */}
@@ -432,9 +442,9 @@ export function DealDossierSheet({ dealId, onClose, onUpdated }: DealDossierShee
                           </div>
                         )}
                         {deal.lost_reason && (
-                          <Badge variant="destructive" className="mt-1">
+                          <div className="mt-2 rounded-md border border-rose-500/30 bg-rose-500/10 px-2.5 py-1.5 text-[11px] font-medium text-rose-500 dark:text-rose-400 break-words">
                             Motivo perda: {deal.lost_reason}
-                          </Badge>
+                          </div>
                         )}
                       </CardContent>
                     </Card>
@@ -446,12 +456,12 @@ export function DealDossierSheet({ dealId, onClose, onUpdated }: DealDossierShee
                     return (
                       <Card key={n.id} className="border-indigo-500/30 bg-indigo-500/5">
                         <CardHeader className="pb-2">
-                          <div className="flex items-center justify-between">
-                            <CardTitle className="text-sm flex items-center gap-2 text-indigo-300">
-                              <ShieldCheck className="h-4 w-4" />
-                              Autorização Publicada no DOU ({meta?.expat_count || 1} colaborador)
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <CardTitle className="text-sm flex items-center gap-2 text-indigo-600 dark:text-indigo-300">
+                              <ShieldCheck className="h-4 w-4 shrink-0" />
+                              <span>Autorização Publicada no DOU ({meta?.expat_count || 1} colaborador)</span>
                             </CardTitle>
-                            <Badge variant="outline" className="font-mono text-[11px]">
+                            <Badge variant="outline" className="font-mono text-[11px] shrink-0">
                               {meta?.process_number || deal.dou_process || "DOU"}
                             </Badge>
                           </div>
@@ -761,7 +771,15 @@ export function DealDossierSheet({ dealId, onClose, onUpdated }: DealDossierShee
                         />
                         <Select value={newActType} onValueChange={(v) => setNewActType(v ?? "call")}>
                           <SelectTrigger className="h-8 text-xs">
-                            <SelectValue />
+                            <SelectValue>
+                              {newActType === "call"
+                                ? "Chamada"
+                                : newActType === "task"
+                                  ? "Tarefa"
+                                  : newActType === "meeting"
+                                    ? "Reunião"
+                                    : "E-mail"}
+                            </SelectValue>
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="call">Chamada</SelectItem>
@@ -978,6 +996,7 @@ export function DealDossierSheet({ dealId, onClose, onUpdated }: DealDossierShee
                     </>
                   )}
                 </TabsContent>
+                </div>
               </ScrollArea>
             </Tabs>
           </>

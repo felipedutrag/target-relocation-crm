@@ -148,7 +148,7 @@ export function ProposalsView({ onOpenDeal }: ProposalsViewProps) {
       </div>
 
       <Tabs defaultValue="proposals" className="space-y-4">
-        <TabsList>
+        <TabsList className="h-auto flex-wrap gap-1 p-1">
           <TabsTrigger value="proposals">Propostas Emitidas ({proposals.length})</TabsTrigger>
           <TabsTrigger value="catalog">Catálogo Oficial ({services.length} serviços)</TabsTrigger>
         </TabsList>
@@ -250,8 +250,8 @@ export function ProposalsView({ onOpenDeal }: ProposalsViewProps) {
                 className="h-8 flex-1 min-w-[220px] text-xs"
               />
               <Select value={countryFilter} onValueChange={(v) => setCountryFilter(v ?? "all")}>
-                <SelectTrigger className="h-8 w-[160px] text-xs">
-                  <SelectValue placeholder="País" />
+                <SelectTrigger className="h-8 w-[175px] text-xs">
+                  <SelectValue>{countryFilter === "all" ? "Todos Países" : countryFilter}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos Países</SelectItem>
@@ -262,8 +262,8 @@ export function ProposalsView({ onOpenDeal }: ProposalsViewProps) {
                 </SelectContent>
               </Select>
               <Select value={catFilter} onValueChange={(v) => setCatFilter(v ?? "all")}>
-                <SelectTrigger className="h-8 w-[180px] text-xs">
-                  <SelectValue placeholder="Categoria" />
+                <SelectTrigger className="h-8 w-[195px] text-xs">
+                  <SelectValue>{catFilter === "all" ? "Todas Categorias" : catFilter}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas Categorias</SelectItem>
@@ -440,7 +440,7 @@ export function ProposalsView({ onOpenDeal }: ProposalsViewProps) {
                 <Label className="text-xs">Moeda</Label>
                 <Select value={currency} onValueChange={(v) => setCurrency(v as "BRL" | "USD")}>
                   <SelectTrigger className="mt-1">
-                    <SelectValue />
+                    <SelectValue>{currency === "BRL" ? "BRL (R$)" : "USD ($)"}</SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="BRL">BRL (R$)</SelectItem>
@@ -464,7 +464,7 @@ export function ProposalsView({ onOpenDeal }: ProposalsViewProps) {
                   }}
                 >
                   <SelectTrigger className="h-7 w-[240px] text-xs">
-                    <SelectValue placeholder="+ Adicionar serviço do catálogo" />
+                    <SelectValue>+ Adicionar serviço do catálogo</SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {services.map((s) => (

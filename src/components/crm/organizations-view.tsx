@@ -177,7 +177,7 @@ export function OrganizationsView({ onOpenDeal, initialSelectedId = null }: Orga
             }}
           >
             <SelectTrigger className="h-8 w-[180px] text-xs">
-              <SelectValue placeholder="Etiqueta" />
+              <SelectValue>{label === "all" ? "Todas Etiquetas" : label}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas Etiquetas</SelectItem>
@@ -269,10 +269,10 @@ export function OrganizationsView({ onOpenDeal, initialSelectedId = null }: Orga
 
       {/* Organization Dossier Sheet */}
       <Sheet open={selectedId !== null} onOpenChange={(o) => !o && setSelectedId(null)}>
-        <SheetContent className="w-full sm:max-w-xl p-0 flex flex-col">
+        <SheetContent className="w-full sm:max-w-xl lg:max-w-2xl p-0 flex flex-col overflow-hidden">
           {detail?.organization && (
             <>
-              <SheetHeader className="p-5 border-b border-border">
+              <SheetHeader className="p-5 border-b border-border pr-12">
                 <SheetTitle className="text-lg">{detail.organization.name}</SheetTitle>
                 <SheetDescription className="flex flex-wrap gap-3 text-xs">
                   {detail.organization.address && (
@@ -289,7 +289,8 @@ export function OrganizationsView({ onOpenDeal, initialSelectedId = null }: Orga
                   )}
                 </SheetDescription>
               </SheetHeader>
-              <ScrollArea className="flex-1 p-5 space-y-5">
+              <ScrollArea className="flex-1 min-h-0">
+                <div className="p-5 space-y-5">
                 <div className="space-y-2">
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Negócios Vinculados ({detail.deals.length})
@@ -349,6 +350,7 @@ export function OrganizationsView({ onOpenDeal, initialSelectedId = null }: Orga
                     ))}
                   </div>
                 )}
+                </div>
               </ScrollArea>
             </>
           )}

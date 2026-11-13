@@ -92,8 +92,8 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     id: "dou",
-    label: "Radar DOU & Expatriados",
-    subtitle: "Diário Oficial + Score RF",
+    label: "Radar DOU",
+    subtitle: "Expatriados, Diário Oficial & Score",
     keywords: "dou diario oficial receita federal score cnpj rn",
     badge: "DOU",
     icon: Radio,
@@ -132,7 +132,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     id: "import",
-    label: "Importador & Arquivos",
+    label: "Arquivos & Import",
     subtitle: "Backup Pipedrive & uploads",
     keywords: "arquivos importador csv backup pipedrive pdf anexos",
     badge: "102 arqs",

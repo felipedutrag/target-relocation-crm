@@ -180,7 +180,7 @@ export function PeopleView({ onOpenDeal, initialSelectedId = null }: PeopleViewP
             }}
           >
             <SelectTrigger className="h-8 w-[180px] text-xs">
-              <SelectValue placeholder="Etiqueta" />
+              <SelectValue>{label === "all" ? "Todas Etiquetas" : label}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas Etiquetas</SelectItem>
@@ -238,14 +238,14 @@ export function PeopleView({ onOpenDeal, initialSelectedId = null }: PeopleViewP
                               {initials}
                             </AvatarFallback>
                           </Avatar>
-                          <div>
-                            <div className="font-medium text-xs">{p.name}</div>
+                          <div className="min-w-0 max-w-[170px]">
+                            <div className="font-medium text-xs truncate">{p.name}</div>
                             <div className="text-[10px] text-muted-foreground font-mono">#{p.id}</div>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-xs text-muted-foreground">{p.org_name || "—"}</TableCell>
-                      <TableCell className="text-xs">{p.primary_email || "—"}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground max-w-[160px] truncate">{p.org_name || "—"}</TableCell>
+                      <TableCell className="text-xs max-w-[195px] truncate">{p.primary_email || "—"}</TableCell>
                       <TableCell onClick={(e) => e.stopPropagation()}>
                         {p.primary_phone ? (
                           <div className="flex items-center gap-1.5 text-xs">
@@ -309,10 +309,10 @@ export function PeopleView({ onOpenDeal, initialSelectedId = null }: PeopleViewP
 
       {/* Person Drawer */}
       <Sheet open={selectedId !== null} onOpenChange={(o) => !o && setSelectedId(null)}>
-        <SheetContent className="w-full sm:max-w-xl p-0 flex flex-col">
+        <SheetContent className="w-full sm:max-w-xl lg:max-w-2xl p-0 flex flex-col overflow-hidden">
           {detail?.person && (
             <>
-              <SheetHeader className="p-5 border-b border-border">
+              <SheetHeader className="p-5 border-b border-border pr-12">
                 <SheetTitle className="text-lg">{detail.person.name}</SheetTitle>
                 <SheetDescription className="flex flex-wrap gap-3 text-xs">
                   {detail.person.primary_email && (
@@ -329,7 +329,8 @@ export function PeopleView({ onOpenDeal, initialSelectedId = null }: PeopleViewP
                   )}
                 </SheetDescription>
               </SheetHeader>
-              <ScrollArea className="flex-1 p-5 space-y-5">
+              <ScrollArea className="flex-1 min-h-0">
+                <div className="p-5 space-y-5">
                 <div className="space-y-2">
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Negócios Vinculados ({detail.deals.length})
@@ -385,6 +386,7 @@ export function PeopleView({ onOpenDeal, initialSelectedId = null }: PeopleViewP
                     ))}
                   </div>
                 )}
+                </div>
               </ScrollArea>
             </>
           )}

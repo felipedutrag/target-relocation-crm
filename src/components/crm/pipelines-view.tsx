@@ -230,8 +230,16 @@ export function PipelinesView({ onOpenDeal }: PipelinesViewProps) {
               setPage(1);
             }}
           >
-            <SelectTrigger className="h-8 w-[125px] text-xs">
-              <SelectValue placeholder="Status" />
+            <SelectTrigger className="h-8 w-[135px] text-xs">
+              <SelectValue>
+                {status === "all"
+                  ? "Todos Status"
+                  : status === "open"
+                    ? "Abertos"
+                    : status === "won"
+                      ? "Ganhos"
+                      : "Perdidos"}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos Status</SelectItem>
@@ -248,8 +256,8 @@ export function PipelinesView({ onOpenDeal }: PipelinesViewProps) {
               setPage(1);
             }}
           >
-            <SelectTrigger className="h-8 w-[150px] text-xs">
-              <SelectValue placeholder="Proprietário" />
+            <SelectTrigger className="h-8 w-[160px] text-xs">
+              <SelectValue>{owner === "all" ? "Todos Usuários" : owner}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos Usuários</SelectItem>
@@ -260,8 +268,16 @@ export function PipelinesView({ onOpenDeal }: PipelinesViewProps) {
           </Select>
 
           <Select value={sort} onValueChange={(v) => setSort(v ?? "update_desc")}>
-            <SelectTrigger className="h-8 w-[160px] text-xs">
-              <SelectValue />
+            <SelectTrigger className="h-8 w-[165px] text-xs">
+              <SelectValue>
+                {sort === "update_desc"
+                  ? "Mais recentes"
+                  : sort === "value_desc"
+                    ? "Maior valor"
+                    : sort === "score_desc"
+                      ? "Maior Score"
+                      : "Data de criação"}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="update_desc">Mais recentes</SelectItem>
@@ -444,13 +460,13 @@ export function PipelinesView({ onOpenDeal }: PipelinesViewProps) {
                       className="cursor-pointer hover:bg-accent/40"
                     >
                       <TableCell className="font-mono text-xs text-muted-foreground">#{d.id}</TableCell>
-                      <TableCell>
-                        <div className="font-medium text-xs">{d.title}</div>
-                        <div className="text-[11px] text-muted-foreground">
+                      <TableCell className="max-w-[300px]">
+                        <div className="font-medium text-xs truncate">{d.title}</div>
+                        <div className="text-[11px] text-muted-foreground truncate">
                           {d.org_name || d.person_name || "—"} {d.cnpj ? `• ${d.cnpj}` : ""}
                         </div>
                       </TableCell>
-                      <TableCell className="text-xs">{d.stage_name}</TableCell>
+                      <TableCell className="text-xs whitespace-nowrap">{d.stage_name}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className={`text-[10px] ${st.className}`}>
                           {st.label}
@@ -553,7 +569,7 @@ export function PipelinesView({ onOpenDeal }: PipelinesViewProps) {
                 <Label className="text-xs">Proprietário</Label>
                 <Select value={newOwner} onValueChange={(v) => setNewOwner(v ?? "Klaus")}>
                   <SelectTrigger className="mt-1">
-                    <SelectValue />
+                    <SelectValue>{newOwner}</SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Klaus">Klaus</SelectItem>

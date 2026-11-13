@@ -184,7 +184,9 @@ export function ActivitiesView({ onOpenDeal }: ActivitiesViewProps) {
 
           <Select value={doneFilter} onValueChange={(v) => { setDoneFilter(v ?? "0"); setPage(1); }}>
             <SelectTrigger className="h-8 w-[135px] text-xs">
-              <SelectValue />
+              <SelectValue>
+                {doneFilter === "0" ? "A Fazer" : doneFilter === "1" ? "Concluídas" : "Todas"}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="0">A Fazer</SelectItem>
@@ -194,8 +196,18 @@ export function ActivitiesView({ onOpenDeal }: ActivitiesViewProps) {
           </Select>
 
           <Select value={typeFilter} onValueChange={(v) => { setTypeFilter(v ?? "all"); setPage(1); }}>
-            <SelectTrigger className="h-8 w-[135px] text-xs">
-              <SelectValue />
+            <SelectTrigger className="h-8 w-[140px] text-xs">
+              <SelectValue>
+                {typeFilter === "all"
+                  ? "Todos Tipos"
+                  : typeFilter === "call"
+                    ? "Chamada"
+                    : typeFilter === "task"
+                      ? "Tarefa"
+                      : typeFilter === "meeting"
+                        ? "Reunião"
+                        : "E-mail"}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos Tipos</SelectItem>
@@ -207,8 +219,16 @@ export function ActivitiesView({ onOpenDeal }: ActivitiesViewProps) {
           </Select>
 
           <Select value={periodFilter} onValueChange={(v) => { setPeriodFilter(v ?? "all"); setPage(1); }}>
-            <SelectTrigger className="h-8 w-[140px] text-xs">
-              <SelectValue />
+            <SelectTrigger className="h-8 w-[145px] text-xs">
+              <SelectValue>
+                {periodFilter === "all"
+                  ? "Todos Períodos"
+                  : periodFilter === "MANHÃ"
+                    ? "[MANHÃ]"
+                    : periodFilter === "TARDE"
+                      ? "[TARDE]"
+                      : "Geral"}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos Períodos</SelectItem>
@@ -219,8 +239,8 @@ export function ActivitiesView({ onOpenDeal }: ActivitiesViewProps) {
           </Select>
 
           <Select value={ownerFilter} onValueChange={(v) => { setOwnerFilter(v ?? "all"); setPage(1); }}>
-            <SelectTrigger className="h-8 w-[145px] text-xs">
-              <SelectValue />
+            <SelectTrigger className="h-8 w-[155px] text-xs">
+              <SelectValue>{ownerFilter === "all" ? "Todos Usuários" : ownerFilter}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos Usuários</SelectItem>
@@ -330,7 +350,15 @@ export function ActivitiesView({ onOpenDeal }: ActivitiesViewProps) {
                 <Label className="text-xs">Tipo</Label>
                 <Select value={actType} onValueChange={(v) => setActType(v ?? "call")}>
                   <SelectTrigger className="mt-1">
-                    <SelectValue />
+                    <SelectValue>
+                      {actType === "call"
+                        ? "Chamada"
+                        : actType === "task"
+                          ? "Tarefa"
+                          : actType === "meeting"
+                            ? "Reunião"
+                            : "E-mail"}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="call">Chamada</SelectItem>
@@ -348,7 +376,7 @@ export function ActivitiesView({ onOpenDeal }: ActivitiesViewProps) {
                 <Label className="text-xs">Responsável</Label>
                 <Select value={ownerName} onValueChange={(v) => setOwnerName(v ?? "Klaus")}>
                   <SelectTrigger className="mt-1">
-                    <SelectValue />
+                    <SelectValue>{ownerName}</SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Klaus">Klaus</SelectItem>

@@ -152,7 +152,7 @@ export function DouRadarView({ onOpenDeal }: DouRadarViewProps) {
           <div className="relative flex-1 min-w-[220px]">
             <Search className="h-3.5 w-3.5 absolute left-2.5 top-2.5 text-muted-foreground" />
             <Input
-              placeholder="Buscar empresa, colaborador estrangeiro, passaporte, CNPJ ou nº do processo..."
+              placeholder="Buscar empresa, expatriado, passaporte, CNPJ ou processo..."
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -169,8 +169,16 @@ export function DouRadarView({ onOpenDeal }: DouRadarViewProps) {
               setPage(1);
             }}
           >
-            <SelectTrigger className="h-8 w-[165px] text-xs">
-              <SelectValue placeholder="Score mínimo" />
+            <SelectTrigger className="h-8 w-[185px] text-xs">
+              <SelectValue>
+                {minScore === "all"
+                  ? "Qualquer Score"
+                  : minScore === "40"
+                    ? "Score ≥ 40 (Qualificado)"
+                    : minScore === "60"
+                      ? "Score ≥ 60 (Alto Fit)"
+                      : "Score ≥ 75 (ICP Ouro)"}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Qualquer Score</SelectItem>
@@ -187,8 +195,12 @@ export function DouRadarView({ onOpenDeal }: DouRadarViewProps) {
               setPage(1);
             }}
           >
-            <SelectTrigger className="h-8 w-[170px] text-xs">
-              <SelectValue placeholder="Etapa Outbound" />
+            <SelectTrigger className="h-8 w-[185px] text-xs">
+              <SelectValue>
+                {stageId === "all"
+                  ? "Todas Etapas"
+                  : stages.find((s) => String(s.id) === stageId)?.name || "Etapa Outbound"}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas Etapas</SelectItem>
@@ -207,8 +219,18 @@ export function DouRadarView({ onOpenDeal }: DouRadarViewProps) {
               setPage(1);
             }}
           >
-            <SelectTrigger className="h-8 w-[160px] text-xs">
-              <SelectValue placeholder="Resolução Normativa" />
+            <SelectTrigger className="h-8 w-[185px] text-xs">
+              <SelectValue>
+                {rn === "all"
+                  ? "Todas RNs"
+                  : rn === "02/2017"
+                    ? "RN 02/2017 (Trabalho)"
+                    : rn === "03/2017"
+                      ? "RN 03/2017 (Técnico)"
+                      : rn === "04/2017"
+                        ? "RN 04/2017 (Transferência)"
+                        : "RN 11/2017 (Diretor)"}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas RNs</SelectItem>

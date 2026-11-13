@@ -317,20 +317,20 @@ export function ImportCenterView({ onOpenDeal }: ImportCenterViewProps) {
                 <TableBody>
                   {filteredAudit.map((af) => (
                     <TableRow key={af.id}>
-                      <TableCell>
-                        <div className="font-medium text-xs">{af.filename}</div>
-                        <div className="text-[10px] text-muted-foreground font-mono">{af.relative_path}</div>
+                      <TableCell className="max-w-[260px]">
+                        <div className="font-medium text-xs truncate">{af.filename}</div>
+                        <div className="text-[10px] text-muted-foreground font-mono truncate">{af.relative_path}</div>
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className="text-[10px] font-mono">
                           {af.file_format}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-xs font-mono">{formatBytes(af.file_size)}</TableCell>
-                      <TableCell className="text-xs">
-                        <span className="inline-flex items-center gap-1">
-                          <Database className="h-3 w-3 text-muted-foreground" />
-                          {af.entity_target}
+                      <TableCell className="text-xs font-mono whitespace-nowrap">{formatBytes(af.file_size)}</TableCell>
+                      <TableCell className="text-xs max-w-[180px]">
+                        <span className="inline-flex items-center gap-1 max-w-full truncate">
+                          <Database className="h-3 w-3 text-muted-foreground shrink-0" />
+                          <span className="truncate">{af.entity_target}</span>
                         </span>
                       </TableCell>
                       <TableCell className="text-right font-mono text-xs">
