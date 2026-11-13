@@ -527,10 +527,10 @@ export const LANDING_COPY: Record<LandingLocale, LandingCopy> = {
       ],
     },
     contact: {
-      badge: "DIRECT CRM-SDR INTEGRATION",
+      badge: "CORPORATE MOBILITY DESK",
       title: "Ready to Simplify Your Team's Global Mobility?",
       subtitle:
-        "Submit your project scope. The lead is saved directly into SQLite and routed to Pipeline CRM - SDR.",
+        "Share your project scope and timeline. Our specialists will prepare a tailored immigration and relocation plan for your team.",
       successTitle: (id) => `Request logged in CRM (Deal #${id})`,
       successDescription:
         "Organization, contact record, and initial diagnostic note have been saved in the SQLite database.",
@@ -950,10 +950,10 @@ export const LANDING_COPY: Record<LandingLocale, LandingCopy> = {
       ],
     },
     contact: {
-      badge: "INTEGRACIÓN DIRECTA CRM-SDR",
+      badge: "MESA CORPORATIVA B2B",
       title: "¿Listo para Simplificar la Movilidad de tu Equipo?",
       subtitle:
-        "Envía los detalles del proyecto. El lead se crea automáticamente en SQLite y se abre en Pipeline CRM - SDR.",
+        "Comparte el alcance y plazos de tu proyecto. Nuestros especialistas estructurarán un plan migratorio y de relocation a medida.",
       successTitle: (id) => `Solicitud registrada en el CRM (Negocio #${id})`,
       successDescription:
         "Organización, contacto y nota inicial ya quedaron guardados en la base SQLite.",
@@ -1373,10 +1373,10 @@ export const LANDING_COPY: Record<LandingLocale, LandingCopy> = {
       ],
     },
     contact: {
-      badge: "INTEGRAÇÃO DIRETA CRM-SDR",
+      badge: "ATENDIMENTO CORPORATIVO B2B",
       title: "Pronto para Simplificar a Mobilidade da sua Equipe?",
       subtitle:
-        "Envie os detalhes do projeto. O lead é criado automaticamente no SQLite e aberto no Pipeline CRM - SDR.",
+        "Compartilhe o escopo e os prazos do seu projeto. Nossos especialistas estruturam um plano sob medida de imigração e relocation.",
       successTitle: (id) => `Solicitação registrada no CRM (Negócio #${id})`,
       successDescription:
         "Organização, contato e nota inicial já estão salvos na base SQLite.",

@@ -844,197 +844,212 @@ export function TargetLandingPage({ onEnterCrm, onOpenLogin }: TargetLandingPage
         </div>
       </section>
 
-      {/* CONTACT DIAGNOSTIC (INTEGRATED WITH CRM SQLITE) */}
-      <section id="contato" className="border-t border-zinc-200/80 bg-zinc-950 text-zinc-100 py-16">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="grid gap-8 lg:grid-cols-12">
-            <div className="lg:col-span-7">
-              <div className="rounded-2xl border border-zinc-200 bg-white p-6 sm:p-8 text-zinc-950">
-                <div className="space-y-1.5 mb-6">
-                  <Badge variant="outline" className="border-zinc-300 text-zinc-700 font-mono text-[10px]">
-                    {t.contact.badge}
-                  </Badge>
-                  <h2 className="text-xl sm:text-2xl font-semibold tracking-[-0.025em]">
-                    {t.contact.title}
-                  </h2>
-                  <p className="text-xs text-zinc-600">{t.contact.subtitle}</p>
-                </div>
+      {/* CONTACT DIAGNOSTIC (LINEAR LIGHT ARCHITECTURAL SPLIT FRAME) */}
+      <section
+        id="contato"
+        className="relative overflow-hidden border-t border-zinc-200/80 bg-white py-20 text-zinc-900"
+      >
+        <div className="bg-linear-grid pointer-events-none absolute inset-0 opacity-50" />
+        <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
+          {/* Clean Top Section Heading */}
+          <div className="mx-auto max-w-2xl text-center space-y-2.5 mb-10">
+            <Badge
+              variant="outline"
+              className="border-zinc-300 bg-zinc-50 text-zinc-700 font-mono text-[10px] tracking-wider"
+            >
+              {t.contact.badge}
+            </Badge>
+            <h2 className="text-2xl sm:text-4xl font-semibold tracking-[-0.03em] text-zinc-950">
+              {t.contact.title}
+            </h2>
+            <p className="text-sm text-zinc-600 leading-relaxed">{t.contact.subtitle}</p>
+          </div>
 
-                {createdDealId ? (
-                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5 space-y-3 text-emerald-950">
-                    <div className="flex items-center gap-2 text-sm font-semibold">
-                      <CheckCircle2 className="size-4 text-emerald-600" />
-                      <span>{t.contact.successTitle(createdDealId)}</span>
-                    </div>
-                    <p className="text-xs text-emerald-900/80">{t.contact.successDescription}</p>
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => onEnterCrm(createdDealId)}
-                        className="h-8 rounded-lg bg-zinc-950 text-white text-xs cursor-pointer"
-                      >
-                        <LayoutDashboard className="mr-1.5 size-3.5" />
-                        {t.contact.openDealBtn(createdDealId)}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setCreatedDealId(null)}
-                        className="h-8 rounded-lg text-xs cursor-pointer"
-                      >
-                        {t.contact.newRequestBtn}
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <form onSubmit={handleSubmitLead} className="space-y-4">
-                    <div className="grid gap-3.5 sm:grid-cols-2">
-                      <div className="space-y-1">
-                        <Label htmlFor="lp-name" className="text-xs font-medium text-zinc-700">
-                          {t.contact.nameLabel}
-                        </Label>
-                        <Input
-                          id="lp-name"
-                          required
-                          placeholder={t.contact.namePlaceholder}
-                          value={name}
-                          onChange={(e) => setName(e.target.value)}
-                          className="h-9 text-xs"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label htmlFor="lp-company" className="text-xs font-medium text-zinc-700">
-                          {t.contact.companyLabel}
-                        </Label>
-                        <Input
-                          id="lp-company"
-                          placeholder={t.contact.companyPlaceholder}
-                          value={company}
-                          onChange={(e) => setCompany(e.target.value)}
-                          className="h-9 text-xs"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid gap-3.5 sm:grid-cols-2">
-                      <div className="space-y-1">
-                        <Label htmlFor="lp-email" className="text-xs font-medium text-zinc-700">
-                          {t.contact.emailLabel}
-                        </Label>
-                        <Input
-                          id="lp-email"
-                          type="email"
-                          required
-                          placeholder={t.contact.emailPlaceholder}
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className="h-9 text-xs"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label htmlFor="lp-phone" className="text-xs font-medium text-zinc-700">
-                          {t.contact.phoneLabel}
-                        </Label>
-                        <Input
-                          id="lp-phone"
-                          inputMode="numeric"
-                          placeholder={t.contact.phonePlaceholder}
-                          value={phone}
-                          onChange={(e) => setPhone(formatPhoneMask(e.target.value))}
-                          className="h-9 text-xs font-mono"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-1">
-                      <Label className="text-xs font-medium text-zinc-700">
-                        {t.contact.serviceLabel}
-                      </Label>
-                      <Select
-                        value={serviceId}
-                        onValueChange={(v) => setServiceId(v ?? "visas")}
-                      >
-                        <SelectTrigger className="h-9 text-xs">
-                          <SelectValue>{selectedServiceOption.label}</SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                          {t.contact.serviceOptions.map((opt) => (
-                            <SelectItem key={opt.id} value={opt.id}>
-                              {opt.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-1">
-                      <Label htmlFor="lp-msg" className="text-xs font-medium text-zinc-700">
-                        {t.contact.messageLabel}
-                      </Label>
-                      <Textarea
-                        id="lp-msg"
-                        rows={3}
-                        placeholder={t.contact.messagePlaceholder}
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        className="text-xs"
-                      />
-                    </div>
-
-                    {submitError && (
-                      <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">
-                        {submitError}
-                      </div>
-                    )}
-
-                    <Button
-                      type="submit"
-                      disabled={submitting}
-                      className="w-full h-10 rounded-lg bg-zinc-950 text-white hover:bg-zinc-800 text-xs font-medium cursor-pointer"
-                    >
-                      <Send className="mr-2 size-3.5" />
-                      {submitting ? t.contact.submitLoading : t.contact.submitIdle}
-                    </Button>
-                  </form>
-                )}
-              </div>
-            </div>
-
-            <div className="lg:col-span-5 space-y-5">
+          {/* Unified Linear 12-column Architectural Container */}
+          <div className="overflow-hidden rounded-2xl border border-zinc-200/90 bg-white shadow-[0_16px_44px_-16px_rgba(0,0,0,0.06)] grid lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-zinc-200/80">
+            {/* Left Column: São Paulo HQ & Map */}
+            <div className="lg:col-span-5 bg-[#FAFAFA] p-6 sm:p-8 flex flex-col justify-between gap-6">
               <div className="space-y-2">
-                <span className="font-mono text-[11px] uppercase tracking-wider text-amber-400">
+                <span className="font-mono text-[11px] uppercase tracking-wider text-amber-600 font-medium">
                   {t.contact.officeEyebrow}
                 </span>
-                <h2 className="text-2xl font-semibold text-white">{t.contact.officeTitle}</h2>
-                <p className="text-xs leading-relaxed text-zinc-400">{t.contact.officeDesc}</p>
+                <h3 className="text-xl font-semibold tracking-[-0.02em] text-zinc-950">
+                  {t.contact.officeTitle}
+                </h3>
+                <p className="text-xs leading-relaxed text-zinc-600">{t.contact.officeDesc}</p>
               </div>
 
-              <div className="space-y-2.5 rounded-xl border border-zinc-800 bg-zinc-900/70 p-4 text-xs text-zinc-300">
-                <div className="flex items-start gap-2.5">
-                  <MapPin className="mt-0.5 size-3.5 shrink-0 text-amber-400" />
+              <div className="space-y-2.5 text-xs text-zinc-700">
+                <div className="flex items-start gap-2.5 rounded-xl border border-zinc-200/80 bg-white p-3.5">
+                  <MapPin className="mt-0.5 size-3.5 shrink-0 text-amber-600" />
                   <span>
                     Av. Adolfo Pinheiro, 2054, Sala 404 — Alto da Boa Vista, São Paulo - SP, CEP
                     04734-003
                   </span>
                 </div>
-                <div className="flex items-center gap-2.5">
-                  <Phone className="size-3.5 shrink-0 text-amber-400" />
-                  <span className="font-mono">+55 (11) 2594-6276 • (11) 2594-6281</span>
+                <div className="flex items-center gap-2.5 rounded-xl border border-zinc-200/80 bg-white p-3.5">
+                  <Phone className="size-3.5 shrink-0 text-amber-600" />
+                  <span className="font-mono text-[11px] text-zinc-900">
+                    +55 (11) 2594-6276 • (11) 2594-6281
+                  </span>
                 </div>
-                <div className="flex items-center gap-2.5">
-                  <Mail className="size-3.5 shrink-0 text-amber-400" />
-                  <span className="font-mono">comercial@targetrelocation.com.br</span>
+                <div className="flex items-center gap-2.5 rounded-xl border border-zinc-200/80 bg-white p-3.5">
+                  <Mail className="size-3.5 shrink-0 text-amber-600" />
+                  <span className="font-mono text-[11px] text-zinc-900">
+                    comercial@targetrelocation.com.br
+                  </span>
                 </div>
               </div>
 
-              <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900">
+              <div className="overflow-hidden rounded-xl border border-zinc-200/80 bg-white">
                 <iframe
                   title="Target Relocation — Alto da Boa Vista, São Paulo"
                   src="https://maps.google.com/maps?q=Target%20Relocation%2C%20Av.%20Adolfo%20Pinheiro%2C%202054%20-%20sala%20404%20-%20Alto%20da%20Boa%20Vista%2C%20S%C3%A3o%20Paulo%20-%20SP%2C%2004734-003&t=m&z=15&output=embed&iwloc=near"
-                  className="h-56 w-full border-0 grayscale contrast-110"
+                  className="h-48 w-full border-0 grayscale contrast-105"
                   loading="lazy"
                 />
               </div>
+            </div>
+
+            {/* Right Column: Clean Project Scope Form */}
+            <div className="lg:col-span-7 bg-white p-6 sm:p-9 flex flex-col justify-center">
+              {createdDealId ? (
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-6 space-y-3 text-emerald-950">
+                  <div className="flex items-center gap-2 text-sm font-semibold">
+                    <CheckCircle2 className="size-4 text-emerald-600" />
+                    <span>{t.contact.successTitle(createdDealId)}</span>
+                  </div>
+                  <p className="text-xs text-emerald-900/80">{t.contact.successDescription}</p>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <Button
+                      size="sm"
+                      onClick={() => onEnterCrm(createdDealId)}
+                      className="h-9 rounded-lg bg-zinc-950 text-white text-xs cursor-pointer"
+                    >
+                      <LayoutDashboard className="mr-1.5 size-3.5" />
+                      {t.contact.openDealBtn(createdDealId)}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setCreatedDealId(null)}
+                      className="h-9 rounded-lg text-xs cursor-pointer"
+                    >
+                      {t.contact.newRequestBtn}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmitLead} className="space-y-4">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="lp-name" className="text-xs font-medium text-zinc-700">
+                        {t.contact.nameLabel}
+                      </Label>
+                      <Input
+                        id="lp-name"
+                        required
+                        placeholder={t.contact.namePlaceholder}
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="h-10 rounded-lg border-zinc-200 bg-zinc-50/40 focus:bg-white text-xs"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="lp-company" className="text-xs font-medium text-zinc-700">
+                        {t.contact.companyLabel}
+                      </Label>
+                      <Input
+                        id="lp-company"
+                        placeholder={t.contact.companyPlaceholder}
+                        value={company}
+                        onChange={(e) => setCompany(e.target.value)}
+                        className="h-10 rounded-lg border-zinc-200 bg-zinc-50/40 focus:bg-white text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="lp-email" className="text-xs font-medium text-zinc-700">
+                        {t.contact.emailLabel}
+                      </Label>
+                      <Input
+                        id="lp-email"
+                        type="email"
+                        required
+                        placeholder={t.contact.emailPlaceholder}
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="h-10 rounded-lg border-zinc-200 bg-zinc-50/40 focus:bg-white text-xs"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="lp-phone" className="text-xs font-medium text-zinc-700">
+                        {t.contact.phoneLabel}
+                      </Label>
+                      <Input
+                        id="lp-phone"
+                        inputMode="numeric"
+                        placeholder={t.contact.phonePlaceholder}
+                        value={phone}
+                        onChange={(e) => setPhone(formatPhoneMask(e.target.value))}
+                        className="h-10 rounded-lg border-zinc-200 bg-zinc-50/40 focus:bg-white text-xs font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-zinc-700">
+                      {t.contact.serviceLabel}
+                    </Label>
+                    <Select
+                      value={serviceId}
+                      onValueChange={(v) => setServiceId(v ?? "visas")}
+                    >
+                      <SelectTrigger className="h-10 w-full rounded-lg border-zinc-200 bg-zinc-50/40 text-xs">
+                        <SelectValue>{selectedServiceOption.label}</SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {t.contact.serviceOptions.map((opt) => (
+                          <SelectItem key={opt.id} value={opt.id}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="lp-msg" className="text-xs font-medium text-zinc-700">
+                      {t.contact.messageLabel}
+                    </Label>
+                    <Textarea
+                      id="lp-msg"
+                      rows={4}
+                      placeholder={t.contact.messagePlaceholder}
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      className="rounded-lg border-zinc-200 bg-zinc-50/40 focus:bg-white text-xs"
+                    />
+                  </div>
+
+                  {submitError && (
+                    <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">
+                      {submitError}
+                    </div>
+                  )}
+
+                  <Button
+                    type="submit"
+                    disabled={submitting}
+                    className="w-full h-10 rounded-lg bg-zinc-950 text-white hover:bg-zinc-800 text-xs font-medium cursor-pointer shadow-xs"
+                  >
+                    <Send className="mr-2 size-3.5" />
+                    {submitting ? t.contact.submitLoading : t.contact.submitIdle}
+                  </Button>
+                </form>
+              )}
             </div>
           </div>
         </div>
