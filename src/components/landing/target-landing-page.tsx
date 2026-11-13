@@ -394,15 +394,6 @@ export function TargetLandingPage({ onEnterCrm, onOpenLogin }: TargetLandingPage
                 {currentHero.cta}
                 <ArrowRight className="ml-2 size-3.5" />
               </a>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={onOpenLogin}
-                className="h-10 rounded-lg border-zinc-200 bg-white px-5 text-[13px] font-medium text-zinc-800 hover:bg-zinc-50 cursor-pointer"
-              >
-                <LogIn className="mr-2 size-3.5 text-zinc-500" />
-                {t.hero.enterCrmBtn}
-              </Button>
               <a
                 href={t.hero.whatsappHref}
                 target="_blank"
