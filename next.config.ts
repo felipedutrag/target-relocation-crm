@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { LEGACY_REDIRECTS } from "./src/lib/legacy-redirects";
 
 const CANONICAL = "https://targetrelocation.com.br";
 const RAILWAY_HOST = "target-relocation-crm-production.up.railway.app";
@@ -24,6 +25,7 @@ const nextConfig: NextConfig = {
         destination: `${CANONICAL}/:path`,
         permanent: true,
       },
+      ...LEGACY_REDIRECTS.map((r) => ({ source: r.source, destination: r.destination, permanent: true })),
     ];
   },
   async headers() {
