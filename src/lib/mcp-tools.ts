@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/site-url";
 import type { McpCallerContext } from "@/lib/mcp-auth";
 import { resolveResendConfig, sendEmailViaResend } from "@/lib/resend";
 
@@ -506,7 +507,7 @@ export async function executeMcpTool(
         ),
       ]);
 
-      const baseSite = "https://target-relocation-crm-production.up.railway.app";
+      const baseSite = SITE_URL;
       const results: Array<{ id: string; title: string; url: string; text: string }> = [];
 
       for (const d of dealsRes.rows) {
@@ -548,7 +549,7 @@ export async function executeMcpTool(
 
     if (name === "fetch") {
       const rawId = String(args.id || "").trim();
-      const baseSite = "https://target-relocation-crm-production.up.railway.app";
+      const baseSite = SITE_URL;
       const [prefix, rest] = rawId.includes(":") ? [rawId.split(":")[0], rawId.slice(rawId.indexOf(":") + 1)] : ["", rawId];
 
       if (prefix === "deal") {

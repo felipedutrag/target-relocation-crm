@@ -3,7 +3,7 @@ import { getPublishedBlogIndex } from "@/lib/blog-queries";
 
 export const dynamic = "force-dynamic";
 
-const SITE_URL = "https://target-relocation-crm-production.up.railway.app";
+import { SITE_URL } from "@/lib/site-url";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = await getPublishedBlogIndex("pt");

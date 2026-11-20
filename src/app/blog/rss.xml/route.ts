@@ -2,7 +2,7 @@ import { getPublishedBlogIndex } from "@/lib/blog-queries";
 
 export const dynamic = "force-dynamic";
 
-const SITE_URL = "https://target-relocation-crm-production.up.railway.app";
+import { SITE_URL } from "@/lib/site-url";
 
 function escapeXml(str: string): string {
   return str

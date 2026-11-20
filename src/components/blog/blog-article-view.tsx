@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Calendar, CheckCircle2, Clock, Home, PlayCircle, ShieldCheck, UserCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { BlogSiteChrome } from "@/components/blog/blog-site-chrome";
+import { SITE_URL } from "@/lib/site-url";
 import { BlogLeadCta } from "@/components/blog/blog-lead-cta";
 import type { BlogLocale, PublicBlogArticle, PublicBlogIndexItem } from "@/lib/blog-queries";
 
@@ -53,7 +54,7 @@ export function BlogArticleView({
   related: PublicBlogIndexItem[];
   locale: BlogLocale;
 }) {
-  const siteUrl = "https://target-relocation-crm-production.up.railway.app";
+  const siteUrl = SITE_URL;
   const ptHref = post.canonical_path || `/${post.slug}`;
   const enHref = post.en_slug ? `/en/${post.en_slug}` : `/en/${post.slug}`;
   const esHref = post.es_slug ? `/es/${post.es_slug}` : `/es/${post.slug}`;

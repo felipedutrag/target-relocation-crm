@@ -10,7 +10,7 @@ import {
   type BlogLocale,
 } from "@/lib/blog-queries";
 
-const SITE_URL = "https://target-relocation-crm-production.up.railway.app";
+import { SITE_URL } from "@/lib/site-url";
 
 const INDEX_COPY: Record<
   BlogLocale,

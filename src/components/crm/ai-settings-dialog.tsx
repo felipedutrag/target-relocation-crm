@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
+import { SITE_URL } from "@/lib/site-url";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -47,7 +48,7 @@ export function AiSettingsDialog({ open, onOpenChange, onSaved }: AiSettingsDial
   const [feedback, setFeedback] = useState<{ type: "ok" | "err"; text: string } | null>(null);
 
   // MCP Connector tab state
-  const [mcpEndpoint, setMcpEndpoint] = useState("https://target-relocation-crm-production.up.railway.app/api/mcp");
+  const [mcpEndpoint, setMcpEndpoint] = useState(`${SITE_URL}/api/mcp`);
   const [copiedUrl, setCopiedUrl] = useState(false);
   const [mcpPassword, setMcpPassword] = useState("");
   const [issuingToken, setIssuingToken] = useState(false);
