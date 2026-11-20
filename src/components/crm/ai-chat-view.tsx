@@ -3,21 +3,23 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowDown,
-  Bot,
+  ArrowUp,
+  Check,
   CheckCircle2,
+  Copy,
+  FileText,
   History,
   KeyRound,
   Loader2,
-  MessageSquarePlus,
-  Send,
-  Sparkles,
-  User,
+  MessageSquare,
+  Plus,
+  Radio,
+  SlidersHorizontal,
+  TrendingUp,
   Wrench,
   X,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 
 interface ChatSession {
   id: string;
@@ -39,12 +41,27 @@ interface ChatMessage {
   created_at: string;
 }
 
-const QUICK_PROMPTS = [
-  "Faça um briefing executivo de hoje: negócios no CRM, Radar DOU, placar SDR e travas do plano de 90 dias.",
-  "Busque os 5 leads do Radar DOU com maior score em aberto para a Áurea ligar hoje.",
-  "Crie uma pauta News sobre exigência no MTE na quinta-feira para revisão e aprovação do Klaus.",
-  "Registre que Ana Souza (RH da Nestlé) visitou o perfil do Klaus no LinkedIn Premium e crie tarefa matinal para o Anderley.",
-  "Adicione a palavra-chave negativa 'visto H2B agrícola' nas campanhas do Google Ads.",
+const PROMPT_SUGGESTIONS = [
+  {
+    short: "Briefing do dia & Plano 30d",
+    prompt: "Faça um briefing executivo de hoje: negócios no CRM, Radar DOU, placar SDR e etapas do plano de 30 dias.",
+    icon: TrendingUp,
+  },
+  {
+    short: "Top 5 Radar DOU para Áurea",
+    prompt: "Busque os 5 leads do Radar DOU com maior score em aberto para a Áurea ligar hoje.",
+    icon: Radio,
+  },
+  {
+    short: "Criar pauta News MTE",
+    prompt: "Crie uma pauta News sobre exigência no MTE na quinta-feira para revisão e aprovação do Klaus.",
+    icon: FileText,
+  },
+  {
+    short: "Negativar termo no Google Ads",
+    prompt: "Adicione a palavra-chave negativa 'visto H2B agrícola' nas campanhas do Google Ads.",
+    icon: SlidersHorizontal,
+  },
 ];
 
 function renderInlineSpans(text: string) {
@@ -59,7 +76,7 @@ function renderInlineSpans(text: string) {
     }
     if (part.startsWith("`") && part.endsWith("`")) {
       return (
-        <code key={idx} className="rounded bg-muted px-1 py-0.5 font-mono text-[11px]">
+        <code key={idx} className="rounded-md bg-muted/80 px-1.5 py-0.5 font-mono text-[11.5px]">
           {part.slice(1, -1)}
         </code>
       );
@@ -68,11 +85,11 @@ function renderInlineSpans(text: string) {
   });
 }
 
-/** Renders structured Markdown blocks (headings, bullet/numbered lists, bold, inline code) inside chat bubbles. */
+/** Renders structured Markdown blocks (headings, bullet/numbered lists, bold, inline code) inside chat responses. */
 function renderChatMarkdown(text: string) {
   const lines = text.split("\n");
   return (
-    <div className="space-y-1.5 break-words">
+    <div className="space-y-2 break-words">
       {lines.map((rawLine, idx) => {
         const trimmed = rawLine.trim();
         if (!trimmed) {
@@ -80,7 +97,7 @@ function renderChatMarkdown(text: string) {
         }
         if (trimmed.startsWith("### ")) {
           return (
-            <h4 key={idx} className="pt-1 text-xs font-semibold tracking-tight">
+            <h4 key={idx} className="pt-1 text-[13px] font-semibold tracking-tight">
               {renderInlineSpans(trimmed.slice(4))}
             </h4>
           );
@@ -88,7 +105,7 @@ function renderChatMarkdown(text: string) {
         if (trimmed.startsWith("## ") || trimmed.startsWith("# ")) {
           const clean = trimmed.replace(/^#{1,3}\s+/, "");
           return (
-            <h3 key={idx} className="pt-1.5 text-sm font-semibold tracking-tight">
+            <h3 key={idx} className="pt-2 text-sm font-semibold tracking-tight">
               {renderInlineSpans(clean)}
             </h3>
           );
@@ -96,8 +113,8 @@ function renderChatMarkdown(text: string) {
         const bulletMatch = trimmed.match(/^[-*]\s+(.+)$/);
         if (bulletMatch) {
           return (
-            <div key={idx} className="flex items-start gap-2 pl-1">
-              <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-current opacity-65" />
+            <div key={idx} className="flex items-start gap-2.5 pl-1">
+              <span className="mt-2 size-1.5 shrink-0 rounded-full bg-current opacity-55" />
               <div className="min-w-0 flex-1">{renderInlineSpans(bulletMatch[1])}</div>
             </div>
           );
@@ -105,8 +122,8 @@ function renderChatMarkdown(text: string) {
         const numMatch = trimmed.match(/^(\d+)\.\s+(.+)$/);
         if (numMatch) {
           return (
-            <div key={idx} className="flex items-start gap-2 pl-1">
-              <span className="shrink-0 font-mono text-[11px] font-semibold opacity-75">
+            <div key={idx} className="flex items-start gap-2.5 pl-1">
+              <span className="shrink-0 font-mono text-[11.5px] font-semibold opacity-70">
                 {numMatch[1]}.
               </span>
               <div className="min-w-0 flex-1">{renderInlineSpans(numMatch[2])}</div>
@@ -117,6 +134,19 @@ function renderChatMarkdown(text: string) {
       })}
     </div>
   );
+}
+
+function formatCompactSessionDate(iso: string): string {
+  try {
+    return new Date(iso).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return iso;
+  }
 }
 
 export function AiChatView({ onOpenAiSettings }: { onOpenAiSettings: () => void }) {
@@ -130,7 +160,9 @@ export function AiChatView({ onOpenAiSettings }: { onOpenAiSettings: () => void 
   const [sending, setSending] = useState(false);
   const [mobileSessionsOpen, setMobileSessionsOpen] = useState(false);
   const [showScrollBottom, setShowScrollBottom] = useState(false);
+  const [copiedMsgId, setCopiedMsgId] = useState<number | null>(null);
   const messagesScrollRef = useRef<HTMLDivElement | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const loadChat = useCallback(async (sessionId?: string | null) => {
     setLoading(true);
@@ -164,6 +196,15 @@ export function AiChatView({ onOpenAiSettings }: { onOpenAiSettings: () => void 
     });
     return () => cancelAnimationFrame(id);
   }, [messages.length, sending, scrollToBottom]);
+
+  // Keep composer textarea height fluid without breaking layout
+  useEffect(() => {
+    const ta = textareaRef.current;
+    if (!ta) return;
+    ta.style.height = "0px";
+    const next = Math.min(Math.max(ta.scrollHeight, 44), 180);
+    ta.style.height = `${next}px`;
+  }, [input]);
 
   function handleMessagesScroll() {
     const el = messagesScrollRef.current;
@@ -224,196 +265,274 @@ export function AiChatView({ onOpenAiSettings }: { onOpenAiSettings: () => void 
     }
   }
 
+  function handleCopyMessage(msg: ChatMessage) {
+    navigator.clipboard.writeText(msg.content);
+    setCopiedMsgId(msg.id);
+    setTimeout(() => setCopiedMsgId(null), 1800);
+  }
+
   const SessionsList = (
     <>
-      <div className="shrink-0 flex items-center justify-between border-b border-border/60 px-3 py-2.5">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Histórico de Sessões ({sessions.length})
+      <div className="shrink-0 flex items-center justify-between px-3.5 py-3">
+        <span className="text-[11px] font-medium tracking-wide text-muted-foreground">
+          Conversas ({sessions.length})
         </span>
         <button
           type="button"
           onClick={() => setMobileSessionsOpen(false)}
-          className="rounded p-1 text-muted-foreground hover:bg-accent lg:hidden"
+          className="rounded-lg p-1 text-muted-foreground hover:bg-accent lg:hidden"
           aria-label="Fechar sessões"
         >
           <X className="size-3.5" />
         </button>
       </div>
-      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-2 space-y-1">
-        {sessions.map((s) => (
-          <button
-            key={s.id}
-            type="button"
-            onClick={() => {
-              loadChat(s.id);
-              setMobileSessionsOpen(false);
-            }}
-            className={`w-full rounded-lg px-2.5 py-2 text-left text-xs transition-colors cursor-pointer ${
-              activeSessionId === s.id
-                ? "bg-accent text-accent-foreground font-medium"
-                : "hover:bg-accent/50 text-muted-foreground"
-            }`}
-          >
-            <div className="truncate">{s.title}</div>
-            <div className="mt-0.5 font-mono text-[10px] opacity-70">
-              {new Date(s.updated_at).toLocaleString("pt-BR")}
-            </div>
-          </button>
-        ))}
+      <div className="chat-scrollbar flex-1 min-h-0 overflow-y-auto overscroll-contain px-2 pb-3 space-y-0.5">
+        {sessions.map((s) => {
+          const active = activeSessionId === s.id;
+          return (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => {
+                loadChat(s.id);
+                setMobileSessionsOpen(false);
+              }}
+              className={`group flex w-full items-start gap-2.5 rounded-xl px-2.5 py-2 text-left text-xs transition-colors cursor-pointer ${
+                active
+                  ? "bg-accent/90 text-foreground font-medium shadow-2xs"
+                  : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+              }`}
+            >
+              <MessageSquare className="size-3.5 shrink-0 mt-0.5 opacity-60" />
+              <div className="min-w-0 flex-1">
+                <div className="truncate leading-snug">{s.title}</div>
+                <div className="mt-0.5 font-mono text-[10px] opacity-60">
+                  {formatCompactSessionDate(s.updated_at)}
+                </div>
+              </div>
+            </button>
+          );
+        })}
         {sessions.length === 0 && !loading && (
-          <div className="p-3 text-xs text-muted-foreground">
-            Envie uma mensagem para iniciar sua primeira sessão no Supabase.
+          <div className="px-3 py-4 text-xs text-muted-foreground leading-relaxed">
+            Inicie uma pergunta ao lado para salvar o histórico na sua conta.
           </div>
         )}
       </div>
     </>
   );
 
+  const canSend = Boolean(input.trim()) && !sending;
+
   return (
     <div
       data-testid="ai-chat-root"
       className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-background"
     >
-      {/* Compact Edge-to-Edge Chat Topbar */}
-      <div className="shrink-0 flex flex-wrap items-center justify-between gap-2 border-b border-border bg-background/95 px-4 py-2.5 lg:px-6">
-        <div className="min-w-0">
-          <h1 className="flex items-center gap-2 text-sm sm:text-base font-semibold tracking-tight">
-            <Sparkles className="size-4 text-amber-500 shrink-0" />
-            <span className="truncate">Copilot IA Target Relocation</span>
-          </h1>
-          <p className="hidden sm:block truncate text-[11px] text-muted-foreground">
-            Opera ao vivo via OpenAI Function Calling sobre CRM (4.344 deals), Radar DOU, Blog GEO, Placar SDR e Google Ads
-          </p>
+      {/* Minimal Modern Chat Topbar */}
+      <header className="shrink-0 flex flex-wrap items-center justify-between gap-2 border-b border-border/70 bg-background/95 backdrop-blur-md px-4 py-2.5 lg:px-6">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-zinc-900 text-xs font-semibold tracking-tight text-white dark:bg-zinc-100 dark:text-zinc-950">
+            T
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h1 className="truncate text-sm font-semibold tracking-tight text-foreground">
+                Copilot Target
+              </h1>
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-mono text-[10px] font-medium ${
+                  loading && !aiConfigured
+                    ? "border-border bg-muted text-muted-foreground"
+                    : aiConfigured
+                      ? "border-emerald-300 bg-emerald-50 text-emerald-900 dark:border-emerald-500/35 dark:bg-emerald-500/15 dark:text-emerald-300"
+                      : "border-amber-300 bg-amber-50 text-amber-950 dark:border-amber-500/35 dark:bg-amber-500/15 dark:text-amber-300"
+                }`}
+              >
+                <span
+                  className={`size-1.5 rounded-full ${
+                    loading && !aiConfigured
+                      ? "bg-muted-foreground/60 animate-pulse"
+                      : aiConfigured
+                        ? "bg-emerald-500"
+                        : "bg-amber-500"
+                  }`}
+                />
+                {loading && !aiConfigured ? "Conectando..." : aiConfigured ? aiModel : "API pendente"}
+              </span>
+            </div>
+            <p className="hidden sm:block truncate text-[11px] text-muted-foreground">
+              Conectado ao CRM (4.344 negócios), Radar DOU, Blog GEO, Placar SDR e Google Ads
+            </p>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0">
           <Button
             size="sm"
-            variant="outline"
-            className="h-8 gap-1.5 text-xs lg:hidden cursor-pointer"
+            variant="ghost"
+            className="h-8 rounded-full gap-1.5 text-xs lg:hidden cursor-pointer"
             onClick={() => setMobileSessionsOpen((v) => !v)}
           >
             <History className="size-3.5" />
-            Sessões ({sessions.length})
+            <span>Sessões ({sessions.length})</span>
           </Button>
-          <Badge
-            variant={aiConfigured ? "default" : "outline"}
-            className={aiConfigured ? "bg-emerald-600 text-white" : ""}
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-8 rounded-full gap-1.5 text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+            onClick={onOpenAiSettings}
           >
-            {aiConfigured ? `OpenAI Ativa • ${aiModel}` : "Chave OpenAI Pendente"}
-          </Badge>
-          <Button size="sm" variant="outline" className="h-8 gap-1.5 text-xs cursor-pointer" onClick={onOpenAiSettings}>
             <KeyRound className="size-3.5" />
-            <span className="hidden sm:inline">Configurar IA</span>
+            <span className="hidden sm:inline">Configurar</span>
           </Button>
-          <Button size="sm" className="h-8 gap-1.5 text-xs cursor-pointer" onClick={createNewSession}>
-            <MessageSquarePlus className="size-3.5" />
-            Nova Conversa
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 rounded-full gap-1.5 px-3.5 text-xs font-medium cursor-pointer"
+            onClick={createNewSession}
+          >
+            <Plus className="size-3.5" />
+            Nova conversa
           </Button>
         </div>
-      </div>
+      </header>
 
-      {!aiConfigured && (
-        <div className="shrink-0 flex flex-wrap items-center justify-between gap-3 border-b border-amber-500/30 bg-amber-500/10 px-4 py-2 text-xs lg:px-6">
+      {!loading && !aiConfigured && (
+        <div className="shrink-0 flex flex-wrap items-center justify-between gap-3 border-b border-amber-300/60 bg-amber-50 px-4 py-2 text-xs text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200 lg:px-6">
           <span>
-            Insira sua <strong>OPENAI_API_KEY</strong> em Configurações IA para ativar o Copilot conversacional e a
-            geração de artigos/auditorias com GPT.
+            Adicione sua <strong>OPENAI_API_KEY</strong> em Configurar para habilitar respostas com GPT em tempo real.
           </span>
-          <Button size="sm" onClick={onOpenAiSettings} className="h-7 text-xs cursor-pointer">
-            Conectar OpenAI Agora
+          <Button size="sm" onClick={onOpenAiSettings} className="h-7 rounded-full text-xs cursor-pointer">
+            Conectar OpenAI
           </Button>
         </div>
       )}
 
-      {/* Full-Height Split Body */}
+      {/* Full-Height Split Workspace */}
       <div className="relative flex flex-1 min-h-0 overflow-hidden">
         {/* Desktop Sessions Rail */}
-        <aside className="hidden w-72 shrink-0 flex-col min-h-0 border-r border-border bg-muted/15 lg:flex">
+        <aside className="hidden w-64 shrink-0 flex-col min-h-0 border-r border-border/60 bg-muted/20 dark:bg-zinc-950/50 lg:flex">
           {SessionsList}
         </aside>
 
         {/* Mobile Sessions Overlay */}
         {mobileSessionsOpen && (
-          <div className="absolute inset-y-0 left-0 z-30 flex w-72 flex-col min-h-0 border-r border-border bg-background shadow-xl lg:hidden">
+          <div className="absolute inset-y-0 left-0 z-30 flex w-64 flex-col min-h-0 border-r border-border bg-background shadow-2xl lg:hidden">
             {SessionsList}
           </div>
         )}
 
-        {/* Right Messages + Composer Column */}
+        {/* Main Thread + Floating Composer Dock */}
         <section className="relative flex flex-1 min-h-0 min-w-0 flex-col overflow-hidden">
-          {/* Native Scrollable Messages Viewport */}
           <div
             ref={messagesScrollRef}
             data-testid="ai-chat-messages-scroll"
             onScroll={handleMessagesScroll}
-            className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 py-5 lg:px-8"
+            className="chat-scrollbar flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 py-6 lg:px-10"
           >
-            <div className="mx-auto max-w-4xl space-y-5 pb-2">
+            <div className="mx-auto max-w-3xl space-y-6 pb-4">
+              {loading && messages.length === 0 && (
+                <div className="flex items-center justify-center gap-2 py-16 text-xs text-muted-foreground">
+                  <Loader2 className="size-4 animate-spin" />
+                  <span>Carregando histórico do Copilot...</span>
+                </div>
+              )}
+
               {messages.length === 0 && !loading && (
-                <div className="py-6 space-y-5">
-                  <div className="text-center space-y-1.5">
-                    <Bot className="size-8 mx-auto text-amber-500" />
-                    <h2 className="text-base font-semibold">Central de Comando IA • Plano de Ação Target</h2>
-                    <p className="text-xs text-muted-foreground max-w-xl mx-auto">
-                      Consulte negócios e DOUs em tempo real no Supabase, crie tarefas para Áurea/Anderley, gere pautas do calendário e adicione negativas no Google Ads:
+                <div className="pt-8 pb-4 space-y-7">
+                  <div className="text-center space-y-2.5">
+                    <div className="mx-auto flex size-11 items-center justify-center rounded-2xl border border-border/80 bg-card shadow-sm text-sm font-semibold text-foreground">
+                      T
+                    </div>
+                    <h2 className="text-lg font-semibold tracking-tight text-foreground">
+                      Como posso ajudar na operação hoje?
+                    </h2>
+                    <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
+                      Consulte o banco em tempo real, delegue tarefas para os SDRs, gere pautas do blog ou ajuste campanhas sem sair do chat.
                     </p>
                   </div>
-                  <div className="grid gap-2">
-                    {QUICK_PROMPTS.map((q) => (
-                      <button
-                        key={q}
-                        type="button"
-                        onClick={() => sendMessage(q)}
-                        className="rounded-xl border border-border bg-muted/30 hover:bg-accent/50 p-3 text-left text-xs transition-colors cursor-pointer"
-                      >
-                        {q}
-                      </button>
-                    ))}
+
+                  <div className="grid gap-2.5 sm:grid-cols-2">
+                    {PROMPT_SUGGESTIONS.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <button
+                          key={item.short}
+                          type="button"
+                          onClick={() => sendMessage(item.prompt)}
+                          className="group flex flex-col gap-1.5 rounded-2xl border border-border/80 bg-card/70 hover:bg-accent/50 hover:border-foreground/20 p-3.5 text-left transition-all cursor-pointer"
+                        >
+                          <div className="flex items-center gap-2 text-xs font-medium text-foreground">
+                            <Icon className="size-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                            <span>{item.short}</span>
+                          </div>
+                          <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2">
+                            {item.prompt}
+                          </p>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
 
-              {messages.map((m) => (
-                <div
-                  key={m.id}
-                  data-testid="ai-chat-message"
-                  className={`flex gap-3 ${m.role === "user" ? "justify-end" : "justify-start"}`}
-                >
-                  {m.role === "assistant" && (
-                    <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-500 mt-0.5">
-                      <Bot className="size-4" />
+              {messages.map((m) =>
+                m.role === "user" ? (
+                  <div key={m.id} data-testid="ai-chat-message" className="flex justify-end">
+                    <div className="max-w-[80%] rounded-2xl rounded-br-sm bg-zinc-900 px-4 py-2.5 text-[13px] leading-relaxed text-zinc-50 shadow-xs dark:bg-zinc-100 dark:text-zinc-950">
+                      {renderChatMarkdown(m.content)}
                     </div>
-                  )}
-                  <div
-                    className={`max-w-[85%] rounded-xl px-4 py-3 text-xs leading-relaxed space-y-2 ${
-                      m.role === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "border border-border bg-card"
-                    }`}
-                  >
-                    {Array.isArray(m.tool_calls_json) && m.tool_calls_json.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 pb-1.5 border-b border-border/50">
-                        {m.tool_calls_json.map((tc, i) => (
-                          <Badge key={i} variant="secondary" className="text-[10px] font-mono gap-1">
-                            <Wrench className="size-2.5 text-emerald-500" />
-                            {tc.name}
-                            <CheckCircle2 className="size-2.5 text-emerald-500" />
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                    {renderChatMarkdown(m.content)}
                   </div>
-                  {m.role === "user" && (
-                    <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground mt-0.5">
-                      <User className="size-4" />
+                ) : (
+                  <div key={m.id} data-testid="ai-chat-message" className="group flex items-start gap-3">
+                    <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full border border-border bg-card text-[11px] font-semibold text-foreground shadow-2xs">
+                      T
                     </div>
-                  )}
-                </div>
-              ))}
+                    <div className="min-w-0 flex-1 space-y-2.5 pt-0.5 text-[13px] leading-[1.65] text-foreground">
+                      {Array.isArray(m.tool_calls_json) && m.tool_calls_json.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5">
+                          {m.tool_calls_json.map((tc, i) => (
+                            <span
+                              key={i}
+                              className="inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-muted/60 px-2.5 py-0.5 font-mono text-[10px] text-muted-foreground"
+                            >
+                              <Wrench className="size-2.5 text-emerald-600 dark:text-emerald-400" />
+                              {tc.name}
+                              <CheckCircle2 className="size-2.5 text-emerald-600 dark:text-emerald-400" />
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="text-foreground/95">{renderChatMarkdown(m.content)}</div>
+
+                      <div className="flex items-center gap-2 pt-0.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                        <button
+                          type="button"
+                          onClick={() => handleCopyMessage(m)}
+                          className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
+                        >
+                          {copiedMsgId === m.id ? (
+                            <>
+                              <Check className="size-3 text-emerald-600 dark:text-emerald-400" />
+                              <span>Copiado</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="size-3" />
+                              <span>Copiar</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )
+              )}
 
               {sending && (
-                <div className="flex items-center gap-2 text-xs text-muted-foreground pl-10">
+                <div className="flex items-center gap-3 pl-10 text-xs text-muted-foreground">
                   <Loader2 className="size-3.5 animate-spin" />
                   <span>Consultando Supabase e executando ferramentas OpenAI...</span>
                 </div>
@@ -421,62 +540,81 @@ export function AiChatView({ onOpenAiSettings }: { onOpenAiSettings: () => void 
             </div>
           </div>
 
-          {/* Floating Scroll-to-Bottom Button */}
+          {/* Floating Circular Scroll-to-Bottom Button */}
           {showScrollBottom && (
-            <div className="pointer-events-none absolute inset-x-0 bottom-[132px] z-10 flex justify-center">
-              <Button
+            <div className="pointer-events-none absolute inset-x-0 bottom-[146px] z-10 flex justify-center">
+              <button
                 type="button"
-                size="sm"
-                variant="secondary"
                 onClick={() => scrollToBottom("smooth")}
-                className="pointer-events-auto h-7 gap-1.5 rounded-full border border-border px-3 text-[11px] shadow-md cursor-pointer"
+                aria-label="Ir para o final da conversa"
+                className="pointer-events-auto flex size-8 items-center justify-center rounded-full border border-border bg-background/95 text-foreground shadow-md backdrop-blur-md hover:bg-accent transition-all cursor-pointer"
               >
-                <ArrowDown className="size-3" />
-                Ir para o final
-              </Button>
+                <ArrowDown className="size-3.5" />
+              </button>
             </div>
           )}
 
-          {/* Pinned Bottom Composer Dock */}
-          <div className="shrink-0 border-t border-border bg-background/95 px-4 py-3 lg:px-8">
-            <div className="mx-auto max-w-4xl space-y-2">
+          {/* Modern Pill-Shaped Floating Composer */}
+          <div className="shrink-0 bg-gradient-to-t from-background via-background/95 to-transparent px-4 pt-2 pb-4 lg:px-10">
+            <div className="mx-auto max-w-3xl space-y-2.5">
               {messages.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
-                  {QUICK_PROMPTS.slice(0, 3).map((q, idx) => (
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {PROMPT_SUGGESTIONS.slice(0, 3).map((item) => (
                     <button
-                      key={idx}
+                      key={item.short}
                       type="button"
-                      onClick={() => sendMessage(q)}
-                      className="rounded-md border border-border bg-muted/40 px-2 py-1 text-[10px] text-muted-foreground hover:text-foreground hover:border-foreground/30 truncate max-w-[260px] cursor-pointer"
+                      onClick={() => sendMessage(item.prompt)}
+                      className="rounded-full border border-border/80 bg-card/80 px-3 py-1 text-[11px] font-medium text-muted-foreground hover:border-foreground/30 hover:bg-accent/60 hover:text-foreground transition-colors cursor-pointer"
                     >
-                      {q}
+                      {item.short}
                     </button>
                   ))}
                 </div>
               )}
-              <div className="flex gap-2">
-                <Textarea
-                  rows={2}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      sendMessage();
-                    }
-                  }}
-                  placeholder="Digite um comando para o Copilot IA (ex: 'Crie tarefa para a Áurea ligar para os 3 maiores DOUs de hoje')..."
-                  className="text-xs resize-none min-h-[54px]"
-                />
-                <Button
-                  type="button"
-                  onClick={() => sendMessage()}
-                  disabled={sending || !input.trim()}
-                  className="h-auto px-4 gap-1.5 text-xs shrink-0 cursor-pointer"
-                >
-                  <Send className="size-3.5" />
-                  Enviar
-                </Button>
+
+              <div className="rounded-[24px] border border-border/90 bg-card shadow-sm transition-all focus-within:border-zinc-400 focus-within:ring-4 focus-within:ring-foreground/[0.04] dark:bg-zinc-900/90 dark:focus-within:border-zinc-600">
+                <div className="px-4 pt-3 pb-1.5">
+                  <textarea
+                    ref={textareaRef}
+                    rows={1}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        sendMessage();
+                      }
+                    }}
+                    placeholder="Pergunte sobre leads, Radar DOU, agenda dos SDRs ou peça para criar pautas..."
+                    className="chat-scrollbar w-full resize-none border-0 bg-transparent text-[13px] leading-relaxed text-foreground placeholder:text-muted-foreground focus:outline-none min-h-[44px] max-h-[180px]"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between gap-2 px-3.5 pb-2.5 pt-1">
+                  <div className="flex items-center gap-2 text-[10px] font-mono text-muted-foreground">
+                    <span>{aiModel}</span>
+                    <span className="opacity-40">•</span>
+                    <span className="hidden sm:inline">Enter para enviar · Shift+Enter quebra linha</span>
+                  </div>
+
+                  <button
+                    type="button"
+                    aria-label="Enviar mensagem"
+                    onClick={() => sendMessage()}
+                    disabled={!canSend}
+                    className={`flex size-8 items-center justify-center rounded-full transition-all ${
+                      canSend
+                        ? "bg-zinc-900 text-white hover:bg-zinc-700 shadow-xs dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 cursor-pointer"
+                        : "bg-muted text-muted-foreground/50 cursor-not-allowed"
+                    }`}
+                  >
+                    {sending ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <ArrowUp className="size-4" />
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

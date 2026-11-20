@@ -288,7 +288,7 @@ export function AiSettingsDialog({ open, onOpenChange, onSaved }: AiSettingsDial
                   MCP 100% Somente Leitura • 30 Tabelas Postgres Liberadas
                 </div>
                 <div className="text-[11px] text-muted-foreground">
-                  Dá acesso completo de leitura (CRM, Radar DOU, Blog SEO, Placar SDR, Ads, Plano 90d e SQL SELECT) com
+                  Dá acesso completo de leitura (CRM, Radar DOU, Blog SEO, Placar SDR, Ads, Plano 30d e SQL SELECT) com
                   proteção contra mutações no Postgres e bloqueio da tabela de credenciais (<code className="font-mono">workspace_settings</code>).
                 </div>
               </div>

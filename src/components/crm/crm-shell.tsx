@@ -186,10 +186,10 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     id: "growth_plan",
-    label: "Plano 90d & GEO",
-    subtitle: "Cronograma, Ads, 10 Perguntas & 9 KPIs",
-    keywords: "plano 90 dias google ads negativas linkedin abm geo 10 perguntas kpis",
-    badge: "90d",
+    label: "Plano 30d & GEO",
+    subtitle: "Cronograma 30d, Checklist, Ads & KPIs",
+    keywords: "plano 30 dias checklist google ads negativas linkedin abm geo 10 perguntas kpis",
+    badge: "30d",
     section: "growth",
     icon: Flag,
   },
@@ -557,7 +557,7 @@ export function CrmShell({
                 <Icon
                   className={cn(
                     "size-3.5 shrink-0",
-                    active ? "text-primary-foreground" : "text-amber-500"
+                    active ? "text-primary-foreground" : "text-muted-foreground"
                   )}
                 />
                 <div className="min-w-0 flex-1">
@@ -764,7 +764,7 @@ export function CrmShell({
               onClick={() => handleNavigate("ai_chat")}
               title="Abrir Chat Assistente IA"
             >
-              <Bot className="size-3.5 text-amber-500" />
+              <Bot className="size-3.5 text-muted-foreground" />
               <span className="hidden sm:inline">Chat IA</span>
             </Button>
             <Button

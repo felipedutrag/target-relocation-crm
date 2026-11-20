@@ -10,21 +10,37 @@ export async function GET() {
     if (auth.errorResponse) return auth.errorResponse;
     const { supabase } = auth;
 
-    const [milestonesRes, adsRes, geoRes, kpisRes, postsRes, aiCfg] = await Promise.all([
-      supabase.from("action_plan_milestones").select("*").order("phase", { ascending: true }).order("due_day", { ascending: true }),
-      supabase.from("ads_campaigns").select("*").order("id", { ascending: true }),
-      supabase.from("geo_audit_tests").select("*").order("id", { ascending: true }),
-      supabase.from("kpi_snapshots").select("*").order("id", { ascending: true }),
-      supabase.from("blog_posts").select("slug, title, question_headline, direct_answer, status, faq_schema_json").eq("status", "published"),
-      resolveOpenAiClient(supabase),
-    ]);
+    const [milestonesRes, adsRes, geoRes, kpisRes, postsRes, editorialRes, auditsRes, meetingsRes, dealsRes, douRes, aiCfg] =
+      await Promise.all([
+        supabase.from("action_plan_milestones").select("*").order("phase", { ascending: true }).order("due_day", { ascending: true }),
+        supabase.from("ads_campaigns").select("*").order("id", { ascending: true }),
+        supabase.from("geo_audit_tests").select("*").order("id", { ascending: true }),
+        supabase.from("kpi_snapshots").select("*").order("id", { ascending: true }),
+        supabase.from("blog_posts").select("id, slug, seo_grade", { count: "exact" }).eq("status", "published"),
+        supabase.from("editorial_items").select("approval_status"),
+        supabase.from("sdr_call_audits").select("id", { count: "exact", head: true }),
+        supabase.from("weekly_meetings").select("id", { count: "exact", head: true }),
+        supabase.from("deals").select("id", { count: "exact", head: true }),
+        supabase.from("deals").select("id", { count: "exact", head: true }).eq("is_dou", 1),
+        resolveOpenAiClient(supabase),
+      ]);
+
+    const editorialRows = editorialRes.data || [];
 
     return NextResponse.json({
       milestones: milestonesRes.data || [],
       campaigns: adsRes.data || [],
       geoTests: geoRes.data || [],
       kpis: kpisRes.data || [],
-      publishedPostsCount: (postsRes.data || []).length,
+      publishedPostsCount: postsRes.count ?? (postsRes.data || []).length,
+      checklistMetrics: {
+        dealsCount: dealsRes.count ?? 0,
+        douCount: douRes.count ?? 0,
+        editorialTotal: editorialRows.length,
+        editorialPendingApproval: editorialRows.filter((e) => e.approval_status === "Para Aprovar").length,
+        sdrAuditsCount: auditsRes.count ?? 0,
+        weeklyMeetingsCount: meetingsRes.count ?? 0,
+      },
       aiConfigured: Boolean(aiCfg.client),
     });
   } catch (error) {

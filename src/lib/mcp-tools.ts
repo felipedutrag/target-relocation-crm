@@ -77,7 +77,7 @@ export const MCP_TOOLS_DEFINITION = [
   {
     name: "get_workspace_overview",
     description:
-      "Retorna painel executivo completo e em tempo real: totais de negócios, Radar DOU, organizações, contatos, notas, propostas, placar SDR, progresso de 90 dias, 9 KPIs e scores Yoast SEO do blog.",
+      "Retorna painel executivo completo e em tempo real: totais de negócios, Radar DOU, organizações, contatos, notas, propostas, placar SDR, progresso de 30 dias, 9 KPIs e scores Yoast SEO do blog.",
     annotations: READONLY_ANNOTATIONS,
     inputSchema: { type: "object", properties: {} },
   },
@@ -589,13 +589,13 @@ export const MCP_RESOURCES_LIST = [
   {
     uri: "target://schema",
     name: "Database Schema (30 Tables)",
-    description: "Estrutura completa do banco Postgres Supabase da Target Relocation (CRM, Radar DOU, Blog & Plano 90d).",
+    description: "Estrutura completa do banco Postgres Supabase da Target Relocation (CRM, Radar DOU, Blog & Plano 30d).",
     mimeType: "application/json",
   },
   {
     uri: "target://overview",
     name: "Workspace Live Overview",
-    description: "Resumo executivo em tempo real com KPIs do CRM, Placar SDR, Meta 90d e Yoast SEO.",
+    description: "Resumo executivo em tempo real com KPIs do CRM, Placar SDR, Meta 30d e Yoast SEO.",
     mimeType: "application/json",
   },
 ];

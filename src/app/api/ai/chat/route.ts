@@ -10,7 +10,7 @@ const TOOLS: OpenAI.Chat.Completions.ChatCompletionTool[] = [
     type: "function",
     function: {
       name: "get_workspace_overview",
-      description: "Obtém resumo em tempo real do CRM (total negócios, Radar DOU, reuniões, atividades pendentes, placar SDR hoje, cronograma 90 dias e status das campanhas).",
+      description: "Obtém resumo em tempo real do CRM (total negócios, Radar DOU, reuniões, atividades pendentes, placar SDR hoje, cronograma 30 dias e status das campanhas).",
       parameters: { type: "object", properties: {} },
     },
   },

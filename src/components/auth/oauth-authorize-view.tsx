@@ -89,7 +89,7 @@ export function OAuthAuthorizeView({ params }: { params: OAuthAuthorizeParams })
           <ul className="space-y-1 text-[11px] text-zinc-600 pl-1">
             <li className="flex items-center gap-1.5">
               <CheckCircle2 className="size-3 text-emerald-600 shrink-0" />
-              Leitura de todas as 30 tabelas de CRM, Radar DOU, Blog & Plano 90d
+              Leitura de todas as 30 tabelas de CRM, Radar DOU, Blog & Plano 30d
             </li>
             <li className="flex items-center gap-1.5">
               <CheckCircle2 className="size-3 text-emerald-600 shrink-0" />

@@ -67,7 +67,7 @@ async function handleRpcMessage(
           version: "1.0.0",
         },
         instructions:
-          `Target Relocation CRM Read-Only MCP Server (autenticado como ${caller.member.full_name} / ${caller.member.email}). Todas as 30 tabelas de negócios (CRM, Radar DOU, Blog SEO, Placar SDR, Ads e Plano 90d) podem ser consultadas via get_database_schema, query_table, run_readonly_sql, search e fetch. Mutações e chaves de API são estritamente bloqueadas.`,
+          `Target Relocation CRM Read-Only MCP Server (autenticado como ${caller.member.full_name} / ${caller.member.email}). Todas as 30 tabelas de negócios (CRM, Radar DOU, Blog SEO, Placar SDR, Ads e Plano 30d) podem ser consultadas via get_database_schema, query_table, run_readonly_sql, search e fetch. Mutações e chaves de API são estritamente bloqueadas.`,
       },
     };
   }
