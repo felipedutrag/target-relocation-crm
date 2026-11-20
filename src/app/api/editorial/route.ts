@@ -110,6 +110,25 @@ export async function POST(req: NextRequest) {
       const genFaq = Array.isArray(generated.faq_schema) ? generated.faq_schema : [];
       const genSeoTitle = String(generated.seo_title || item.topic).slice(0, 60);
       const genSeoDesc = String(generated.seo_description || genDirect || "").slice(0, 158);
+
+      const { data: existingPost } = await supabase
+        .from("blog_posts")
+        .select("featured_image_url, featured_image_alt")
+        .eq("slug", slug)
+        .maybeSingle();
+
+      const fallbackCovers: Record<string, string> = {
+        news: "https://vjusbszsrfigogalwdbg.supabase.co/storage/v1/object/public/blog-media/unsplash/transferencia-de-executivo-estrangeiro-para-o-brasil.jpg",
+        institutional:
+          "https://vjusbszsrfigogalwdbg.supabase.co/storage/v1/object/public/blog-media/unsplash/como-funciona-o-ponto-unico.jpg",
+        faq_service:
+          "https://vjusbszsrfigogalwdbg.supabase.co/storage/v1/object/public/blog-media/unsplash/autorizacao-residencia-trabalho-brasil.jpg",
+      };
+      const featuredImageUrl =
+        existingPost?.featured_image_url || fallbackCovers[pillar] || fallbackCovers.faq_service;
+      const featuredImageAlt =
+        existingPost?.featured_image_alt || `${genTitle} — Target Relocation`;
+
       const seoRes = analyzeArticleSeo({
         slug,
         title: genTitle,
@@ -118,6 +137,8 @@ export async function POST(req: NextRequest) {
         seo_description: genSeoDesc,
         direct_answer: genDirect,
         content_markdown: genMd,
+        featured_image_url: featuredImageUrl,
+        featured_image_alt: featuredImageAlt,
         faq_schema_json: genFaq,
         author_name: "Klaus Duailibi",
       });
@@ -134,6 +155,8 @@ export async function POST(req: NextRequest) {
             content_markdown: genMd,
             pillar,
             category: pillar === "news" ? "Notícias MTE/DOU" : pillar === "institutional" ? "Institucional & Cases" : "Guias Técnicos GEO",
+            featured_image_url: featuredImageUrl,
+            featured_image_alt: featuredImageAlt,
             faq_schema_json: genFaq,
             author_name: "Klaus Duailibi",
             author_role: "Diretor • Target Relocation",

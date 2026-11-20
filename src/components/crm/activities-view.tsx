@@ -135,20 +135,20 @@ export function ActivitiesView({ onOpenDeal }: ActivitiesViewProps) {
         <Card className="cursor-pointer" onClick={() => { setDoneFilter("0"); setPage(1); }}>
           <CardHeader className="pb-1">
             <CardTitle className="text-xs text-muted-foreground flex items-center gap-1.5">
-              <Clock className="h-3.5 w-3.5 text-amber-400" />
+              <Clock className="h-3.5 w-3.5 text-amber-700 dark:text-amber-400" />
               Pendentes
             </CardTitle>
           </CardHeader>
-          <CardContent className="text-2xl font-bold text-amber-400">{summary.pending}</CardContent>
+          <CardContent className="text-2xl font-bold text-amber-700 dark:text-amber-400">{summary.pending}</CardContent>
         </Card>
         <Card className="cursor-pointer" onClick={() => { setDoneFilter("1"); setPage(1); }}>
           <CardHeader className="pb-1">
             <CardTitle className="text-xs text-muted-foreground flex items-center gap-1.5">
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-700 dark:text-emerald-400" />
               Concluídas
             </CardTitle>
           </CardHeader>
-          <CardContent className="text-2xl font-bold text-emerald-400">
+          <CardContent className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">
             {summary.completed.toLocaleString("pt-BR")}
           </CardContent>
         </Card>
@@ -286,7 +286,10 @@ export function ActivitiesView({ onOpenDeal }: ActivitiesViewProps) {
                         </Badge>
                       )}
                       {a.is_auto_cadence === 1 && (
-                        <Badge variant="outline" className="text-[10px] border-indigo-500/30 text-indigo-300">
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] border-indigo-300 bg-indigo-100 text-indigo-900 dark:border-indigo-500/40 dark:bg-indigo-500/20 dark:text-indigo-200"
+                        >
                           Cadência Auto
                         </Badge>
                       )}
@@ -302,7 +305,7 @@ export function ActivitiesView({ onOpenDeal }: ActivitiesViewProps) {
                       <button
                         type="button"
                         onClick={() => onOpenDeal(a.deal_id!)}
-                        className="text-sky-400 hover:underline inline-flex items-center gap-1"
+                        className="text-sky-700 dark:text-sky-400 hover:underline inline-flex items-center gap-1"
                       >
                         Negócio: {a.deal_title || `#${a.deal_id}`}
                         <ExternalLink className="h-3 w-3" />

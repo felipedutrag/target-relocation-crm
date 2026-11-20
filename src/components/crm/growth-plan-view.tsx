@@ -271,7 +271,7 @@ export function GrowthPlanView({ onOpenAiSettings }: { onOpenAiSettings: () => v
                               m.status === "completed"
                                 ? "bg-emerald-600 text-white"
                                 : m.status === "in_progress"
-                                  ? "border-amber-500/50 text-amber-500"
+                                  ? "border-amber-300 bg-amber-100 text-amber-950 dark:border-amber-500/50 dark:bg-amber-500/20 dark:text-amber-300"
                                   : ""
                             }`}
                           >
@@ -366,7 +366,11 @@ export function GrowthPlanView({ onOpenAiSettings }: { onOpenAiSettings: () => v
                     <div className="text-[11px] font-semibold text-muted-foreground">Palavras Negativas:</div>
                     <div className="flex flex-wrap gap-1">
                       {(c.negative_keywords_json || []).map((kw) => (
-                        <Badge key={kw} variant="outline" className="text-[10px] border-rose-500/30 text-rose-400">
+                        <Badge
+                          key={kw}
+                          variant="outline"
+                          className="text-[10px] border-rose-300 bg-rose-100 text-rose-900 dark:border-rose-500/40 dark:bg-rose-500/20 dark:text-rose-300"
+                        >
                           - {kw}
                         </Badge>
                       ))}
@@ -476,7 +480,7 @@ export function GrowthPlanView({ onOpenAiSettings }: { onOpenAiSettings: () => v
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Meta:</span>
-                    <span className="font-mono text-emerald-500 font-semibold">{k.target_value || "—"}</span>
+                    <span className="font-mono text-emerald-700 dark:text-emerald-400 font-semibold">{k.target_value || "—"}</span>
                   </div>
                   {k.notes && <p className="text-[11px] text-muted-foreground pt-1 border-t border-border/50">{k.notes}</p>}
                 </CardContent>

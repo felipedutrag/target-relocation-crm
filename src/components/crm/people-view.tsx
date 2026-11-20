@@ -259,7 +259,7 @@ export function PeopleView({ onOpenDeal, initialSelectedId = null }: PeopleViewP
                                 className={buttonVariants({
                                   size: "icon",
                                   variant: "ghost",
-                                  className: "h-6 w-6 text-emerald-400",
+                                  className: "h-6 w-6 text-emerald-700 dark:text-emerald-400",
                                 })}
                               >
                                 <MessageSquarePlus className="h-3.5 w-3.5" />
@@ -280,8 +280,8 @@ export function PeopleView({ onOpenDeal, initialSelectedId = null }: PeopleViewP
                         )}
                       </TableCell>
                       <TableCell className="text-center font-mono text-xs">
-                        <span className="text-sky-400">{p.open_deals_count}</span> /{" "}
-                        <span className="text-emerald-400">{p.won_deals_count}</span>
+                        <span className="text-sky-700 dark:text-sky-400">{p.open_deals_count}</span> /{" "}
+                        <span className="text-emerald-700 dark:text-emerald-400">{p.won_deals_count}</span>
                       </TableCell>
                       <TableCell className="text-xs">{p.owner_name || "Klaus"}</TableCell>
                       <TableCell className="text-right text-xs text-muted-foreground">{formatDate(p.update_time)}</TableCell>
@@ -350,7 +350,7 @@ export function PeopleView({ onOpenDeal, initialSelectedId = null }: PeopleViewP
                           {d.stage_name} • {d.status}
                         </div>
                       </div>
-                      <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+                      <div className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400 font-semibold">
                         {d.value > 0 ? formatMoney(d.value, d.currency) : ""}
                         <ExternalLink className="h-3.5 w-3.5" />
                       </div>

@@ -224,7 +224,7 @@ export function OrganizationsView({ onOpenDeal, initialSelectedId = null }: Orga
                     <TableCell className="font-mono text-xs text-muted-foreground">#{o.id}</TableCell>
                     <TableCell>
                       <div className="font-medium text-xs">{o.name}</div>
-                      {o.website && <div className="text-[11px] text-sky-400 truncate max-w-[260px]">{o.website}</div>}
+                      {o.website && <div className="text-[11px] text-sky-700 dark:text-sky-400 truncate max-w-[260px]">{o.website}</div>}
                     </TableCell>
                     <TableCell>
                       {o.label_name ? (
@@ -239,10 +239,10 @@ export function OrganizationsView({ onOpenDeal, initialSelectedId = null }: Orga
                       {o.address || "—"}
                     </TableCell>
                     <TableCell className="text-center font-mono text-xs">{o.people_count}</TableCell>
-                    <TableCell className="text-center font-mono text-xs text-sky-400">{o.open_deals_count}</TableCell>
+                    <TableCell className="text-center font-mono text-xs text-sky-700 dark:text-sky-400">{o.open_deals_count}</TableCell>
                     <TableCell className="text-center font-mono text-xs">
-                      <span className="text-emerald-400">{o.won_deals_count}</span> /{" "}
-                      <span className="text-rose-400">{o.lost_deals_count}</span>
+                      <span className="text-emerald-700 dark:text-emerald-400">{o.won_deals_count}</span> /{" "}
+                      <span className="text-rose-700 dark:text-rose-400">{o.lost_deals_count}</span>
                     </TableCell>
                     <TableCell className="text-xs">{o.owner_name || "Klaus"}</TableCell>
                     <TableCell className="text-right text-xs text-muted-foreground">{formatDate(o.update_time)}</TableCell>
@@ -282,7 +282,7 @@ export function OrganizationsView({ onOpenDeal, initialSelectedId = null }: Orga
                     </span>
                   )}
                   {detail.organization.website && (
-                    <span className="inline-flex items-center gap-1 text-sky-400">
+                    <span className="inline-flex items-center gap-1 text-sky-700 dark:text-sky-400">
                       <Globe className="h-3.5 w-3.5" />
                       {detail.organization.website}
                     </span>
@@ -310,7 +310,7 @@ export function OrganizationsView({ onOpenDeal, initialSelectedId = null }: Orga
                           {d.stage_name} • {d.status}
                         </div>
                       </div>
-                      <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+                      <div className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400 font-semibold">
                         {d.value > 0 ? formatMoney(d.value, d.currency) : ""}
                         <ExternalLink className="h-3.5 w-3.5" />
                       </div>

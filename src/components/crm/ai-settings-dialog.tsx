@@ -196,7 +196,7 @@ export function AiSettingsDialog({ open, onOpenChange, onSaved }: AiSettingsDial
             </div>
 
             {!isAdmin && (
-              <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 flex items-start gap-2 text-amber-500">
+              <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 flex items-start gap-2 text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
                 <ShieldAlert className="size-4 shrink-0 mt-0.5" />
                 <span>Apenas Klaus (Admin) ou Felipe (Ops) podem alterar a API Key do workspace.</span>
               </div>
@@ -246,8 +246,8 @@ export function AiSettingsDialog({ open, onOpenChange, onSaved }: AiSettingsDial
               <div
                 className={`rounded-lg border p-2.5 text-xs flex items-center gap-2 ${
                   feedback.type === "ok"
-                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-500"
-                    : "border-rose-500/30 bg-rose-500/10 text-rose-500"
+                    ? "border-emerald-300 bg-emerald-50 text-emerald-900 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300"
+                    : "border-rose-300 bg-rose-50 text-rose-900 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300"
                 }`}
               >
                 {feedback.type === "ok" && <CheckCircle2 className="size-4 shrink-0" />}
@@ -281,10 +281,10 @@ export function AiSettingsDialog({ open, onOpenChange, onSaved }: AiSettingsDial
           </TabsContent>
 
           <TabsContent value="mcp" className="space-y-4 text-xs">
-            <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 flex items-start gap-2.5">
-              <ShieldCheck className="size-4 text-emerald-500 shrink-0 mt-0.5" />
+            <div className="rounded-lg border border-emerald-300 bg-emerald-50 p-3 flex items-start gap-2.5 dark:border-emerald-500/30 dark:bg-emerald-500/10">
+              <ShieldCheck className="size-4 text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" />
               <div className="space-y-0.5">
-                <div className="font-semibold text-emerald-600 dark:text-emerald-400">
+                <div className="font-semibold text-emerald-900 dark:text-emerald-300">
                   MCP 100% Somente Leitura • 30 Tabelas Postgres Liberadas
                 </div>
                 <div className="text-[11px] text-muted-foreground">
@@ -370,10 +370,10 @@ export function AiSettingsDialog({ open, onOpenChange, onSaved }: AiSettingsDial
 
               {mcpFeedback && (
                 <div
-                  className={`rounded-md p-2 text-[11px] ${
+                  className={`rounded-md border p-2 text-[11px] ${
                     mcpFeedback.type === "ok"
-                      ? "bg-emerald-500/10 text-emerald-500"
-                      : "bg-rose-500/10 text-rose-500"
+                      ? "border-emerald-300 bg-emerald-50 text-emerald-900 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300"
+                      : "border-rose-300 bg-rose-50 text-rose-900 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300"
                   }`}
                 >
                   {mcpFeedback.text}

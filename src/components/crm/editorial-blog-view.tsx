@@ -299,16 +299,19 @@ export function EditorialBlogView({ onOpenAiSettings }: { onOpenAiSettings: () =
                             item.approval_status === "Publicado"
                               ? "bg-emerald-600 text-white"
                               : item.approval_status === "Aprovado"
-                                ? "border-sky-500/40 text-sky-400"
+                                ? "border-sky-300 bg-sky-100 text-sky-900 dark:border-sky-500/40 dark:bg-sky-500/20 dark:text-sky-300"
                                 : item.approval_status === "Para Aprovar"
-                                  ? "border-amber-500/40 text-amber-400"
+                                  ? "border-amber-300 bg-amber-100 text-amber-950 dark:border-amber-500/40 dark:bg-amber-500/20 dark:text-amber-300"
                                   : ""
                           }`}
                         >
                           {item.approval_status}
                         </Badge>
                         {item.technical_reviewed && (
-                          <Badge variant="outline" className="text-[10px] border-emerald-500/40 text-emerald-400">
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] border-emerald-300 bg-emerald-100 text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-500/20 dark:text-emerald-300"
+                          >
                             Rev. Técnica OK
                           </Badge>
                         )}

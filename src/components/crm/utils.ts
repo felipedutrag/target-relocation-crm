@@ -40,17 +40,20 @@ export function getStatusBadgeVariant(status: string): {
     case "won":
       return {
         label: "Ganho",
-        className: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+        className:
+          "bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/40",
       };
     case "lost":
       return {
         label: "Perdido",
-        className: "bg-rose-500/15 text-rose-400 border-rose-500/30",
+        className:
+          "bg-rose-100 text-rose-900 border-rose-300 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/40",
       };
     default:
       return {
         label: "Aberto",
-        className: "bg-sky-500/15 text-sky-400 border-sky-500/30",
+        className:
+          "bg-sky-100 text-sky-900 border-sky-300 dark:bg-sky-500/20 dark:text-sky-300 dark:border-sky-500/40",
       };
   }
 }
@@ -58,28 +61,34 @@ export function getStatusBadgeVariant(status: string): {
 export function getLabelColorClass(color: string | null | undefined): string {
   switch (color) {
     case "purple":
-      return "bg-purple-500/15 text-purple-300 border-purple-500/30";
+      return "bg-purple-100 text-purple-900 border-purple-300 dark:bg-purple-500/20 dark:text-purple-200 dark:border-purple-500/40";
     case "blue":
-      return "bg-blue-500/15 text-blue-300 border-blue-500/30";
+      return "bg-blue-100 text-blue-900 border-blue-300 dark:bg-blue-500/20 dark:text-blue-200 dark:border-blue-500/40";
     case "green":
-      return "bg-emerald-500/15 text-emerald-300 border-emerald-500/30";
+      return "bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-200 dark:border-emerald-500/40";
     case "yellow":
     case "orange":
-      return "bg-amber-500/15 text-amber-300 border-amber-500/30";
+      return "bg-amber-100 text-amber-950 border-amber-300 dark:bg-amber-500/20 dark:text-amber-200 dark:border-amber-500/40";
     case "red":
-      return "bg-rose-500/15 text-rose-300 border-rose-500/30";
+      return "bg-rose-100 text-rose-900 border-rose-300 dark:bg-rose-500/20 dark:text-rose-200 dark:border-rose-500/40";
     case "brown":
-      return "bg-orange-900/30 text-orange-300 border-orange-500/30";
+      return "bg-amber-200/80 text-amber-950 border-amber-400 dark:bg-orange-500/25 dark:text-orange-200 dark:border-orange-500/45";
     default:
-      return "bg-muted text-muted-foreground border-border";
+      return "bg-zinc-100 text-zinc-800 border-zinc-300 dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700";
   }
 }
 
 export function getScoreColorClass(score: number | null | undefined): string {
-  if (score === null || score === undefined) return "bg-muted text-muted-foreground border-border";
-  if (score >= 60) return "bg-emerald-500/15 text-emerald-400 border-emerald-500/30";
-  if (score >= 40) return "bg-amber-500/15 text-amber-400 border-amber-500/30";
-  return "bg-rose-500/15 text-rose-400 border-rose-500/30";
+  if (score === null || score === undefined) {
+    return "bg-zinc-100 text-zinc-700 border-zinc-300 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700";
+  }
+  if (score >= 60) {
+    return "bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/40";
+  }
+  if (score >= 40) {
+    return "bg-amber-100 text-amber-950 border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/40";
+  }
+  return "bg-rose-100 text-rose-900 border-rose-300 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/40";
 }
 
 export function buildWhatsappUrl(phone: string | null | undefined): string | null {

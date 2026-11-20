@@ -286,8 +286,12 @@ export function BlogListClient({
                 <div className="flex flex-1 flex-col justify-between p-5 space-y-4">
                   <div className="space-y-2.5">
                     <div className="flex items-center justify-between gap-2">
-                      <Badge variant="outline" className="border-zinc-200 bg-zinc-50 text-zinc-700 text-[10px] truncate max-w-[170px]">
-                        {post.category}
+                      <Badge
+                        variant="outline"
+                        title={post.category || undefined}
+                        className="border-zinc-300 bg-zinc-50 text-zinc-800 text-[10px] max-w-[205px]"
+                      >
+                        <span className="truncate">{post.category}</span>
                       </Badge>
                       <span className="inline-flex items-center gap-1 font-mono text-[10px] text-zinc-400 shrink-0">
                         <Calendar className="size-3" />

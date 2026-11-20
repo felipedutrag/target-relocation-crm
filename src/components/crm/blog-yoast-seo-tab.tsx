@@ -68,9 +68,52 @@ function getGradeDotClass(status: SeoCheckStatus | SeoGrade): string {
 }
 
 function getGradeBadgeClass(grade: string): string {
-  if (grade === "good") return "border-emerald-500/30 bg-emerald-500/15 text-emerald-500";
-  if (grade === "ok") return "border-amber-500/30 bg-amber-500/15 text-amber-500";
-  return "border-rose-500/30 bg-rose-500/15 text-rose-500";
+  if (grade === "good") {
+    return "border-emerald-300 bg-emerald-100 text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-500/20 dark:text-emerald-300";
+  }
+  if (grade === "ok") {
+    return "border-amber-300 bg-amber-100 text-amber-950 dark:border-amber-500/40 dark:bg-amber-500/20 dark:text-amber-300";
+  }
+  return "border-rose-300 bg-rose-100 text-rose-900 dark:border-rose-500/40 dark:bg-rose-500/20 dark:text-rose-300";
+}
+
+function getGradeOverlayBadgeClass(grade: string): string {
+  if (grade === "good") {
+    return "border-emerald-300 bg-white/95 text-emerald-900 shadow-sm dark:border-emerald-500/50 dark:bg-zinc-950/90 dark:text-emerald-300";
+  }
+  if (grade === "ok") {
+    return "border-amber-300 bg-white/95 text-amber-950 shadow-sm dark:border-amber-500/50 dark:bg-zinc-950/90 dark:text-amber-300";
+  }
+  return "border-rose-300 bg-white/95 text-rose-900 shadow-sm dark:border-rose-500/50 dark:bg-zinc-950/90 dark:text-rose-300";
+}
+
+function getStatusBadgeInfo(status: string): { label: string; className: string } {
+  if (status === "published") {
+    return {
+      label: "Publicado",
+      className:
+        "border-emerald-300 bg-emerald-100 text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-500/20 dark:text-emerald-300",
+    };
+  }
+  if (status === "approved") {
+    return {
+      label: "Aprovado",
+      className:
+        "border-sky-300 bg-sky-100 text-sky-900 dark:border-sky-500/40 dark:bg-sky-500/20 dark:text-sky-300",
+    };
+  }
+  if (status === "ready_for_approval") {
+    return {
+      label: "Aguardando aprovação",
+      className:
+        "border-amber-300 bg-amber-100 text-amber-950 dark:border-amber-500/40 dark:bg-amber-500/20 dark:text-amber-300",
+    };
+  }
+  return {
+    label: status === "draft" ? "Rascunho" : status,
+    className:
+      "border-zinc-300 bg-zinc-100 text-zinc-800 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200",
+  };
 }
 
 function getGradeLabel(grade: string): string {
@@ -338,11 +381,11 @@ export function BlogYoastSeoTab({
           }}
         >
           <CardContent className="p-3.5">
-            <div className="flex items-center gap-1.5 text-[11px] text-emerald-500 font-medium">
-              <span className="size-2.5 rounded-full bg-emerald-500" />
+            <div className="flex items-center gap-1.5 text-[11px] text-emerald-700 dark:text-emerald-400 font-medium">
+              <span className="size-2.5 rounded-full bg-emerald-600 dark:bg-emerald-500" />
               Semáforo Bom (≥ 75)
             </div>
-            <div className="mt-1 text-2xl font-bold font-mono text-emerald-500">{stats.good}</div>
+            <div className="mt-1 text-2xl font-bold font-mono text-emerald-700 dark:text-emerald-400">{stats.good}</div>
             <div className="text-[10px] text-muted-foreground mt-0.5">Prontos para tráfego orgânico</div>
           </CardContent>
         </Card>
@@ -355,11 +398,11 @@ export function BlogYoastSeoTab({
           }}
         >
           <CardContent className="p-3.5">
-            <div className="flex items-center gap-1.5 text-[11px] text-amber-500 font-medium">
+            <div className="flex items-center gap-1.5 text-[11px] text-amber-800 dark:text-amber-400 font-medium">
               <span className="size-2.5 rounded-full bg-amber-500" />
               Semáforo Regular (50–74)
             </div>
-            <div className="mt-1 text-2xl font-bold font-mono text-amber-500">{stats.ok}</div>
+            <div className="mt-1 text-2xl font-bold font-mono text-amber-800 dark:text-amber-400">{stats.ok}</div>
             <div className="text-[10px] text-muted-foreground mt-0.5">Falta ALT, FAQ ou meta adjust</div>
           </CardContent>
         </Card>
@@ -372,11 +415,11 @@ export function BlogYoastSeoTab({
           }}
         >
           <CardContent className="p-3.5">
-            <div className="flex items-center gap-1.5 text-[11px] text-rose-500 font-medium">
-              <span className="size-2.5 rounded-full bg-rose-500" />
+            <div className="flex items-center gap-1.5 text-[11px] text-rose-700 dark:text-rose-400 font-medium">
+              <span className="size-2.5 rounded-full bg-rose-600 dark:bg-rose-500" />
               Precisa Melhorar (&lt; 50)
             </div>
-            <div className="mt-1 text-2xl font-bold font-mono text-rose-500">{stats.bad}</div>
+            <div className="mt-1 text-2xl font-bold font-mono text-rose-700 dark:text-rose-400">{stats.bad}</div>
             <div className="text-[10px] text-muted-foreground mt-0.5">Prioridade alta de otimização</div>
           </CardContent>
         </Card>
@@ -486,12 +529,15 @@ export function BlogYoastSeoTab({
                   )}
                   <div className="absolute top-2 left-2 flex flex-wrap items-center gap-1.5">
                     <span
-                      className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[10px] font-semibold backdrop-blur-md bg-background/85 ${getGradeBadgeClass(p.seo_grade)}`}
+                      className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[10px] font-semibold backdrop-blur-md ${getGradeOverlayBadgeClass(p.seo_grade)}`}
                     >
                       <span className={`size-2 rounded-full ${getGradeDotClass(p.seo_grade as SeoGrade)}`} />
                       SEO {p.seo_score}/100
                     </span>
-                    <Badge variant="secondary" className="text-[10px] font-mono bg-background/85 backdrop-blur-md">
+                    <Badge
+                      variant="outline"
+                      className="text-[10px] font-mono border-zinc-300 bg-white/95 text-zinc-900 shadow-sm backdrop-blur-md dark:border-zinc-700 dark:bg-zinc-950/90 dark:text-zinc-100"
+                    >
                       Legib. {p.readability_score}/100
                     </Badge>
                   </div>
@@ -499,8 +545,12 @@ export function BlogYoastSeoTab({
 
                 <CardHeader className="pb-2 pt-3">
                   <div className="flex items-center justify-between gap-2 text-[10px]">
-                    <Badge variant="outline" className="truncate max-w-[165px]">
-                      {p.category || p.pillar}
+                    <Badge
+                      variant="outline"
+                      title={p.category || p.pillar}
+                      className="max-w-[205px] border-zinc-300 bg-zinc-50 text-zinc-800 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
+                    >
+                      <span className="truncate">{p.category || p.pillar}</span>
                     </Badge>
                     <span className="font-mono text-muted-foreground shrink-0">
                       {p.word_count || 0} palavras • {p.reading_time_min || 3}m
@@ -524,7 +574,7 @@ export function BlogYoastSeoTab({
                   className="h-7 text-[11px] gap-1.5 cursor-pointer"
                   onClick={() => openYoastInspector(p)}
                 >
-                  <SlidersHorizontal className="size-3 text-amber-500" />
+                  <SlidersHorizontal className="size-3 text-amber-600 dark:text-amber-400" />
                   Yoast SEO & Editar
                 </Button>
 
@@ -533,14 +583,16 @@ export function BlogYoastSeoTab({
                     href={publicUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-sky-500 hover:underline inline-flex items-center gap-1 text-[11px] font-medium truncate max-w-[165px]"
+                    className="text-sky-700 dark:text-sky-400 hover:underline inline-flex items-center gap-1 text-[11px] font-medium truncate max-w-[165px]"
                     title={publicUrl}
                   >
                     <span className="truncate">{publicUrl}</span>
                     <ExternalLink className="size-3 shrink-0" />
                   </a>
                 ) : (
-                  <Badge variant="secondary" className="text-[10px]">{p.status}</Badge>
+                  <Badge variant="outline" className={`text-[10px] ${getStatusBadgeInfo(p.status).className}`}>
+                    {getStatusBadgeInfo(p.status).label}
+                  </Badge>
                 )}
               </div>
             </Card>
@@ -692,12 +744,12 @@ export function BlogYoastSeoTab({
                   <div className="flex items-center justify-between">
                     <Label className="text-xs">Título SEO (ideal: 35–60 chars)</Label>
                     <span
-                      className={`font-mono text-[10px] ${
+                      className={`font-mono text-[10px] font-medium ${
                         titleLen >= 35 && titleLen <= 60
-                          ? "text-emerald-500"
+                          ? "text-emerald-700 dark:text-emerald-400"
                           : titleLen >= 25 && titleLen <= 68
-                            ? "text-amber-500"
-                            : "text-rose-500"
+                            ? "text-amber-700 dark:text-amber-400"
+                            : "text-rose-700 dark:text-rose-400"
                       }`}
                     >
                       {titleLen}/60 chars
@@ -726,12 +778,12 @@ export function BlogYoastSeoTab({
                   <div className="flex items-center justify-between">
                     <Label className="text-xs">Meta Description (ideal: 115–160 chars)</Label>
                     <span
-                      className={`font-mono text-[10px] ${
+                      className={`font-mono text-[10px] font-medium ${
                         descLen >= 115 && descLen <= 160
-                          ? "text-emerald-500"
+                          ? "text-emerald-700 dark:text-emerald-400"
                           : descLen >= 80 && descLen <= 175
-                            ? "text-amber-500"
-                            : "text-rose-500"
+                            ? "text-amber-700 dark:text-amber-400"
+                            : "text-rose-700 dark:text-rose-400"
                       }`}
                     >
                       {descLen}/160 chars
@@ -835,7 +887,7 @@ export function BlogYoastSeoTab({
                                 </div>
                                 <div className="text-muted-foreground">{c.detail}</div>
                                 {c.status !== "good" && (
-                                  <div className="text-amber-500 mt-0.5">Sugestão: {c.hint}</div>
+                                  <div className="text-amber-800 dark:text-amber-400 mt-0.5">Sugestão: {c.hint}</div>
                                 )}
                               </div>
                             </div>
@@ -860,7 +912,7 @@ export function BlogYoastSeoTab({
                                 </div>
                                 <div className="text-muted-foreground">{c.detail}</div>
                                 {c.status !== "good" && (
-                                  <div className="text-amber-500 mt-0.5">Sugestão: {c.hint}</div>
+                                  <div className="text-amber-800 dark:text-amber-400 mt-0.5">Sugestão: {c.hint}</div>
                                 )}
                               </div>
                             </div>
@@ -868,7 +920,7 @@ export function BlogYoastSeoTab({
                       </div>
 
                       <div className="pt-2 border-t border-border/60 text-[11px] text-muted-foreground flex items-center gap-1.5">
-                        <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
+                        <CheckCircle2 className="size-3.5 text-emerald-700 dark:text-emerald-400 shrink-0" />
                         <span>
                           FAQ Schema ativo: <strong>{faqSchema.length}</strong> pergunta(s) estruturada(s).
                         </span>

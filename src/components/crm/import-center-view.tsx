@@ -181,7 +181,7 @@ export function ImportCenterView({ onOpenDeal }: ImportCenterViewProps) {
       </div>
 
       {banner && (
-        <Alert className="border-emerald-500/40 bg-emerald-500/10 text-emerald-300">
+        <Alert className="border-emerald-300 bg-emerald-50 text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-300">
           <CheckCircle2 className="h-4 w-4" />
           <AlertTitle>Importação Concluída</AlertTitle>
           <AlertDescription className="text-xs">{banner}</AlertDescription>
@@ -337,7 +337,7 @@ export function ImportCenterView({ onOpenDeal }: ImportCenterViewProps) {
                         {af.records_count.toLocaleString("pt-BR")}
                       </TableCell>
                       <TableCell>
-                        <Badge className="text-[10px] bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                        <Badge className="text-[10px] bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/40">
                           {af.status}
                         </Badge>
                       </TableCell>
@@ -374,8 +374,8 @@ export function ImportCenterView({ onOpenDeal }: ImportCenterViewProps) {
                         variant="outline"
                         className={`text-[10px] ${
                           wh.last_http_status === "200"
-                            ? "border-emerald-500/30 text-emerald-400"
-                            : "border-amber-500/30 text-amber-400"
+                            ? "border-emerald-300 bg-emerald-100 text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-500/20 dark:text-emerald-300"
+                            : "border-amber-300 bg-amber-100 text-amber-950 dark:border-amber-500/40 dark:bg-amber-500/20 dark:text-amber-300"
                         }`}
                       >
                         HTTP {wh.last_http_status || "—"}

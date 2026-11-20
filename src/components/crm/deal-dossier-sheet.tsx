@@ -208,7 +208,7 @@ export function DealDossierSheet({ dealId, onClose, onUpdated }: DealDossierShee
                       </Badge>
                     )}
                     {deal.is_dou === 1 && (
-                      <Badge className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/30">
+                      <Badge className="bg-indigo-100 text-indigo-900 border border-indigo-300 hover:bg-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-200 dark:border-indigo-500/40 dark:hover:bg-indigo-500/30">
                         DOU • {deal.expat_count || 1} Expatriado(s)
                       </Badge>
                     )}
@@ -244,7 +244,8 @@ export function DealDossierSheet({ dealId, onClose, onUpdated }: DealDossierShee
                       className={buttonVariants({
                         size: "sm",
                         variant: "outline",
-                        className: "h-8 gap-1.5 text-emerald-400 border-emerald-500/30",
+                        className:
+                          "h-8 gap-1.5 text-emerald-800 border-emerald-300 bg-emerald-50 hover:bg-emerald-100 dark:bg-transparent dark:text-emerald-300 dark:border-emerald-500/40",
                       })}
                     >
                       <MessageSquarePlus className="h-3.5 w-3.5" />
@@ -253,7 +254,7 @@ export function DealDossierSheet({ dealId, onClose, onUpdated }: DealDossierShee
                   )}
                   <div className="text-right">
                     <div className="text-xs text-muted-foreground">Valor do Negócio</div>
-                    <div className="text-lg font-bold text-emerald-400">
+                    <div className="text-lg font-bold text-emerald-700 dark:text-emerald-400">
                       {formatMoney(deal.value, deal.currency)}
                     </div>
                   </div>
@@ -408,7 +409,7 @@ export function DealDossierSheet({ dealId, onClose, onUpdated }: DealDossierShee
                         )}
                         {deal.segment && <div className="text-muted-foreground">Segmento/CNAE: {deal.segment}</div>}
                         {(deal.website || Boolean(data.organization?.website)) && (
-                          <div className="text-sky-400 truncate">
+                          <div className="text-sky-700 dark:text-sky-400 truncate">
                             {deal.website || String(data.organization?.website)}
                           </div>
                         )}
@@ -442,7 +443,7 @@ export function DealDossierSheet({ dealId, onClose, onUpdated }: DealDossierShee
                           </div>
                         )}
                         {deal.lost_reason && (
-                          <div className="mt-2 rounded-md border border-rose-500/30 bg-rose-500/10 px-2.5 py-1.5 text-[11px] font-medium text-rose-500 dark:text-rose-400 break-words">
+                          <div className="mt-2 rounded-md border border-rose-300 bg-rose-50 px-2.5 py-1.5 text-[11px] font-medium text-rose-900 dark:border-rose-500/35 dark:bg-rose-500/10 dark:text-rose-300 break-words">
                             Motivo perda: {deal.lost_reason}
                           </div>
                         )}
@@ -582,7 +583,7 @@ export function DealDossierSheet({ dealId, onClose, onUpdated }: DealDossierShee
                     <Card key={n.id} className="border-amber-500/30">
                       <CardHeader className="pb-2">
                         <div className="flex items-center justify-between">
-                          <CardTitle className="text-sm flex items-center gap-2 text-amber-300">
+                          <CardTitle className="text-sm flex items-center gap-2 text-amber-800 dark:text-amber-300">
                             <PhoneCall className="h-4 w-4" />
                             Script de Ligação Outbound IA
                           </CardTitle>
@@ -599,7 +600,7 @@ export function DealDossierSheet({ dealId, onClose, onUpdated }: DealDossierShee
                       </CardHeader>
                       <CardContent>
                         <div
-                          className="text-xs leading-relaxed whitespace-pre-wrap text-foreground/90 prose prose-invert max-w-none"
+                          className="text-xs leading-relaxed whitespace-pre-wrap text-foreground/90 prose prose-sm dark:prose-invert max-w-none"
                           dangerouslySetInnerHTML={{ __html: n.content }}
                         />
                       </CardContent>
@@ -610,7 +611,7 @@ export function DealDossierSheet({ dealId, onClose, onUpdated }: DealDossierShee
                   {emailSeqNotes.slice(0, 1).map((n) => (
                     <Card key={n.id} className="border-emerald-500/30">
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-sm flex items-center gap-2 text-emerald-300">
+                        <CardTitle className="text-sm flex items-center gap-2 text-emerald-800 dark:text-emerald-300">
                           <Mail className="h-4 w-4" />
                           Sequência de E-mails Outbound (D+0 a D+17)
                         </CardTitle>
@@ -667,7 +668,7 @@ export function DealDossierSheet({ dealId, onClose, onUpdated }: DealDossierShee
                               </div>
                             </div>
                             <div className="text-right">
-                              <div className="font-bold text-sm text-emerald-400">
+                              <div className="font-bold text-sm text-emerald-700 dark:text-emerald-400">
                                 {formatMoney(p.total_value, p.currency)}
                               </div>
                               {p.attachment_file_id && (
@@ -675,7 +676,7 @@ export function DealDossierSheet({ dealId, onClose, onUpdated }: DealDossierShee
                                   href={`/api/files/${p.attachment_file_id}`}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="text-[11px] text-sky-400 hover:underline inline-flex items-center gap-1"
+                                  className="text-[11px] text-sky-700 dark:text-sky-400 hover:underline inline-flex items-center gap-1"
                                 >
                                   Abrir documento <ExternalLink className="h-3 w-3" />
                                 </a>
@@ -750,7 +751,7 @@ export function DealDossierSheet({ dealId, onClose, onUpdated }: DealDossierShee
                       </CardHeader>
                       <CardContent className="p-4">
                         <div
-                          className="text-xs leading-relaxed break-words [&_img]:max-w-full [&_img]:rounded-md [&_img]:border [&_img]:border-border [&_img]:my-2 [&_a]:text-sky-400 [&_a]:underline"
+                          className="text-xs leading-relaxed break-words [&_img]:max-w-full [&_img]:rounded-md [&_img]:border [&_img]:border-border [&_img]:my-2 [&_a]:text-sky-700 dark:[&_a]:text-sky-400 [&_a]:underline"
                           dangerouslySetInnerHTML={{ __html: note.content }}
                         />
                       </CardContent>
@@ -944,7 +945,7 @@ export function DealDossierSheet({ dealId, onClose, onUpdated }: DealDossierShee
                           </div>
                           <div className="text-muted-foreground">
                             De <span className="text-foreground">{ev.old_label || ev.old_value || "—"}</span> → Para{" "}
-                            <span className="text-emerald-400 font-medium">{ev.new_label || ev.new_value || "—"}</span>
+                            <span className="text-emerald-700 dark:text-emerald-400 font-medium">{ev.new_label || ev.new_value || "—"}</span>
                           </div>
                         </div>
                         <span className="text-[11px] text-muted-foreground shrink-0">{formatDate(ev.timestamp)}</span>

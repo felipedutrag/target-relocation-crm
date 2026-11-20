@@ -103,7 +103,7 @@ export function DouRadarView({ onOpenDeal }: DouRadarViewProps) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <ShieldCheck className="h-6 w-6 text-indigo-400" />
+            <ShieldCheck className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
             Radar DOU & Inteligência Outbound
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -124,7 +124,7 @@ export function DouRadarView({ onOpenDeal }: DouRadarViewProps) {
           <CardHeader className="pb-1.5">
             <CardTitle className="text-xs text-muted-foreground">Expatriados Mapeados</CardTitle>
           </CardHeader>
-          <CardContent className="text-2xl font-bold text-indigo-400">
+          <CardContent className="text-2xl font-bold text-indigo-700 dark:text-indigo-400">
             {stats.total_expats.toLocaleString("pt-BR")}
           </CardContent>
         </Card>
@@ -132,7 +132,7 @@ export function DouRadarView({ onOpenDeal }: DouRadarViewProps) {
           <CardHeader className="pb-1.5">
             <CardTitle className="text-xs text-muted-foreground">Qualificados (Score ≥ 40)</CardTitle>
           </CardHeader>
-          <CardContent className="text-2xl font-bold text-amber-400">
+          <CardContent className="text-2xl font-bold text-amber-700 dark:text-amber-400">
             {stats.qualified_count.toLocaleString("pt-BR")}
           </CardContent>
         </Card>
@@ -140,7 +140,7 @@ export function DouRadarView({ onOpenDeal }: DouRadarViewProps) {
           <CardHeader className="pb-1.5">
             <CardTitle className="text-xs text-muted-foreground">Alta Prioridade (Score ≥ 60)</CardTitle>
           </CardHeader>
-          <CardContent className="text-2xl font-bold text-emerald-400">
+          <CardContent className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">
             {stats.high_score_count.toLocaleString("pt-BR")}
           </CardContent>
         </Card>
@@ -297,8 +297,8 @@ export function DouRadarView({ onOpenDeal }: DouRadarViewProps) {
                   </div>
 
                   {/* Expatriate box */}
-                  <div className="p-2.5 rounded-md border border-indigo-500/20 bg-indigo-500/5 space-y-1">
-                    <div className="flex items-center justify-between text-[11px] font-semibold text-indigo-300">
+                  <div className="p-2.5 rounded-md border border-indigo-300/60 bg-indigo-50/70 dark:border-indigo-500/20 dark:bg-indigo-500/5 space-y-1">
+                    <div className="flex items-center justify-between text-[11px] font-semibold text-indigo-900 dark:text-indigo-300">
                       <span className="inline-flex items-center gap-1">
                         <UserCheck className="h-3.5 w-3.5" />
                         Expatriados ({item.expat_count || expats.length || 1})
@@ -328,13 +328,19 @@ export function DouRadarView({ onOpenDeal }: DouRadarViewProps) {
                   <div className="flex flex-wrap items-center justify-between gap-1.5 pt-2 border-t border-border/60">
                     <div className="flex flex-wrap gap-1">
                       {item.has_call_script && (
-                        <Badge variant="outline" className="text-[10px] border-amber-500/30 text-amber-300 gap-1">
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] border-amber-300 bg-amber-100 text-amber-950 dark:border-amber-500/40 dark:bg-amber-500/20 dark:text-amber-300 gap-1"
+                        >
                           <PhoneCall className="h-2.5 w-2.5" />
                           Script Call
                         </Badge>
                       )}
                       {item.has_email_sequence && (
-                        <Badge variant="outline" className="text-[10px] border-emerald-500/30 text-emerald-300 gap-1">
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] border-emerald-300 bg-emerald-100 text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-500/20 dark:text-emerald-300 gap-1"
+                        >
                           <Mail className="h-2.5 w-2.5" />
                           4 E-mails
                         </Badge>

@@ -134,7 +134,7 @@ export function ProposalsView({ onOpenDeal }: ProposalsViewProps) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <FileSpreadsheet className="h-6 w-6 text-emerald-400" />
+            <FileSpreadsheet className="h-6 w-6 text-emerald-700 dark:text-emerald-400" />
             Propostas Comerciais & Catálogo de Serviços
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -174,7 +174,7 @@ export function ProposalsView({ onOpenDeal }: ProposalsViewProps) {
                       </CardDescription>
                     </div>
                     <div className="text-right shrink-0">
-                      <div className="text-xl font-bold text-emerald-400">
+                      <div className="text-xl font-bold text-emerald-700 dark:text-emerald-400">
                         {formatMoney(p.total_value, p.currency)}
                       </div>
                       <div className="text-[10px] text-muted-foreground">{formatDate(p.created_at)}</div>
@@ -299,11 +299,11 @@ export function ProposalsView({ onOpenDeal }: ProposalsViewProps) {
                         {svc.scope}
                       </pre>
                     )}
-                    {svc.notes && <div className="text-[10px] text-amber-400/90">{svc.notes}</div>}
+                    {svc.notes && <div className="text-[10px] text-amber-800 dark:text-amber-400/90">{svc.notes}</div>}
                   </div>
                   <div className="flex items-center justify-between pt-2 border-t border-border/60">
                     <div>
-                      <div className="font-bold text-sm text-emerald-400">
+                      <div className="font-bold text-sm text-emerald-700 dark:text-emerald-400">
                         {svc.price !== null ? formatMoney(svc.price, svc.currency) : "Sob consulta"}
                       </div>
                       <div className="text-[10px] text-muted-foreground">{svc.unit}</div>
@@ -368,7 +368,7 @@ export function ProposalsView({ onOpenDeal }: ProposalsViewProps) {
                       <div>
                         {it.quantity} × {formatMoney(it.unit_price, previewProposal.currency)}
                       </div>
-                      <div className="font-bold text-emerald-400">
+                      <div className="font-bold text-emerald-700 dark:text-emerald-400">
                         {formatMoney(it.subtotal, previewProposal.currency)}
                       </div>
                     </div>
@@ -376,9 +376,9 @@ export function ProposalsView({ onOpenDeal }: ProposalsViewProps) {
                 ))}
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-50 border border-emerald-300 dark:bg-emerald-500/10 dark:border-emerald-500/30">
                 <span className="font-semibold text-sm">TOTAL CONSOLIDADO DA PROPOSTA</span>
-                <span className="text-xl font-bold text-emerald-400">
+                <span className="text-xl font-bold text-emerald-800 dark:text-emerald-400">
                   {formatMoney(previewProposal.total_value, previewProposal.currency)}
                 </span>
               </div>
@@ -542,7 +542,7 @@ export function ProposalsView({ onOpenDeal }: ProposalsViewProps) {
 
             <div className="p-3 rounded-md bg-muted/40 flex items-center justify-between font-bold text-sm">
               <span>Total da Proposta</span>
-              <span className="text-emerald-400">{formatMoney(builderTotal, currency)}</span>
+              <span className="text-emerald-700 dark:text-emerald-400">{formatMoney(builderTotal, currency)}</span>
             </div>
           </div>
           <DialogFooter>

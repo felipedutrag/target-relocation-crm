@@ -326,7 +326,7 @@ export function PipelinesView({ onOpenDeal }: PipelinesViewProps) {
                         {col.total_count.toLocaleString("pt-BR")}
                       </Badge>
                     </div>
-                    <div className="text-[11px] text-emerald-400 font-medium mt-0.5">
+                    <div className="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium mt-0.5">
                       {col.total_value > 0 ? formatMoney(col.total_value) : "Sem valor atribuído"}
                     </div>
                   </div>
@@ -368,7 +368,7 @@ export function PipelinesView({ onOpenDeal }: PipelinesViewProps) {
                             {d.value > 0 && (
                               <Badge
                                 variant="outline"
-                                className="text-[10px] bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                                className="text-[10px] bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/40"
                               >
                                 {formatMoney(d.value, d.currency)}
                               </Badge>
@@ -384,7 +384,7 @@ export function PipelinesView({ onOpenDeal }: PipelinesViewProps) {
                             {d.is_dou === 1 && (
                               <Badge
                                 variant="outline"
-                                className="text-[10px] bg-indigo-500/10 text-indigo-300 border-indigo-500/30"
+                                className="text-[10px] bg-indigo-100 text-indigo-900 border-indigo-300 dark:bg-indigo-500/20 dark:text-indigo-200 dark:border-indigo-500/40"
                               >
                                 <ShieldCheck className="h-2.5 w-2.5 mr-0.5" />
                                 DOU
@@ -490,7 +490,7 @@ export function PipelinesView({ onOpenDeal }: PipelinesViewProps) {
                           "—"
                         )}
                       </TableCell>
-                      <TableCell className="font-mono text-xs font-medium text-emerald-400">
+                      <TableCell className="font-mono text-xs font-medium text-emerald-700 dark:text-emerald-400">
                         {d.value > 0 ? formatMoney(d.value, d.currency) : "—"}
                       </TableCell>
                       <TableCell className="text-xs">{d.owner_name}</TableCell>

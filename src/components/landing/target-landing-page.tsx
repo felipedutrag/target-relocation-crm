@@ -780,8 +780,12 @@ export function TargetLandingPage({ onEnterCrm, onOpenLogin, latestBlogPosts = [
                     <div className="flex flex-1 flex-col justify-between p-5">
                       <div className="space-y-2.5">
                         <div className="flex items-center justify-between text-[11px]">
-                          <Badge variant="outline" className="bg-white border-zinc-200 text-zinc-700 truncate max-w-[155px]">
-                            {post.category}
+                          <Badge
+                            variant="outline"
+                            title={post.category || undefined}
+                            className="bg-white border-zinc-300 text-zinc-800 max-w-[205px]"
+                          >
+                            <span className="truncate">{post.category}</span>
                           </Badge>
                           <span className="font-mono text-zinc-400">
                             {new Date(post.updated_at).toLocaleDateString("pt-BR")}

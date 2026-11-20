@@ -258,7 +258,7 @@ export function SdrOperationsView({
       </div>
 
       {banner && (
-        <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-xs text-emerald-500">
+        <div className="rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-2.5 text-xs text-emerald-900 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
           {banner}
         </div>
       )}
@@ -525,8 +525,8 @@ export function SdrOperationsView({
                       Score {a.score}/100
                     </Badge>
                   </div>
-                  {a.strengths && <div><strong className="text-emerald-500">Pontos fortes:</strong> {a.strengths}</div>}
-                  {a.improvements && <div><strong className="text-amber-500">Ajustes recomendados:</strong> {a.improvements}</div>}
+                  {a.strengths && <div><strong className="text-emerald-700 dark:text-emerald-400">Pontos fortes:</strong> {a.strengths}</div>}
+                  {a.improvements && <div><strong className="text-amber-700 dark:text-amber-400">Ajustes recomendados:</strong> {a.improvements}</div>}
                   {a.recommended_next_step && (
                     <div className="p-2 rounded bg-muted/40"><strong>Próximo passo CRM:</strong> {a.recommended_next_step}</div>
                   )}
