@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import {
   Activity,
   ArrowRight,
+  BarChart3,
   BookOpen,
   Bot,
   Briefcase,
@@ -17,6 +18,7 @@ import {
   KeyRound,
   LayoutDashboard,
   LogOut,
+  Mail,
   Menu,
   Moon,
   PhoneCall,
@@ -58,6 +60,8 @@ import { AiChatView } from "./ai-chat-view";
 import { EditorialBlogView } from "./editorial-blog-view";
 import { SdrOperationsView } from "./sdr-operations-view";
 import { GrowthPlanView } from "./growth-plan-view";
+import { EmailMarketingView } from "./email-marketing-view";
+import { AnalyticsView } from "./analytics-view";
 import { AiSettingsDialog } from "./ai-settings-dialog";
 
 interface SearchOrg {
@@ -174,6 +178,24 @@ const NAV_ITEMS: NavItem[] = [
     badge: "24",
     section: "growth",
     icon: BookOpen,
+  },
+  {
+    id: "email_marketing",
+    label: "E-mail Marketing",
+    subtitle: "Resend, Broadcasts, Audiências & Templates",
+    keywords: "email marketing resend newsletter templates broadcasts audiencias smtp dkmin",
+    badge: "Resend",
+    section: "growth",
+    icon: Mail,
+  },
+  {
+    id: "analytics",
+    label: "Analytics & Heatmap",
+    subtitle: "Visitantes, Artigos, Regiões & Mapa de Calor",
+    keywords: "analytics heatmap mapa calor visitantes sessoes blog utm tracking regioes",
+    badge: "Live",
+    section: "growth",
+    icon: BarChart3,
   },
   {
     id: "sdr_ops",
@@ -885,6 +907,10 @@ export function CrmShell({
             {activeTab === "editorial" && (
               <EditorialBlogView onOpenAiSettings={() => setAiSettingsOpen(true)} />
             )}
+            {activeTab === "email_marketing" && (
+              <EmailMarketingView onOpenAiSettings={() => setAiSettingsOpen(true)} />
+            )}
+            {activeTab === "analytics" && <AnalyticsView />}
             {activeTab === "sdr_ops" && (
               <SdrOperationsView
                 onOpenDeal={setSelectedDealId}

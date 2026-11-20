@@ -285,11 +285,10 @@ export function AiSettingsDialog({ open, onOpenChange, onSaved }: AiSettingsDial
               <ShieldCheck className="size-4 text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" />
               <div className="space-y-0.5">
                 <div className="font-semibold text-emerald-900 dark:text-emerald-300">
-                  MCP 100% Somente Leitura • 30 Tabelas Postgres Liberadas
+                  MCP Conectado • 35 Tabelas Postgres + Envio Resend
                 </div>
                 <div className="text-[11px] text-muted-foreground">
-                  Dá acesso completo de leitura (CRM, Radar DOU, Blog SEO, Placar SDR, Ads, Plano 30d e SQL SELECT) com
-                  proteção contra mutações no Postgres e bloqueio da tabela de credenciais (<code className="font-mono">workspace_settings</code>).
+                  Leitura completa (CRM, Radar DOU, Blog SEO, Analytics &amp; Heatmap, E-mail Logs, Placar SDR e SQL SELECT) e ferramenta <code className="font-mono">send_email</code> via Resend, com mutações SQL e <code className="font-mono">workspace_settings</code> bloqueadas.
                 </div>
               </div>
             </div>

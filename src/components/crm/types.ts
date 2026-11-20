@@ -9,6 +9,8 @@ export type CrmTab =
   | "import"
   | "ai_chat"
   | "editorial"
+  | "email_marketing"
+  | "analytics"
   | "sdr_ops"
   | "growth_plan";
 

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { SiteTracker } from "@/components/analytics/site-tracker";
 import "./globals.css";
 
 const inter = Inter({
@@ -33,6 +34,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full bg-background text-foreground font-sans selection:bg-zinc-900 selection:text-white">
+        <SiteTracker />
         <TooltipProvider delay={150}>{children}</TooltipProvider>
       </body>
     </html>

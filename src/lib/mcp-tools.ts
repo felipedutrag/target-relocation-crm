@@ -1,4 +1,5 @@
 import type { McpCallerContext } from "@/lib/mcp-auth";
+import { resolveResendConfig, sendEmailViaResend } from "@/lib/resend";
 
 export const ALLOWED_MCP_TABLES = new Set([
   "action_plan_milestones",
@@ -6,11 +7,16 @@ export const ALLOWED_MCP_TABLES = new Set([
   "ads_campaigns",
   "ai_chat_messages",
   "ai_chat_sessions",
+  "analytics_events",
+  "analytics_heatmap_points",
+  "analytics_sessions",
   "app_meta",
   "blog_posts",
   "deal_flow_events",
   "deals",
   "editorial_items",
+  "email_logs",
+  "email_templates",
   "field_definitions",
   "files",
   "geo_audit_tests",
@@ -70,7 +76,7 @@ export const MCP_TOOLS_DEFINITION = [
   {
     name: "get_database_schema",
     description:
-      "Lista todas as 30 tabelas disponíveis no banco PostgreSQL (CRM, Radar DOU, Blog GEO, SDR, Ads, KPIs), com todas as colunas, tipos de dados e contagem aproximada de linhas.",
+      "Lista todas as 35 tabelas disponíveis no banco PostgreSQL (CRM, Radar DOU, Blog GEO, SDR, Ads, E-mail Marketing & Analytics), com colunas, tipos e contagem de linhas.",
     annotations: READONLY_ANNOTATIONS,
     inputSchema: { type: "object", properties: {} },
   },
@@ -84,7 +90,7 @@ export const MCP_TOOLS_DEFINITION = [
   {
     name: "query_table",
     description:
-      "Consulta paginada e segura em qualquer uma das 30 tabelas públicas (ex: deals, organizations, persons, notes, activities, blog_posts, sdr_daily_logs, ads_campaigns, kpi_snapshots).",
+      "Consulta paginada e segura em qualquer uma das 35 tabelas públicas (ex: deals, organizations, persons, notes, activities, blog_posts, analytics_events, analytics_sessions, email_logs, email_templates).",
     annotations: READONLY_ANNOTATIONS,
     inputSchema: {
       type: "object",
@@ -158,6 +164,51 @@ export const MCP_TOOLS_DEFINITION = [
         seo_grade: { type: "string", enum: ["all", "good", "ok", "needs_improvement"], description: "Filtro de semáforo Yoast" },
         category: { type: "string", description: "Filtro parcial por categoria" },
         limit: { type: "number", description: "Máximo de artigos listados (padrão 20)" },
+      },
+    },
+  },
+  {
+    name: "get_analytics_summary",
+    description:
+      "Retorna métricas completas de Analytics & Mapa de Calor do site (visitantes únicos, sessões, pageviews, leituras por artigo do blog, páginas mais acessadas, horários, dispositivos, regiões e URLs/UTMs de rastreamento).",
+    annotations: READONLY_ANNOTATIONS,
+    inputSchema: {
+      type: "object",
+      properties: {
+        days: { type: "number", description: "Janela em dias (padrão 30, máximo 365)" },
+      },
+    },
+  },
+  {
+    name: "send_email",
+    description:
+      "Envia um e-mail transacional ou comercial via Resend e registra o disparo em public.email_logs. Por padrão utiliza o remetente configurado em RESEND_FROM_EMAIL (Target Relocation <onboarding@resend.dev> no modo sandbox).",
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
+    inputSchema: {
+      type: "object",
+      required: ["to", "subject"],
+      properties: {
+        to: {
+          type: "string",
+          description: "E-mail destinatário ou lista separada por vírgula",
+        },
+        subject: { type: "string", description: "Assunto do e-mail" },
+        html: { type: "string", description: "Corpo em HTML do e-mail" },
+        text: { type: "string", description: "Versão em texto puro (opcional)" },
+        from: {
+          type: "string",
+          description: "Remetente opcional (padrão: Target Relocation <onboarding@resend.dev>)",
+        },
+        reply_to: { type: "string", description: "E-mail Reply-To opcional" },
+        cc: { type: "string", description: "Cópias separadas por vírgula (opcional)" },
+        bcc: { type: "string", description: "Cópias ocultas separadas por vírgula (opcional)" },
+        scheduled_at: { type: "string", description: "Data/hora ISO 8601 futura para agendamento (opcional)" },
+        deal_id: { type: "number", description: "ID do negócio no CRM relacionado ao e-mail (opcional)" },
       },
     },
   },
@@ -288,7 +339,7 @@ export async function executeMcpTool(
       if (!ALLOWED_MCP_TABLES.has(table)) {
         return {
           isError: true,
-          text: `Tabela '${table}' não permitida. Use get_database_schema para listar as 30 tabelas disponíveis.`,
+          text: `Tabela '${table}' não permitida. Use get_database_schema para listar as 35 tabelas disponíveis.`,
         };
       }
       const cols = Array.isArray(args.columns)
@@ -577,6 +628,189 @@ export async function executeMcpTool(
       }
 
       return { isError: true, text: `ID '${rawId}' não reconhecido para fetch.` };
+    }
+
+    if (name === "get_analytics_summary") {
+      const days = Math.max(1, Math.min(365, Math.floor(Number(args.days || 30))));
+      const intervalExpr = `now() - interval '${days} days'`;
+
+      const [summaryRes, pagesRes, blogRes, deviceRes, regionRes, trackingRes, hourlyRes] = await Promise.all([
+        execReadonlySql(
+          caller,
+          `SELECT
+            count(DISTINCT visitor_id)::int AS unique_visitors,
+            count(DISTINCT session_id)::int AS sessions,
+            count(*) FILTER (WHERE event_type IN ('pageview', 'blog_read'))::int AS pageviews,
+            count(*) FILTER (WHERE is_blog_article AND event_type IN ('pageview', 'blog_read'))::int AS blog_reads,
+            count(*) FILTER (WHERE event_type IN ('click', 'whatsapp_click', 'cta_click', 'outbound_click'))::int AS total_clicks,
+            coalesce(round(avg(scroll_depth_pct)), 0)::int AS avg_scroll_pct
+          FROM analytics_events
+          WHERE occurred_at >= ${intervalExpr}`,
+          1
+        ),
+        execReadonlySql(
+          caller,
+          `SELECT path, count(*) FILTER (WHERE event_type IN ('pageview', 'blog_read'))::int AS views, count(DISTINCT visitor_id)::int AS visitors
+          FROM analytics_events
+          WHERE occurred_at >= ${intervalExpr}
+          GROUP BY path
+          ORDER BY views DESC`,
+          15
+        ),
+        execReadonlySql(
+          caller,
+          `SELECT blog_slug, count(*) FILTER (WHERE event_type IN ('pageview', 'blog_read'))::int AS views, count(DISTINCT visitor_id)::int AS visitors, coalesce(round(avg(scroll_depth_pct)), 0)::int AS avg_scroll_pct
+          FROM analytics_events
+          WHERE occurred_at >= ${intervalExpr} AND is_blog_article = true AND blog_slug IS NOT NULL
+          GROUP BY blog_slug
+          ORDER BY views DESC`,
+          15
+        ),
+        execReadonlySql(
+          caller,
+          `SELECT device_type, count(*)::int AS sessions, count(DISTINCT visitor_id)::int AS visitors
+          FROM analytics_sessions
+          WHERE started_at >= ${intervalExpr}
+          GROUP BY device_type
+          ORDER BY sessions DESC`,
+          10
+        ),
+        execReadonlySql(
+          caller,
+          `SELECT coalesce(country, 'Desconhecido') AS country, coalesce(region, 'Desconhecido') AS region, coalesce(city, 'Desconhecido') AS city, count(*)::int AS sessions
+          FROM analytics_sessions
+          WHERE started_at >= ${intervalExpr}
+          GROUP BY 1, 2, 3
+          ORDER BY sessions DESC`,
+          15
+        ),
+        execReadonlySql(
+          caller,
+          `SELECT coalesce(utm_source, referrer_domain, 'direto') AS source, coalesce(utm_medium, 'none') AS medium, coalesce(utm_campaign, '—') AS campaign, count(*)::int AS sessions
+          FROM analytics_sessions
+          WHERE started_at >= ${intervalExpr}
+          GROUP BY 1, 2, 3
+          ORDER BY sessions DESC`,
+          15
+        ),
+        execReadonlySql(
+          caller,
+          `SELECT extract(hour FROM (occurred_at AT TIME ZONE 'America/Sao_Paulo'))::int AS hour_brt, count(*)::int AS events
+          FROM analytics_events
+          WHERE occurred_at >= ${intervalExpr}
+          GROUP BY 1
+          ORDER BY 1 ASC`,
+          24
+        ),
+      ]);
+
+      return {
+        text: JSON.stringify(
+          {
+            days,
+            summary: summaryRes.rows[0] || {},
+            top_pages: pagesRes.rows,
+            top_blog_articles: blogRes.rows,
+            by_device: deviceRes.rows,
+            by_region: regionRes.rows,
+            by_tracking: trackingRes.rows,
+            by_hour_brt: hourlyRes.rows,
+          },
+          null,
+          2
+        ),
+      };
+    }
+
+    if (name === "send_email") {
+      const cfg = await resolveResendConfig(caller.supabase);
+      if (!cfg.apiKey) {
+        return { isError: true, text: "RESEND_API_KEY não configurada no servidor." };
+      }
+
+      const toList = String(args.to || "")
+        .split(/[,;\s]+/)
+        .map((s) => s.trim())
+        .filter((s) => s.includes("@"));
+      const subject = String(args.subject || "").trim();
+      const html = args.html ? String(args.html) : undefined;
+      const text = args.text ? String(args.text) : undefined;
+
+      if (toList.length === 0 || !subject || (!html && !text)) {
+        return { isError: true, text: "Parâmetros 'to' (e-mail válido), 'subject' e ('html' ou 'text') são obrigatórios." };
+      }
+
+      const ccList = args.cc
+        ? String(args.cc)
+            .split(/[,;\s]+/)
+            .map((s) => s.trim())
+            .filter((s) => s.includes("@"))
+        : [];
+      const bccList = args.bcc
+        ? String(args.bcc)
+            .split(/[,;\s]+/)
+            .map((s) => s.trim())
+            .filter((s) => s.includes("@"))
+        : [];
+
+      const from = args.from && String(args.from).trim() ? String(args.from).trim() : cfg.fromEmail;
+      const replyTo = args.reply_to ? String(args.reply_to).trim() : undefined;
+      const scheduledAt = args.scheduled_at ? String(args.scheduled_at).trim() : undefined;
+
+      const sendRes = await sendEmailViaResend({
+        apiKey: cfg.apiKey,
+        from,
+        to: toList,
+        subject,
+        html,
+        text,
+        cc: ccList,
+        bcc: bccList,
+        replyTo,
+        scheduledAt,
+        tags: [{ name: "source", value: "mcp_connector" }],
+      });
+
+      await caller.supabase.rpc("log_resend_email", {
+        p_payload: {
+          resend_email_id: sendRes.id || `mcp-err-${Date.now()}`,
+          source: "mcp",
+          from_email: sendRes.from,
+          to_emails: toList,
+          cc_emails: ccList,
+          bcc_emails: bccList,
+          reply_to: replyTo || null,
+          subject,
+          html_body: html || null,
+          text_body: text || null,
+          status: sendRes.ok ? (scheduledAt ? "scheduled" : "sent") : "failed",
+          scheduled_at: scheduledAt || null,
+          sent_by_name: caller.member.full_name,
+          sent_by_email: caller.member.email,
+          deal_id: args.deal_id ? Number(args.deal_id) : null,
+          tags_json: [{ name: "source", value: "mcp_connector" }],
+          error_message: sendRes.error,
+        },
+      });
+
+      if (!sendRes.ok) {
+        return { isError: true, text: sendRes.error || "Falha ao enviar e-mail via Resend." };
+      }
+
+      return {
+        text: JSON.stringify(
+          {
+            success: true,
+            resend_email_id: sendRes.id,
+            from: sendRes.from,
+            to: toList,
+            subject,
+            status: scheduledAt ? "scheduled" : "sent",
+          },
+          null,
+          2
+        ),
+      };
     }
 
     return { isError: true, text: `Ferramenta MCP desconhecida: ${name}` };
