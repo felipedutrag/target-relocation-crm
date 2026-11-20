@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDb } from "@/lib/db";
-import { ensureDatabaseSeeded } from "@/lib/importer";
+import { requireWorkspaceUser } from "@/lib/supabase/server";
 import { parseNoteContent } from "@/lib/parsers";
 
 export const dynamic = "force-dynamic";
@@ -10,81 +9,91 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    await ensureDatabaseSeeded();
+    const auth = await requireWorkspaceUser();
+    if (auth.errorResponse) return auth.errorResponse;
+    const { supabase } = auth;
+
     const { id } = await context.params;
     const dealId = Number(id);
     if (Number.isNaN(dealId)) {
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });
     }
 
-    const db = getDb();
-    const deal = db.prepare("SELECT * FROM deals WHERE id = ?").get(dealId) as Record<string, unknown> | undefined;
+    const { data: deal } = await supabase.from("deals").select("*").eq("id", dealId).maybeSingle();
     if (!deal) {
       return NextResponse.json({ error: "Negócio não encontrado" }, { status: 404 });
     }
 
-    const organization = deal.org_id
-      ? db.prepare("SELECT * FROM organizations WHERE id = ?").get(Number(deal.org_id))
-      : null;
-    const person = deal.person_id
-      ? db.prepare("SELECT * FROM persons WHERE id = ?").get(Number(deal.person_id))
-      : null;
+    const fileOrFilters = [`deal_id.eq.${dealId}`];
+    if (deal.org_id) fileOrFilters.push(`org_id.eq.${deal.org_id}`);
+    if (deal.person_id) fileOrFilters.push(`person_id.eq.${deal.person_id}`);
 
-    const rawNotes = db
-      .prepare(
-        `SELECT * FROM notes
-         WHERE deal_id = ?
-         ORDER BY pinned_to_deal_flag DESC, add_time DESC`
-      )
-      .all(dealId) as Array<Record<string, unknown>>;
+    const [orgRes, personRes, notesRes, actRes, filesRes, flowRes, propRes, stagesRes, mailRes] =
+      await Promise.all([
+        deal.org_id ? supabase.from("organizations").select("*").eq("id", Number(deal.org_id)).maybeSingle() : Promise.resolve({ data: null }),
+        deal.person_id ? supabase.from("persons").select("*").eq("id", Number(deal.person_id)).maybeSingle() : Promise.resolve({ data: null }),
+        supabase
+          .from("notes")
+          .select("*")
+          .eq("deal_id", dealId)
+          .order("pinned_to_deal_flag", { ascending: false })
+          .order("add_time", { ascending: false }),
+        supabase
+          .from("activities")
+          .select("*")
+          .eq("deal_id", dealId)
+          .order("done", { ascending: true })
+          .order("due_date", { ascending: false })
+          .order("id", { ascending: false }),
+        supabase
+          .from("files")
+          .select("*")
+          .or(fileOrFilters.join(","))
+          .order("has_local_file", { ascending: false })
+          .order("add_time", { ascending: false }),
+        supabase
+          .from("deal_flow_events")
+          .select("*")
+          .eq("deal_id", dealId)
+          .order("timestamp", { ascending: false })
+          .order("id", { ascending: false })
+          .limit(100),
+        supabase
+          .from("proposals")
+          .select("*")
+          .eq("deal_id", dealId)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("stages")
+          .select("*")
+          .eq("pipeline_id", Number(deal.pipeline_id || 1))
+          .order("order_nr", { ascending: true }),
+        deal.person_id
+          ? supabase.from("mail_threads").select("*").eq("linked_person_id", Number(deal.person_id))
+          : Promise.resolve({ data: [] }),
+      ]);
 
-    const notes = rawNotes.map((n) => ({
+    const notes = (notesRes.data || []).map((n) => ({
       ...n,
       parsed_meta: n.parsed_meta_json ? JSON.parse(String(n.parsed_meta_json)) : null,
     }));
 
-    const activities = db
-      .prepare("SELECT * FROM activities WHERE deal_id = ? ORDER BY done ASC, due_date DESC, id DESC")
-      .all(dealId);
-
-    const files = db
-      .prepare(
-        `SELECT * FROM files
-         WHERE deal_id = ? OR (? IS NOT NULL AND org_id = ?) OR (? IS NOT NULL AND person_id = ?)
-         ORDER BY has_local_file DESC, add_time DESC`
-      )
-      .all(dealId, deal.org_id ?? null, deal.org_id ?? null, deal.person_id ?? null, deal.person_id ?? null);
-
-    const flowEvents = db
-      .prepare("SELECT * FROM deal_flow_events WHERE deal_id = ? ORDER BY timestamp DESC, id DESC LIMIT 100")
-      .all(dealId);
-
-    const proposals = db
-      .prepare("SELECT * FROM proposals WHERE deal_id = ? ORDER BY created_at DESC")
-      .all(dealId) as Array<Record<string, unknown>>;
-
-    const stages = db
-      .prepare("SELECT * FROM stages WHERE pipeline_id = ? ORDER BY order_nr ASC")
-      .all(Number(deal.pipeline_id || 1));
-
-    const mailThreads = deal.person_id
-      ? db.prepare("SELECT * FROM mail_threads WHERE linked_person_id = ?").all(Number(deal.person_id))
-      : [];
+    const proposals = (propRes.data || []).map((p) => ({
+      ...p,
+      items: p.items_json ? JSON.parse(String(p.items_json)) : [],
+    }));
 
     return NextResponse.json({
       deal,
-      organization,
-      person,
+      organization: orgRes.data || null,
+      person: personRes.data || null,
       notes,
-      activities,
-      files,
-      flowEvents,
-      proposals: proposals.map((p) => ({
-        ...p,
-        items: p.items_json ? JSON.parse(String(p.items_json)) : [],
-      })),
-      stages,
-      mailThreads,
+      activities: actRes.data || [],
+      files: filesRes.data || [],
+      flowEvents: flowRes.data || [],
+      proposals,
+      stages: stagesRes.data || [],
+      mailThreads: mailRes.data || [],
     });
   } catch (error) {
     console.error("GET /api/deals/[id] error:", error);
@@ -97,14 +106,16 @@ export async function PATCH(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    await ensureDatabaseSeeded();
+    const auth = await requireWorkspaceUser();
+    if (auth.errorResponse) return auth.errorResponse;
+    const { supabase } = auth;
+
     const { id } = await context.params;
     const dealId = Number(id);
-    const db = getDb();
     const body = (await req.json()) as Record<string, unknown>;
     const now = new Date().toISOString().replace("T", " ").slice(0, 19);
 
-    const existing = db.prepare("SELECT * FROM deals WHERE id = ?").get(dealId) as Record<string, unknown> | undefined;
+    const { data: existing } = await supabase.from("deals").select("*").eq("id", dealId).maybeSingle();
     if (!existing) {
       return NextResponse.json({ error: "Negócio não encontrado" }, { status: 404 });
     }
@@ -112,115 +123,129 @@ export async function PATCH(
     if (body.action === "add_note") {
       const content = String(body.content || "").trim();
       if (!content) return NextResponse.json({ error: "Conteúdo da nota vazio" }, { status: 400 });
-      const maxId = (db.prepare("SELECT COALESCE(MAX(id), 20000) as m FROM notes").get() as { m: number }).m;
       const parsed = parseNoteContent(content);
-      db.prepare(
-        `INSERT INTO notes (id, deal_id, deal_title, person_id, person_name, org_id, org_name, user_id, user_name, content, note_category, parsed_meta_json, pinned_to_deal_flag, add_time, update_time)
-         VALUES (?, ?, ?, ?, ?, ?, ?, 24624701, ?, ?, ?, ?, ?, ?, ?)`
-      ).run(
-        maxId + 1,
-        dealId,
-        String(existing.title || ""),
-        existing.person_id ? Number(existing.person_id) : null,
-        existing.person_name ? String(existing.person_name) : null,
-        existing.org_id ? Number(existing.org_id) : null,
-        existing.org_name ? String(existing.org_name) : null,
-        String(body.user_name || "Klaus"),
-        parsed.cleanHtml,
-        parsed.category,
-        JSON.stringify(parsed.meta),
-        body.pinned ? 1 : 0,
-        now,
-        now
-      );
-      db.prepare("UPDATE deals SET notes_count = notes_count + 1, update_time = ? WHERE id = ?").run(now, dealId);
+      await supabase.from("notes").insert({
+        deal_id: dealId,
+        deal_title: String(existing.title || ""),
+        person_id: existing.person_id ? Number(existing.person_id) : null,
+        person_name: existing.person_name ? String(existing.person_name) : null,
+        org_id: existing.org_id ? Number(existing.org_id) : null,
+        org_name: existing.org_name ? String(existing.org_name) : null,
+        user_id: 24624701,
+        user_name: String(body.user_name || auth.member.crm_owner_name || "Klaus"),
+        content: parsed.cleanHtml,
+        note_category: parsed.category,
+        parsed_meta_json: JSON.stringify(parsed.meta),
+        pinned_to_deal_flag: body.pinned ? 1 : 0,
+        add_time: now,
+        update_time: now,
+      });
+      await supabase
+        .from("deals")
+        .update({ notes_count: Number(existing.notes_count || 0) + 1, update_time: now })
+        .eq("id", dealId);
       return NextResponse.json({ success: true });
     }
 
     if (body.action === "add_activity") {
       const subject = String(body.subject || "").trim();
       if (!subject) return NextResponse.json({ error: "Assunto obrigatório" }, { status: 400 });
-      const maxId = (db.prepare("SELECT COALESCE(MAX(id), 10000) as m FROM activities").get() as { m: number }).m;
-      db.prepare(
-        `INSERT INTO activities (id, subject, type, type_name, done, due_date, due_time, deal_id, deal_title, person_id, person_name, org_id, org_name, user_id, owner_name, note, add_time, update_time)
-         VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, 24624701, ?, ?, ?, ?)`
-      ).run(
-        maxId + 1,
+      await supabase.from("activities").insert({
         subject,
-        String(body.type || "task"),
-        String(body.type_name || "Tarefa"),
-        String(body.due_date || now.slice(0, 10)),
-        String(body.due_time || "10:00"),
-        dealId,
-        String(existing.title || ""),
-        existing.person_id ? Number(existing.person_id) : null,
-        existing.person_name ? String(existing.person_name) : null,
-        existing.org_id ? Number(existing.org_id) : null,
-        existing.org_name ? String(existing.org_name) : null,
-        String(body.owner_name || existing.owner_name || "Klaus"),
-        body.note ? String(body.note) : null,
-        now,
-        now
-      );
-      db.prepare("UPDATE deals SET activities_count = activities_count + 1, undone_activities_count = undone_activities_count + 1, update_time = ? WHERE id = ?").run(now, dealId);
+        type: String(body.type || "task"),
+        type_name: String(body.type_name || "Tarefa"),
+        done: 0,
+        due_date: String(body.due_date || now.slice(0, 10)),
+        due_time: String(body.due_time || "10:00"),
+        deal_id: dealId,
+        deal_title: String(existing.title || ""),
+        person_id: existing.person_id ? Number(existing.person_id) : null,
+        person_name: existing.person_name ? String(existing.person_name) : null,
+        org_id: existing.org_id ? Number(existing.org_id) : null,
+        org_name: existing.org_name ? String(existing.org_name) : null,
+        user_id: 24624701,
+        owner_name: String(body.owner_name || existing.owner_name || "Klaus"),
+        note: body.note ? String(body.note) : null,
+        add_time: now,
+        update_time: now,
+      });
+      await supabase
+        .from("deals")
+        .update({
+          activities_count: Number(existing.activities_count || 0) + 1,
+          undone_activities_count: Number(existing.undone_activities_count || 0) + 1,
+          update_time: now,
+        })
+        .eq("id", dealId);
       return NextResponse.json({ success: true });
     }
 
-    // Update deal fields
     const nextStageId = body.stage_id != null ? Number(body.stage_id) : Number(existing.stage_id);
-    const stage = db.prepare("SELECT * FROM stages WHERE id = ?").get(nextStageId) as
-      | { id: number; name: string; order_nr: number; pipeline_id: number; pipeline_name: string }
-      | undefined;
+    const { data: stage } = await supabase.from("stages").select("*").eq("id", nextStageId).maybeSingle();
 
     const nextStatus = body.status ? String(body.status) : String(existing.status);
     const nextValue = body.value != null ? Number(body.value) : Number(existing.value || 0);
     const nextOwner = body.owner_name ? String(body.owner_name) : String(existing.owner_name || "Klaus");
-    const nextLostReason = body.lost_reason !== undefined ? (body.lost_reason ? String(body.lost_reason) : null) : (existing.lost_reason as string | null);
+    const nextLostReason =
+      body.lost_reason !== undefined
+        ? body.lost_reason
+          ? String(body.lost_reason)
+          : null
+        : (existing.lost_reason as string | null);
 
-    db.prepare(
-      `UPDATE deals
-       SET stage_id = ?, stage_name = ?, stage_order_nr = ?, pipeline_id = ?, pipeline_name = ?,
-           status = ?, value = ?, formatted_value = ?, owner_name = ?, lost_reason = ?,
-           won_time = CASE WHEN ? = 'won' AND won_time IS NULL THEN ? ELSE won_time END,
-           lost_time = CASE WHEN ? = 'lost' AND lost_time IS NULL THEN ? ELSE lost_time END,
-           close_time = CASE WHEN ? IN ('won', 'lost') AND close_time IS NULL THEN ? ELSE close_time END,
-           update_time = ?
-       WHERE id = ?`
-    ).run(
-      stage?.id ?? nextStageId,
-      stage?.name ?? String(existing.stage_name || ""),
-      stage?.order_nr ?? Number(existing.stage_order_nr || 0),
-      stage?.pipeline_id ?? Number(existing.pipeline_id || 1),
-      stage?.pipeline_name ?? String(existing.pipeline_name || ""),
-      nextStatus,
-      nextValue,
-      `R$ ${nextValue.toLocaleString("pt-BR")}`,
-      nextOwner,
-      nextLostReason,
-      nextStatus,
-      now,
-      nextStatus,
-      now,
-      nextStatus,
-      now,
-      now,
-      dealId
-    );
+    await supabase
+      .from("deals")
+      .update({
+        stage_id: stage?.id ?? nextStageId,
+        stage_name: stage?.name ?? String(existing.stage_name || ""),
+        stage_order_nr: stage?.order_nr ?? Number(existing.stage_order_nr || 0),
+        pipeline_id: stage?.pipeline_id ?? Number(existing.pipeline_id || 1),
+        pipeline_name: stage?.pipeline_name ?? String(existing.pipeline_name || ""),
+        status: nextStatus,
+        value: nextValue,
+        formatted_value: `R$ ${nextValue.toLocaleString("pt-BR")}`,
+        owner_name: nextOwner,
+        lost_reason: nextLostReason,
+        won_time: nextStatus === "won" && !existing.won_time ? now : existing.won_time,
+        lost_time: nextStatus === "lost" && !existing.lost_time ? now : existing.lost_time,
+        close_time:
+          (nextStatus === "won" || nextStatus === "lost") && !existing.close_time ? now : existing.close_time,
+        update_time: now,
+      })
+      .eq("id", dealId);
 
     if (nextStageId !== Number(existing.stage_id) && stage) {
-      db.prepare(
-        `INSERT INTO deal_flow_events (deal_id, object_type, timestamp, user_id, field_key, field_name, old_value, new_value, old_label, new_label, change_source)
-         VALUES (?, 'dealChange', ?, 24624701, 'stage_id', 'Etapa', ?, ?, ?, ?, 'crm-ui')`
-      ).run(dealId, now, String(existing.stage_id), String(stage.id), String(existing.stage_name || ""), stage.name);
+      await supabase.from("deal_flow_events").insert({
+        deal_id: dealId,
+        object_type: "dealChange",
+        timestamp: now,
+        user_id: 24624701,
+        field_key: "stage_id",
+        field_name: "Etapa",
+        old_value: String(existing.stage_id),
+        new_value: String(stage.id),
+        old_label: String(existing.stage_name || ""),
+        new_label: stage.name,
+        change_source: "crm-ui",
+      });
     }
     if (nextStatus !== String(existing.status)) {
-      db.prepare(
-        `INSERT INTO deal_flow_events (deal_id, object_type, timestamp, user_id, field_key, field_name, old_value, new_value, old_label, new_label, change_source)
-         VALUES (?, 'dealChange', ?, 24624701, 'status', 'Status', ?, ?, ?, ?, 'crm-ui')`
-      ).run(dealId, now, String(existing.status), nextStatus, String(existing.status), nextStatus);
+      await supabase.from("deal_flow_events").insert({
+        deal_id: dealId,
+        object_type: "dealChange",
+        timestamp: now,
+        user_id: 24624701,
+        field_key: "status",
+        field_name: "Status",
+        old_value: String(existing.status),
+        new_value: nextStatus,
+        old_label: String(existing.status),
+        new_label: nextStatus,
+        change_source: "crm-ui",
+      });
     }
 
-    const updated = db.prepare("SELECT * FROM deals WHERE id = ?").get(dealId);
+    const { data: updated } = await supabase.from("deals").select("*").eq("id", dealId).maybeSingle();
     return NextResponse.json({ success: true, deal: updated });
   } catch (error) {
     console.error("PATCH /api/deals/[id] error:", error);

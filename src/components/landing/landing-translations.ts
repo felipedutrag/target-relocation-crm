@@ -533,7 +533,7 @@ export const LANDING_COPY: Record<LandingLocale, LandingCopy> = {
         "Share your project scope and timeline. Our specialists will prepare a tailored immigration and relocation plan for your team.",
       successTitle: (id) => `Request logged in CRM (Deal #${id})`,
       successDescription:
-        "Organization, contact record, and initial diagnostic note have been saved in the SQLite database.",
+        "Organization, contact record, and initial diagnostic note have been saved in Supabase Postgres.",
       openDealBtn: (id) => `Open Deal #${id}`,
       newRequestBtn: "New inquiry",
       nameLabel: "Full name *",
@@ -956,7 +956,7 @@ export const LANDING_COPY: Record<LandingLocale, LandingCopy> = {
         "Comparte el alcance y plazos de tu proyecto. Nuestros especialistas estructurarán un plan migratorio y de relocation a medida.",
       successTitle: (id) => `Solicitud registrada en el CRM (Negocio #${id})`,
       successDescription:
-        "Organización, contacto y nota inicial ya quedaron guardados en la base SQLite.",
+        "Organización, contacto y nota inicial ya quedaron guardados en la base Supabase Postgres.",
       openDealBtn: (id) => `Abrir Negocio #${id}`,
       newRequestBtn: "Nueva solicitud",
       nameLabel: "Nombre completo *",
@@ -1379,7 +1379,7 @@ export const LANDING_COPY: Record<LandingLocale, LandingCopy> = {
         "Compartilhe o escopo e os prazos do seu projeto. Nossos especialistas estruturam um plano sob medida de imigração e relocation.",
       successTitle: (id) => `Solicitação registrada no CRM (Negócio #${id})`,
       successDescription:
-        "Organização, contato e nota inicial já estão salvos na base SQLite.",
+        "Organização, contato e nota inicial já estão salvos na base Supabase Postgres.",
       openDealBtn: (id) => `Abrir Negócio #${id}`,
       newRequestBtn: "Nova solicitação",
       nameLabel: "Nome completo *",

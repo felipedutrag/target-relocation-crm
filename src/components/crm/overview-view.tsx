@@ -111,11 +111,11 @@ export function OverviewView({ onOpenDeal, onNavigate }: OverviewViewProps) {
             </h2>
             <span className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2 py-0.5 font-mono text-[10px] text-muted-foreground">
               <span className="size-1.5 rounded-full bg-emerald-500" />
-              SQLite Synced
+              Supabase PG17
             </span>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Base unificada do backup Pipedrive • {kpis.auditedFiles} arquivos auditados e indexados localmente
+            Base unificada do backup Pipedrive • {kpis.auditedFiles} arquivos auditados e migrados no Postgres 17
           </p>
         </div>
         <div className="flex items-center gap-2">

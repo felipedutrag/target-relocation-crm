@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDb } from "@/lib/db";
-import { ensureDatabaseSeeded } from "@/lib/importer";
+import { requireWorkspaceUser } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -9,20 +8,32 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    await ensureDatabaseSeeded();
+    const auth = await requireWorkspaceUser();
+    if (auth.errorResponse) return auth.errorResponse;
+    const { supabase } = auth;
+
     const { id } = await context.params;
     const personId = Number(id);
-    const db = getDb();
-    const person = db.prepare("SELECT * FROM persons WHERE id = ?").get(personId);
+
+    const { data: person } = await supabase.from("persons").select("*").eq("id", personId).maybeSingle();
     if (!person) return NextResponse.json({ error: "Pessoa não encontrada" }, { status: 404 });
 
-    const deals = db.prepare("SELECT * FROM deals WHERE person_id = ? ORDER BY update_time DESC").all(personId);
-    const notes = db.prepare("SELECT * FROM notes WHERE person_id = ? ORDER BY add_time DESC LIMIT 50").all(personId);
-    const activities = db.prepare("SELECT * FROM activities WHERE person_id = ? ORDER BY due_date DESC").all(personId);
-    const files = db.prepare("SELECT * FROM files WHERE person_id = ? ORDER BY add_time DESC").all(personId);
-    const mailThreads = db.prepare("SELECT * FROM mail_threads WHERE linked_person_id = ?").all(personId);
+    const [dealsRes, notesRes, actRes, filesRes, mailRes] = await Promise.all([
+      supabase.from("deals").select("*").eq("person_id", personId).order("update_time", { ascending: false }),
+      supabase.from("notes").select("*").eq("person_id", personId).order("add_time", { ascending: false }).limit(50),
+      supabase.from("activities").select("*").eq("person_id", personId).order("due_date", { ascending: false }),
+      supabase.from("files").select("*").eq("person_id", personId).order("add_time", { ascending: false }),
+      supabase.from("mail_threads").select("*").eq("linked_person_id", personId),
+    ]);
 
-    return NextResponse.json({ person, deals, notes, activities, files, mailThreads });
+    return NextResponse.json({
+      person,
+      deals: dealsRes.data || [],
+      notes: notesRes.data || [],
+      activities: actRes.data || [],
+      files: filesRes.data || [],
+      mailThreads: mailRes.data || [],
+    });
   } catch (error) {
     return NextResponse.json({ error: String(error) }, { status: 500 });
   }

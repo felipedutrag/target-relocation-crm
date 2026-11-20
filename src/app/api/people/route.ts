@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDb } from "@/lib/db";
-import { ensureDatabaseSeeded } from "@/lib/importer";
+import { requireWorkspaceUser } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {
-    await ensureDatabaseSeeded();
-    const db = getDb();
+    const auth = await requireWorkspaceUser();
+    if (auth.errorResponse) return auth.errorResponse;
+    const { supabase } = auth;
+
     const sp = req.nextUrl.searchParams;
     const search = (sp.get("search") || "").trim();
     const label = sp.get("label") || "";
@@ -15,49 +16,36 @@ export async function GET(req: NextRequest) {
     const page = Math.max(1, Number(sp.get("page") || 1));
     const limit = Math.min(100, Math.max(10, Number(sp.get("limit") || 30)));
 
-    const where: string[] = [];
-    const params: (string | number)[] = [];
+    let query = supabase.from("persons").select("*", { count: "exact" });
 
     if (search) {
-      where.push("(name LIKE ? OR primary_email LIKE ? OR primary_phone LIKE ? OR org_name LIKE ?)");
-      const q = `%${search}%`;
-      params.push(q, q, q, q);
+      const s = search.replace(/[,()]/g, " ");
+      query = query.or(`name.ilike.%${s}%,primary_email.ilike.%${s}%,primary_phone.ilike.%${s}%,org_name.ilike.%${s}%`);
     }
     if (label && label !== "all") {
-      where.push("label_name LIKE ?");
-      params.push(`%${label}%`);
+      query = query.ilike("label_name", `%${label}%`);
     }
     if (owner && owner !== "all") {
-      where.push("owner_name = ?");
-      params.push(owner);
+      query = query.eq("owner_name", owner);
     }
 
-    const whereSql = where.length > 0 ? `WHERE ${where.join(" AND ")}` : "";
-    const total = (db.prepare(`SELECT COUNT(*) as c FROM persons ${whereSql}`).get(...params) as { c: number }).c;
     const offset = (page - 1) * limit;
+    const { data: rows, count, error } = await query
+      .order("open_deals_count", { ascending: false })
+      .order("notes_count", { ascending: false })
+      .order("update_time", { ascending: false })
+      .range(offset, offset + limit - 1);
 
-    const rows = db
-      .prepare(
-        `SELECT * FROM persons ${whereSql}
-         ORDER BY open_deals_count DESC, notes_count DESC, update_time DESC
-         LIMIT ? OFFSET ?`
-      )
-      .all(...params, limit, offset);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    const labels = db
-      .prepare(
-        `SELECT COALESCE(NULLIF(label_name, ''), 'Sem etiqueta') as label_name, COUNT(*) as count
-         FROM persons GROUP BY COALESCE(NULLIF(label_name, ''), 'Sem etiqueta') ORDER BY count DESC`
-      )
-      .all();
-
+    const total = count || 0;
     return NextResponse.json({
       total,
       page,
       limit,
-      totalPages: Math.ceil(total / limit),
-      labels,
-      people: rows,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+      labels: [],
+      people: rows || [],
     });
   } catch (error) {
     return NextResponse.json({ error: String(error) }, { status: 500 });
@@ -66,30 +54,31 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    await ensureDatabaseSeeded();
-    const db = getDb();
+    const auth = await requireWorkspaceUser();
+    if (auth.errorResponse) return auth.errorResponse;
+    const { supabase } = auth;
+
     const body = (await req.json()) as Record<string, unknown>;
     const name = String(body.name || "").trim();
     if (!name) return NextResponse.json({ error: "Nome obrigatório" }, { status: 400 });
 
-    const maxId = (db.prepare("SELECT COALESCE(MAX(id), 6000) as m FROM persons").get() as { m: number }).m;
     const now = new Date().toISOString().replace("T", " ").slice(0, 19);
-    db.prepare(
-      `INSERT INTO persons (id, name, primary_email, primary_phone, org_name, owner_name, label_name, add_time, update_time)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    ).run(
-      maxId + 1,
-      name,
-      body.email ? String(body.email) : "",
-      body.phone ? String(body.phone) : "",
-      body.org_name ? String(body.org_name) : "",
-      String(body.owner_name || "Klaus"),
-      body.label_name ? String(body.label_name) : "",
-      now,
-      now
-    );
+    const { data: created, error } = await supabase
+      .from("persons")
+      .insert({
+        name,
+        primary_email: body.email ? String(body.email) : "",
+        primary_phone: body.phone ? String(body.phone) : "",
+        org_name: body.org_name ? String(body.org_name) : "",
+        owner_name: String(body.owner_name || auth.member.crm_owner_name || "Klaus"),
+        label_name: body.label_name ? String(body.label_name) : "",
+        add_time: now,
+        update_time: now,
+      })
+      .select("*")
+      .single();
 
-    const created = db.prepare("SELECT * FROM persons WHERE id = ?").get(maxId + 1);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true, person: created }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: String(error) }, { status: 500 });

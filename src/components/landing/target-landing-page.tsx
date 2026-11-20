@@ -49,6 +49,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import type { ServiceCatalogItem } from "@/components/crm/types";
 import { formatMoney } from "@/components/crm/utils";
+import { CATALOG_SERVICES_SEED } from "@/lib/catalog-seed";
 import {
   LANDING_COPY,
   LANDING_LOCALES,
@@ -137,7 +138,9 @@ export function TargetLandingPage({ onEnterCrm, onOpenLogin }: TargetLandingPage
   const [openFaq, setOpenFaq] = useState<number>(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [catalogCountry, setCatalogCountry] = useState("Brasil");
-  const [catalog, setCatalog] = useState<ServiceCatalogItem[]>([]);
+  const [catalog] = useState<ServiceCatalogItem[]>(() =>
+    CATALOG_SERVICES_SEED.map((s, idx) => ({ id: idx + 1, ...s }))
+  );
 
   // CRM-integrated contact form state
   const [name, setName] = useState("");
@@ -163,17 +166,6 @@ export function TargetLandingPage({ onEnterCrm, onOpenLogin }: TargetLandingPage
     return () => clearInterval(timer);
   }, [t.hero.modes.length]);
 
-  useEffect(() => {
-    fetch("/api/proposals")
-      .then((r) => r.json())
-      .then((json) => {
-        if (Array.isArray(json.catalog)) {
-          setCatalog(json.catalog);
-        }
-      })
-      .catch(() => {});
-  }, []);
-
   const currentHero = t.hero.modes[heroIndex] ?? t.hero.modes[0];
   const selectedServiceOption =
     t.contact.serviceOptions.find((opt) => opt.id === serviceId) ?? t.contact.serviceOptions[0];
@@ -188,30 +180,30 @@ export function TargetLandingPage({ onEnterCrm, onOpenLogin }: TargetLandingPage
 
     setSubmitting(true);
     try {
+      const sp = new URLSearchParams(window.location.search);
       const titleCompany = company.trim() ? `${company.trim()} — ` : "";
-      const res = await fetch("/api/deals", {
+      const res = await fetch("/api/public/lead", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          action: "create_deal",
           title: `${titleCompany}${selectedServiceOption.crmTitle} (${name.trim()})`,
-          pipeline_id: 1,
-          owner_name: "Klaus",
-          org_name: company.trim() || undefined,
+          org_name: company.trim() || "",
           person_name: name.trim(),
           email: email.trim(),
           phone: phone.trim(),
           service_interest: selectedServiceOption.label,
-          origin: t.contact.originTag,
-          form_filled: t.contact.formTag,
+          origin: sp.get("utm_source") || t.contact.originTag,
           message: message.trim(),
+          utm_source: sp.get("utm_source"),
+          utm_medium: sp.get("utm_medium"),
+          utm_campaign: sp.get("utm_campaign"),
         }),
       });
       const json = await res.json();
       if (!res.ok) {
         throw new Error(json.error || t.contact.submitErrorFallback);
       }
-      setCreatedDealId(json.id ?? json.deal?.id ?? null);
+      setCreatedDealId(json.lead?.deal_id ?? json.id ?? null);
       setName("");
       setCompany("");
       setEmail("");
@@ -260,7 +252,7 @@ export function TargetLandingPage({ onEnterCrm, onOpenLogin }: TargetLandingPage
               <a href="#sobre" className="hover:text-zinc-950 transition-colors">
                 {t.nav.about}
               </a>
-              <a href="#blog" className="hover:text-zinc-950 transition-colors">
+              <a href="/blog" className="hover:text-zinc-950 transition-colors">
                 {t.nav.insights}
               </a>
               <a href="#faq" className="hover:text-zinc-950 transition-colors">
@@ -758,10 +750,8 @@ export function TargetLandingPage({ onEnterCrm, onOpenLogin }: TargetLandingPage
               </h2>
             </div>
             <a
-              href="https://targetrelocation.com.br/blog/"
-              target="_blank"
-              rel="noreferrer"
-              className="text-xs font-medium text-zinc-600 hover:text-zinc-950"
+              href="/blog"
+              className="text-xs font-medium text-zinc-900 underline underline-offset-4 hover:text-zinc-600"
             >
               {t.blog.viewAll}
             </a>
@@ -789,9 +779,7 @@ export function TargetLandingPage({ onEnterCrm, onOpenLogin }: TargetLandingPage
                     {post.readTime}
                   </span>
                   <a
-                    href="https://targetrelocation.com.br/blog/"
-                    target="_blank"
-                    rel="noreferrer"
+                    href="/blog"
                     className="font-medium text-zinc-900 hover:underline"
                   >
                     {t.blog.readMore}

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDb } from "@/lib/db";
-import { ensureDatabaseSeeded } from "@/lib/importer";
+import { requireWorkspaceUser } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -9,19 +8,36 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    await ensureDatabaseSeeded();
+    const auth = await requireWorkspaceUser();
+    if (auth.errorResponse) return auth.errorResponse;
+    const { supabase } = auth;
+
     const { id } = await context.params;
     const orgId = Number(id);
-    const db = getDb();
-    const organization = db.prepare("SELECT * FROM organizations WHERE id = ?").get(orgId);
-    if (!organization) return NextResponse.json({ error: "Organização não encontrada" }, { status: 404 });
 
-    const deals = db.prepare("SELECT * FROM deals WHERE org_id = ? ORDER BY update_time DESC").all(orgId);
-    const persons = db.prepare("SELECT * FROM persons WHERE org_id = ? ORDER BY name ASC").all(orgId);
-    const notes = db.prepare("SELECT * FROM notes WHERE org_id = ? ORDER BY add_time DESC LIMIT 50").all(orgId);
-    const files = db.prepare("SELECT * FROM files WHERE org_id = ? ORDER BY add_time DESC").all(orgId);
+    const { data: organization } = await supabase
+      .from("organizations")
+      .select("*")
+      .eq("id", orgId)
+      .maybeSingle();
+    if (!organization) {
+      return NextResponse.json({ error: "Organização não encontrada" }, { status: 404 });
+    }
 
-    return NextResponse.json({ organization, deals, persons, notes, files });
+    const [dealsRes, personsRes, notesRes, filesRes] = await Promise.all([
+      supabase.from("deals").select("*").eq("org_id", orgId).order("update_time", { ascending: false }),
+      supabase.from("persons").select("*").eq("org_id", orgId).order("name", { ascending: true }),
+      supabase.from("notes").select("*").eq("org_id", orgId).order("add_time", { ascending: false }).limit(50),
+      supabase.from("files").select("*").eq("org_id", orgId).order("add_time", { ascending: false }),
+    ]);
+
+    return NextResponse.json({
+      organization,
+      deals: dealsRes.data || [],
+      persons: personsRes.data || [],
+      notes: notesRes.data || [],
+      files: filesRes.data || [],
+    });
   } catch (error) {
     return NextResponse.json({ error: String(error) }, { status: 500 });
   }

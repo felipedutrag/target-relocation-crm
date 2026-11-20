@@ -4,17 +4,22 @@ import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import {
   Activity,
   ArrowRight,
+  BookOpen,
+  Bot,
   Briefcase,
   Building2,
   CalendarClock,
   FileSpreadsheet,
+  Flag,
   FolderUp,
   Globe,
   Kanban,
+  KeyRound,
   LayoutDashboard,
   LogOut,
   Menu,
   Moon,
+  PhoneCall,
   Radio,
   Search,
   Sparkles,
@@ -49,6 +54,11 @@ import { ActivitiesView } from "./activities-view";
 import { ProposalsView } from "./proposals-view";
 import { ImportCenterView } from "./import-center-view";
 import { DealDossierSheet } from "./deal-dossier-sheet";
+import { AiChatView } from "./ai-chat-view";
+import { EditorialBlogView } from "./editorial-blog-view";
+import { SdrOperationsView } from "./sdr-operations-view";
+import { GrowthPlanView } from "./growth-plan-view";
+import { AiSettingsDialog } from "./ai-settings-dialog";
 
 interface SearchOrg {
   id: number;
@@ -71,6 +81,7 @@ interface NavItem {
   subtitle: string;
   keywords: string;
   badge?: string;
+  section?: "crm" | "growth";
   icon: React.ComponentType<{ className?: string }>;
 }
 
@@ -80,6 +91,7 @@ const NAV_ITEMS: NavItem[] = [
     label: "Visão Geral",
     subtitle: "KPIs, funil & automações",
     keywords: "overview dashboard resumo metricas kpi painel",
+    section: "crm",
     icon: LayoutDashboard,
   },
   {
@@ -88,6 +100,7 @@ const NAV_ITEMS: NavItem[] = [
     subtitle: "CRM - SDR & Outbound",
     keywords: "deals funil kanban sdr outbound negocios vendas",
     badge: "4.344",
+    section: "crm",
     icon: Kanban,
   },
   {
@@ -96,14 +109,16 @@ const NAV_ITEMS: NavItem[] = [
     subtitle: "Expatriados, Diário Oficial & Score",
     keywords: "dou diario oficial receita federal score cnpj rn",
     badge: "DOU",
+    section: "crm",
     icon: Radio,
   },
   {
     id: "organizations",
     label: "Organizações",
     subtitle: "Empresas, CNPJs & sócios",
-    keywords: "empresas cnpj clientes multinacionais organizacoes",
+    keywords: "empresas cnpj clientes multinacionais organizacoes icp 109",
     badge: "2.973",
+    section: "crm",
     icon: Building2,
   },
   {
@@ -112,6 +127,7 @@ const NAV_ITEMS: NavItem[] = [
     subtitle: "Contatos, cargos & RH",
     keywords: "contatos pessoas rh decisores email whatsapp telefone",
     badge: "3.369",
+    section: "crm",
     icon: Users,
   },
   {
@@ -120,6 +136,7 @@ const NAV_ITEMS: NavItem[] = [
     subtitle: "Follow-ups, e-mails & calls",
     keywords: "tarefas follow up calls ligacoes emails agenda",
     badge: "2.542",
+    section: "crm",
     icon: CalendarClock,
   },
   {
@@ -128,6 +145,7 @@ const NAV_ITEMS: NavItem[] = [
     subtitle: "55+ serviços & orçamentos",
     keywords: "propostas orcamentos servicos vistos precos brl usd",
     badge: "55+",
+    section: "crm",
     icon: FileSpreadsheet,
   },
   {
@@ -136,7 +154,44 @@ const NAV_ITEMS: NavItem[] = [
     subtitle: "Backup Pipedrive & uploads",
     keywords: "arquivos importador csv backup pipedrive pdf anexos",
     badge: "102 arqs",
+    section: "crm",
     icon: FolderUp,
+  },
+  {
+    id: "ai_chat",
+    label: "Assistente IA",
+    subtitle: "Copilot OpenAI conectado ao CRM",
+    keywords: "chat ia openai copilot assistente ai gpt prompt dou sdr",
+    badge: "GPT",
+    section: "growth",
+    icon: Bot,
+  },
+  {
+    id: "editorial",
+    label: "Blog & Editorial",
+    subtitle: "GEO/SEO + 24 pautas + 1→4 canais",
+    keywords: "blog geo seo editorial linkedin instagram heygen youtube aprovacao klaus",
+    badge: "24",
+    section: "growth",
+    icon: BookOpen,
+  },
+  {
+    id: "sdr_ops",
+    label: "Placar SDR",
+    subtitle: "Meta 40/8 • Perfil Klaus • Auditor IA",
+    keywords: "sdr placar aurea anderley ligacoes auditor perfil klaus reuniao semanal",
+    badge: "40/8",
+    section: "growth",
+    icon: PhoneCall,
+  },
+  {
+    id: "growth_plan",
+    label: "Plano 90d & GEO",
+    subtitle: "Cronograma, Ads, 10 Perguntas & 9 KPIs",
+    keywords: "plano 90 dias google ads negativas linkedin abm geo 10 perguntas kpis",
+    badge: "90d",
+    section: "growth",
+    icon: Flag,
   },
 ];
 
@@ -187,6 +242,7 @@ export function CrmShell({
   const [selectedPersonId, setSelectedPersonId] = useState<number | null>(null);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [cmdOpen, setCmdOpen] = useState(false);
+  const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [refreshTick, setRefreshTick] = useState(0);
 
@@ -435,7 +491,7 @@ export function CrmShell({
 
       <ScrollArea className="flex-1 px-2.5 py-1.5">
         <div className="space-y-0.5">
-          {filteredNavItems.map((item) => {
+          {filteredNavItems.filter((i) => i.section !== "growth").map((item) => {
             const Icon = item.icon;
             const active = activeTab === item.id;
             return (
@@ -454,6 +510,54 @@ export function CrmShell({
                   className={cn(
                     "size-3.5 shrink-0",
                     active ? "text-primary-foreground" : "text-muted-foreground"
+                  )}
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-[12.5px] font-medium leading-tight">
+                    {item.label}
+                  </div>
+                </div>
+                {item.badge && (
+                  <span
+                    className={cn(
+                      "ml-auto shrink-0 rounded px-1.5 py-0.5 font-mono text-[10px] tabular-nums",
+                      active
+                        ? "bg-primary-foreground/15 text-primary-foreground"
+                        : "bg-muted text-muted-foreground"
+                    )}
+                  >
+                    {item.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+
+          {filteredNavItems.some((i) => i.section === "growth") && (
+            <div className="pt-3 pb-1 px-2 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+              Plano de Ação, Blog & IA
+            </div>
+          )}
+
+          {filteredNavItems.filter((i) => i.section === "growth").map((item) => {
+            const Icon = item.icon;
+            const active = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => handleNavigate(item.id)}
+                className={cn(
+                  "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left cursor-pointer",
+                  active
+                    ? "bg-primary text-primary-foreground shadow-2xs"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                )}
+              >
+                <Icon
+                  className={cn(
+                    "size-3.5 shrink-0",
+                    active ? "text-primary-foreground" : "text-amber-500"
                   )}
                 />
                 <div className="min-w-0 flex-1">
@@ -546,7 +650,7 @@ export function CrmShell({
               onClick={() => openGlobalWithQuery(workspaceQuery.trim())}
             >
               <span className="truncate">
-                Buscar “{workspaceQuery.trim()}” no SQLite
+                Buscar “{workspaceQuery.trim()}” no Supabase
               </span>
               <ArrowRight className="size-3 shrink-0 ml-1" />
             </Button>
@@ -645,6 +749,26 @@ export function CrmShell({
           </div>
 
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 rounded-lg border-border bg-card text-xs text-foreground hover:bg-accent cursor-pointer gap-1.5"
+              onClick={() => handleNavigate("ai_chat")}
+              title="Abrir Chat Assistente IA"
+            >
+              <Bot className="size-3.5 text-amber-500" />
+              <span className="hidden sm:inline">Chat IA</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 rounded-lg border-border bg-card text-xs text-foreground hover:bg-accent cursor-pointer gap-1.5"
+              onClick={() => setAiSettingsOpen(true)}
+              title="Configurar OpenAI API Key"
+            >
+              <KeyRound className="size-3.5 text-muted-foreground" />
+              <span className="hidden xl:inline">Config IA</span>
+            </Button>
             {onOpenLanding && (
               <Button
                 variant="outline"
@@ -734,9 +858,30 @@ export function CrmShell({
             {activeTab === "import" && (
               <ImportCenterView onOpenDeal={setSelectedDealId} />
             )}
+            {activeTab === "ai_chat" && (
+              <AiChatView onOpenAiSettings={() => setAiSettingsOpen(true)} />
+            )}
+            {activeTab === "editorial" && (
+              <EditorialBlogView onOpenAiSettings={() => setAiSettingsOpen(true)} />
+            )}
+            {activeTab === "sdr_ops" && (
+              <SdrOperationsView
+                onOpenDeal={setSelectedDealId}
+                onOpenAiSettings={() => setAiSettingsOpen(true)}
+              />
+            )}
+            {activeTab === "growth_plan" && (
+              <GrowthPlanView onOpenAiSettings={() => setAiSettingsOpen(true)} />
+            )}
           </div>
         </main>
       </div>
+
+      <AiSettingsDialog
+        open={aiSettingsOpen}
+        onOpenChange={setAiSettingsOpen}
+        onSaved={() => setRefreshTick((v) => v + 1)}
+      />
 
       {/* Deal Dossier 360 Drawer */}
       <DealDossierSheet
@@ -778,7 +923,7 @@ export function CrmShell({
           ))}
           {cmdLoading && (
             <span className="ml-auto font-mono text-[10px] text-muted-foreground">
-              Buscando no SQLite...
+              Buscando no Supabase...
             </span>
           )}
         </div>
@@ -787,7 +932,7 @@ export function CrmShell({
           {!hasAnyCmdResults && (
             <CommandEmpty>
               {cmdLoading
-                ? "Consultando base SQLite (24.534 registros)..."
+                ? "Consultando Supabase Postgres (24.534+ registros)..."
                 : "Nenhum registro ou módulo encontrado para essa busca."}
             </CommandEmpty>
           )}

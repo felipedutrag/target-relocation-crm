@@ -6,7 +6,11 @@ export type CrmTab =
   | "people"
   | "activities"
   | "proposals"
-  | "import";
+  | "import"
+  | "ai_chat"
+  | "editorial"
+  | "sdr_ops"
+  | "growth_plan";
 
 export interface Pipeline {
   id: number;

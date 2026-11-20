@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "node:fs";
 import path from "node:path";
-import { getBackupRoot, getDb } from "@/lib/db";
-import { ensureDatabaseSeeded } from "@/lib/importer";
+import { requireWorkspaceUser } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -24,19 +23,23 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    await ensureDatabaseSeeded();
+    const auth = await requireWorkspaceUser();
+    if (auth.errorResponse) return auth.errorResponse;
+    const { supabase } = auth;
+
     const { id } = await context.params;
     const fileId = Number(id);
     if (Number.isNaN(fileId)) {
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });
     }
 
-    const db = getDb();
-    const row = db.prepare("SELECT * FROM files WHERE id = ?").get(fileId) as
-      | { local_filename?: string; name?: string; file_type?: string }
-      | undefined;
+    const { data: row } = await supabase
+      .from("files")
+      .select("local_filename, name, file_type, url")
+      .eq("id", fileId)
+      .maybeSingle();
 
-    const arquivosDir = path.join(getBackupRoot(), "api-2026-09-28", "arquivos");
+    const arquivosDir = path.join(process.cwd(), "backup_pipedrive", "api-2026-09-28", "arquivos");
     let targetPath: string | null = null;
     let displayName = row?.name || `arquivo-${fileId}`;
 
@@ -55,7 +58,7 @@ export async function GET(
 
     if (!targetPath) {
       return NextResponse.json(
-        { error: "Arquivo não disponível localmente (apenas referência remota no Pipedrive)" },
+        { error: "Arquivo não disponível localmente no container." },
         { status: 404 }
       );
     }

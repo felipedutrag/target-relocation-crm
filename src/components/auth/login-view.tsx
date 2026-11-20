@@ -14,6 +14,7 @@ import {
   Sparkles,
   UserCheck,
 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -22,9 +23,11 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
 export interface AuthenticatedUser {
+  id?: string;
   name: string;
   email: string;
   role: string;
+  crmOwnerName?: string | null;
 }
 
 interface LoginViewProps {
@@ -34,53 +37,97 @@ interface LoginViewProps {
 
 const CRM_PROFILES: AuthenticatedUser[] = [
   {
-    name: "Klaus Müller",
+    name: "Klaus Duailibi",
     email: "klaus@targetrelocation.com.br",
-    role: "Admin • Diretoria",
+    role: "admin",
+    crmOwnerName: "Klaus",
+  },
+  {
+    name: "Áurea Azevedo",
+    email: "aureaazevedo@icloud.com",
+    role: "sdr_outbound",
+    crmOwnerName: "Aurea Azevedo",
   },
   {
     name: "Anderley Nino",
     email: "anderleynino007@gmail.com",
-    role: "SDR • Outbound DOU",
+    role: "sdr_inbound",
+    crmOwnerName: "Anderley Nino",
   },
   {
-    name: "Aurea Azevedo",
-    email: "aureaazevedo@icloud.com",
-    role: "Consultora • Relocation",
+    name: "Felipe (Boost)",
+    email: "felipe@targetrelocation.com.br",
+    role: "ops",
+    crmOwnerName: "Felipe",
   },
 ];
 
+const ROLE_LABELS: Record<string, string> = {
+  admin: "Admin • Diretoria",
+  sdr_outbound: "SDR • ICP & DOU",
+  sdr_inbound: "SDR • Inbound",
+  ops: "Ops & IA • Boost",
+};
+
 export function LoginView({ onSuccess, onBackToLanding }: LoginViewProps) {
   const [username, setUsername] = useState("klaus@targetrelocation.com.br");
-  const [password, setPassword] = useState("target@2026");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!username.trim() || !password.trim()) {
-      setError("Informe seu usuário/e-mail e sua senha para acessar o workspace.");
+    const trimmedEmail = username.trim().toLowerCase();
+    if (!trimmedEmail || !password) {
+      setError("Informe seu e-mail corporativo e sua senha do Supabase Auth.");
       return;
     }
 
     setLoading(true);
-    setTimeout(() => {
-      const matched =
-        CRM_PROFILES.find(
-          (p) =>
-            p.email.toLowerCase() === username.trim().toLowerCase() ||
-            p.name.toLowerCase() === username.trim().toLowerCase()
-        ) ?? {
-          name: username.includes("@") ? username.split("@")[0] : username.trim(),
-          email: username.includes("@") ? username.trim() : `${username.trim()}@targetrelocation.com.br`,
-          role: "Membro do Workspace",
-        };
+    try {
+      const supabase = createClient();
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email: trimmedEmail,
+        password,
+      });
+
+      if (authError || !data.user) {
+        setError(
+          authError?.message === "Invalid login credentials"
+            ? "E-mail ou senha inválidos. Verifique suas credenciais."
+            : authError?.message || "Falha ao autenticar no Supabase Auth."
+        );
+        return;
+      }
+
+      const { data: member } = await supabase
+        .from("workspace_members")
+        .select("*")
+        .eq("user_id", data.user.id)
+        .eq("is_active", true)
+        .maybeSingle();
+
+      if (!member) {
+        await supabase.auth.signOut();
+        setError("Conta autenticada sem permissão ativa neste workspace.");
+        return;
+      }
+
+      onSuccess({
+        id: data.user.id,
+        name: member.full_name,
+        email: member.email,
+        role: member.role,
+        crmOwnerName: member.crm_owner_name,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro inesperado ao conectar ao Supabase Auth.");
+    } finally {
       setLoading(false);
-      onSuccess(matched);
-    }, 320);
+    }
   };
 
   return (
@@ -96,7 +143,6 @@ export function LoginView({ onSuccess, onBackToLanding }: LoginViewProps) {
           }}
         />
 
-        {/* Transparent Target Logo rendered directly on dark showcase surface */}
         <div className="relative z-10 flex items-center justify-between">
           <div className="inline-flex items-center">
             <img
@@ -109,34 +155,32 @@ export function LoginView({ onSuccess, onBackToLanding }: LoginViewProps) {
             variant="outline"
             className="border-zinc-700/80 bg-zinc-900/80 text-zinc-300 font-mono text-[11px]"
           >
-            TARGET3 · v2.6
+            TARGET3 · SUPABASE CLOUD
           </Badge>
         </div>
 
-        {/* Center Linear Workspace Telemetry Preview */}
         <div className="relative z-10 my-auto max-w-lg space-y-8 py-10">
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900/90 px-3 py-1 text-xs font-medium text-zinc-300">
               <Sparkles className="size-3.5 text-amber-400" />
-              <span>Workspace Operacional de Mobilidade Global</span>
+              <span>Supabase Postgres 17 + Plano de Ação IA</span>
             </div>
             <h1 className="text-3xl xl:text-4xl font-semibold tracking-[-0.03em] text-white leading-[1.15]">
-              Controle absoluto de vistos, DOU e realocações em um único fluxo.
+              Controle absoluto de vistos, DOU, SDRs e GEO em um único workspace.
             </h1>
             <p className="text-sm leading-relaxed text-zinc-400">
-              Acesse pipelines CRM-SDR e Outbound, publicações do Diário Oficial enriquecidas com
-              Receita Federal, dossiês 360° e gerador de propostas multi-país.
+              Pipelines CRM-SDR & Outbound no PostgreSQL, publicações do Diário Oficial com
+              Receita Federal, fábrica editorial GEO/SEO 1→4 canais e Copilot IA.
             </p>
           </div>
 
-          {/* Mini Linear UI Mockup Card */}
           <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-5 shadow-2xl backdrop-blur-sm space-y-4">
             <div className="flex items-center justify-between text-xs text-zinc-400">
               <span className="flex items-center gap-2 font-medium text-zinc-200">
                 <Radio className="size-3.5 text-emerald-400" />
-                Telemetria SQLite · Sincronizado
+                Supabase Postgres · Ativo com RLS
               </span>
-              <span className="font-mono text-[11px] text-zinc-500">target3.pipedrive</span>
+              <span className="font-mono text-[11px] text-zinc-500">us-west-2 • pg17</span>
             </div>
 
             <div className="grid grid-cols-3 gap-2.5">
@@ -160,7 +204,7 @@ export function LoginView({ onSuccess, onBackToLanding }: LoginViewProps) {
               {[
                 { label: "PneuStore (#3432) — Proposta PDF", status: "R$ 62.315", dot: "bg-emerald-400" },
                 { label: "JSL S.A (#3361) — Radar DOU RN 02", status: "Score 100", dot: "bg-amber-400" },
-                { label: "Colégio Magister — Orçamento EUA/MX", status: "Anexo XLSX", dot: "bg-sky-400" },
+                { label: "Calendário Editorial — Nov/26 a Fev/27", status: "24 pautas", dot: "bg-sky-400" },
               ].map((row) => (
                 <div
                   key={row.label}
@@ -177,19 +221,17 @@ export function LoginView({ onSuccess, onBackToLanding }: LoginViewProps) {
           </div>
         </div>
 
-        {/* Bottom quote */}
         <div className="relative z-10 flex items-center justify-between border-t border-zinc-800/80 pt-5 text-xs text-zinc-400">
           <span className="flex items-center gap-2">
             <ShieldCheck className="size-4 text-zinc-300" />
-            <span>ABEMMI • ITALCAM • Câmara Árabe-Brasileira</span>
+            <span>ABEMMI • ITALCAM • Câmara Árabe-Brasileira • EuRA</span>
           </span>
           <span className="font-mono text-[11px] text-zinc-500">São Paulo, BR</span>
         </div>
       </div>
 
-      {/* RIGHT COLUMN: Pure White Header + Crisp Linear Auth Form */}
+      {/* RIGHT COLUMN: Pure White Header + Supabase Auth Form */}
       <div className="flex flex-col justify-between bg-white px-6 py-6 sm:px-12 lg:px-16">
-        {/* Top White Header with seamless White-bg Logo */}
         <header className="flex items-center justify-between bg-white py-2 border-b border-zinc-100">
           <img
             src="/target-logo.png"
@@ -208,35 +250,33 @@ export function LoginView({ onSuccess, onBackToLanding }: LoginViewProps) {
           </Button>
         </header>
 
-        {/* Centered Auth Form */}
-        <div className="mx-auto w-full max-w-[390px] py-10 space-y-7">
+        <div className="mx-auto w-full max-w-[400px] py-10 space-y-6">
           <div className="space-y-2">
             <Badge
               variant="secondary"
               className="bg-zinc-100 text-zinc-700 font-medium text-[11px] px-2.5 py-0.5"
             >
-              Acesso ao Portal CRM
+              Portal Corporativo • Supabase Auth
             </Badge>
             <h2 className="text-2xl font-semibold tracking-[-0.025em] text-zinc-950">
               Entrar no workspace
             </h2>
             <p className="text-[13px] leading-relaxed text-zinc-500">
-              Digite seu usuário ou e-mail corporativo e senha para gerenciar pipelines, propostas e
-              o Radar DOU.
+              Autenticação real via Supabase JWT para operar CRM, Blog GEO, SDRs e Assistente IA.
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="login-user" className="text-xs font-medium text-zinc-700">
-                Usuário ou E-mail
+                E-mail Corporativo
               </Label>
               <div className="relative">
                 <Mail className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
                 <Input
                   id="login-user"
-                  type="text"
-                  autoComplete="username"
+                  type="email"
+                  autoComplete="email"
                   placeholder="klaus@targetrelocation.com.br"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
@@ -250,7 +290,7 @@ export function LoginView({ onSuccess, onBackToLanding }: LoginViewProps) {
                 <Label htmlFor="login-password" className="text-xs font-medium text-zinc-700">
                   Senha
                 </Label>
-                <span className="text-[11px] text-zinc-400">SSO / Credencial local</span>
+                <span className="text-[11px] text-zinc-400">JWT + Cookies SSR</span>
               </div>
               <div className="relative">
                 <Lock className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
@@ -258,7 +298,7 @@ export function LoginView({ onSuccess, onBackToLanding }: LoginViewProps) {
                   id="login-password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
-                  placeholder="••••••••"
+                  placeholder="Digite sua senha de acesso"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="h-10 pl-9 pr-10 bg-white border-zinc-200 text-sm focus-visible:ring-zinc-900"
@@ -282,7 +322,7 @@ export function LoginView({ onSuccess, onBackToLanding }: LoginViewProps) {
                 />
                 <span>Manter sessão conectada</span>
               </label>
-              <span className="font-mono text-[11px] text-zinc-400">SQLite Auth</span>
+              <span className="font-mono text-[11px] text-emerald-600">Supabase Auth</span>
             </div>
 
             {error && (
@@ -297,7 +337,7 @@ export function LoginView({ onSuccess, onBackToLanding }: LoginViewProps) {
               className="w-full h-10 rounded-lg bg-zinc-950 text-white hover:bg-zinc-800 text-sm font-medium cursor-pointer transition-all"
             >
               {loading ? (
-                "Autenticando workspace..."
+                "Autenticando via Supabase..."
               ) : (
                 <span className="inline-flex items-center gap-2">
                   Entrar no CRM
@@ -311,7 +351,7 @@ export function LoginView({ onSuccess, onBackToLanding }: LoginViewProps) {
             <div className="relative flex items-center justify-center">
               <Separator className="bg-zinc-200" />
               <span className="absolute bg-white px-2.5 text-[11px] font-medium text-zinc-400 uppercase tracking-wider">
-                Acesso Rápido (Equipe Pipedrive)
+                Contas Provisionadas da Equipe
               </span>
             </div>
 
@@ -322,10 +362,7 @@ export function LoginView({ onSuccess, onBackToLanding }: LoginViewProps) {
                   <button
                     key={profile.email}
                     type="button"
-                    onClick={() => {
-                      setUsername(profile.email);
-                      setPassword("target@2026");
-                    }}
+                    onClick={() => setUsername(profile.email)}
                     className={`flex items-center justify-between rounded-lg border px-3 py-2 text-left transition-colors cursor-pointer ${
                       selected
                         ? "border-zinc-900 bg-zinc-50"
@@ -347,7 +384,7 @@ export function LoginView({ onSuccess, onBackToLanding }: LoginViewProps) {
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
                       <span className="text-[10px] text-zinc-500 hidden sm:inline">
-                        {profile.role}
+                        {ROLE_LABELS[profile.role] || profile.role}
                       </span>
                       {selected && <CheckCircle2 className="size-3.5 text-zinc-900" />}
                     </div>
@@ -358,7 +395,6 @@ export function LoginView({ onSuccess, onBackToLanding }: LoginViewProps) {
           </div>
         </div>
 
-        {/* Footer note */}
         <footer className="flex flex-wrap items-center justify-between gap-2 border-t border-zinc-100 pt-4 text-[11px] text-zinc-400">
           <span>Target Relocation • Alto da Boa Vista, São Paulo</span>
           <span>(11) 2594-6276</span>

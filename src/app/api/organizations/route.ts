@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDb } from "@/lib/db";
-import { ensureDatabaseSeeded } from "@/lib/importer";
+import { requireWorkspaceUser } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {
-    await ensureDatabaseSeeded();
-    const db = getDb();
+    const auth = await requireWorkspaceUser();
+    if (auth.errorResponse) return auth.errorResponse;
+    const { supabase } = auth;
+
     const sp = req.nextUrl.searchParams;
     const search = (sp.get("search") || "").trim();
     const label = sp.get("label") || "";
@@ -15,49 +16,36 @@ export async function GET(req: NextRequest) {
     const page = Math.max(1, Number(sp.get("page") || 1));
     const limit = Math.min(100, Math.max(10, Number(sp.get("limit") || 30)));
 
-    const where: string[] = [];
-    const params: (string | number)[] = [];
+    let query = supabase.from("organizations").select("*", { count: "exact" });
 
     if (search) {
-      where.push("(name LIKE ? OR address LIKE ? OR website LIKE ? OR city LIKE ?)");
-      const q = `%${search}%`;
-      params.push(q, q, q, q);
+      const s = search.replace(/[,()]/g, " ");
+      query = query.or(`name.ilike.%${s}%,address.ilike.%${s}%,website.ilike.%${s}%,city.ilike.%${s}%`);
     }
     if (label && label !== "all") {
-      where.push("label_name LIKE ?");
-      params.push(`%${label}%`);
+      query = query.ilike("label_name", `%${label}%`);
     }
     if (owner && owner !== "all") {
-      where.push("owner_name = ?");
-      params.push(owner);
+      query = query.eq("owner_name", owner);
     }
 
-    const whereSql = where.length > 0 ? `WHERE ${where.join(" AND ")}` : "";
-    const total = (db.prepare(`SELECT COUNT(*) as c FROM organizations ${whereSql}`).get(...params) as { c: number }).c;
     const offset = (page - 1) * limit;
+    const { data: rows, count, error } = await query
+      .order("open_deals_count", { ascending: false })
+      .order("notes_count", { ascending: false })
+      .order("update_time", { ascending: false })
+      .range(offset, offset + limit - 1);
 
-    const rows = db
-      .prepare(
-        `SELECT * FROM organizations ${whereSql}
-         ORDER BY open_deals_count DESC, notes_count DESC, update_time DESC
-         LIMIT ? OFFSET ?`
-      )
-      .all(...params, limit, offset);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    const labels = db
-      .prepare(
-        `SELECT COALESCE(NULLIF(label_name, ''), 'Sem etiqueta') as label_name, COUNT(*) as count
-         FROM organizations GROUP BY COALESCE(NULLIF(label_name, ''), 'Sem etiqueta') ORDER BY count DESC`
-      )
-      .all();
-
+    const total = count || 0;
     return NextResponse.json({
       total,
       page,
       limit,
-      totalPages: Math.ceil(total / limit),
-      labels,
-      organizations: rows,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+      labels: [],
+      organizations: rows || [],
     });
   } catch (error) {
     console.error("GET /api/organizations error:", error);
@@ -67,30 +55,31 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    await ensureDatabaseSeeded();
-    const db = getDb();
+    const auth = await requireWorkspaceUser();
+    if (auth.errorResponse) return auth.errorResponse;
+    const { supabase } = auth;
+
     const body = (await req.json()) as Record<string, unknown>;
     const name = String(body.name || "").trim();
     if (!name) return NextResponse.json({ error: "Nome obrigatório" }, { status: 400 });
 
-    const maxId = (db.prepare("SELECT COALESCE(MAX(id), 5000) as m FROM organizations").get() as { m: number }).m;
     const now = new Date().toISOString().replace("T", " ").slice(0, 19);
-    db.prepare(
-      `INSERT INTO organizations (id, name, owner_name, label_name, address, website, linkedin, add_time, update_time)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    ).run(
-      maxId + 1,
-      name,
-      String(body.owner_name || "Klaus"),
-      body.label_name ? String(body.label_name) : null,
-      body.address ? String(body.address) : null,
-      body.website ? String(body.website) : null,
-      body.linkedin ? String(body.linkedin) : null,
-      now,
-      now
-    );
+    const { data: created, error } = await supabase
+      .from("organizations")
+      .insert({
+        name,
+        owner_name: String(body.owner_name || auth.member.crm_owner_name || "Klaus"),
+        label_name: body.label_name ? String(body.label_name) : null,
+        address: body.address ? String(body.address) : null,
+        website: body.website ? String(body.website) : null,
+        linkedin: body.linkedin ? String(body.linkedin) : null,
+        add_time: now,
+        update_time: now,
+      })
+      .select("*")
+      .single();
 
-    const created = db.prepare("SELECT * FROM organizations WHERE id = ?").get(maxId + 1);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true, organization: created }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: String(error) }, { status: 500 });
