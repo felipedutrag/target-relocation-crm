@@ -6,15 +6,18 @@ import { createClient } from "@/lib/supabase/client";
 import { LoginView, type AuthenticatedUser } from "@/components/auth/login-view";
 import { CrmShell } from "@/components/crm/crm-shell";
 import { TargetLandingPage } from "@/components/landing/target-landing-page";
+import type { LandingBlogPreview } from "@/lib/blog-queries";
 
 export type AppViewMode = "landing" | "login" | "crm";
 
 export function AppEntry({
   initialMode = "landing",
   initialUser = null,
+  latestBlogPosts = [],
 }: {
   initialMode?: AppViewMode;
   initialUser?: AuthenticatedUser | null;
+  latestBlogPosts?: LandingBlogPreview[];
 }) {
   const router = useRouter();
   const [mode, setMode] = useState<AppViewMode>(initialMode);
@@ -97,6 +100,7 @@ export function AppEntry({
 
   return (
     <TargetLandingPage
+      latestBlogPosts={latestBlogPosts}
       onEnterCrm={handleEnterCrm}
       onOpenLogin={() => {
         router.push("/login");

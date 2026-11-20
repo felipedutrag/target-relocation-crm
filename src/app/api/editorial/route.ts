@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireWorkspaceUser } from "@/lib/supabase/server";
 import { generateOmnichannelPack, resolveOpenAiClient, slugifyPt } from "@/lib/openai";
+import { analyzeArticleSeo } from "@/lib/seo-analyzer";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +13,13 @@ export async function GET() {
 
     const [itemsRes, postsRes, aiCfg] = await Promise.all([
       supabase.from("editorial_items").select("*").order("scheduled_date", { ascending: true }),
-      supabase.from("blog_posts").select("*").order("published_at", { ascending: false, nullsFirst: false }),
+      supabase
+        .from("blog_posts")
+        .select(
+          "id, slug, en_slug, es_slug, canonical_path, wp_post_id, title, question_headline, direct_answer, pillar, category, featured_image_url, featured_image_alt, focus_keyword, seo_title, seo_description, seo_score, readability_score, seo_grade, seo_checks_json, word_count, reading_time_min, status, technical_reviewed, youtube_embed_url, author_name, published_at, updated_at, source_url"
+        )
+        .order("published_at", { ascending: false, nullsFirst: false })
+        .order("id", { ascending: false }),
       resolveOpenAiClient(supabase),
     ]);
 
@@ -97,26 +104,52 @@ export async function POST(req: NextRequest) {
       const slug = slugifyPt(String(generated.slug || item.topic)) || `artigo-${item.id}`;
       const pillar =
         item.format === "News" ? "news" : item.format === "Institucional" ? "institutional" : "faq_service";
+      const genTitle = String(generated.question_headline || item.topic);
+      const genDirect = String(generated.direct_answer || "");
+      const genMd = String(generated.content_markdown || "");
+      const genFaq = Array.isArray(generated.faq_schema) ? generated.faq_schema : [];
+      const genSeoTitle = String(generated.seo_title || item.topic).slice(0, 60);
+      const genSeoDesc = String(generated.seo_description || genDirect || "").slice(0, 158);
+      const seoRes = analyzeArticleSeo({
+        slug,
+        title: genTitle,
+        question_headline: genTitle,
+        seo_title: genSeoTitle,
+        seo_description: genSeoDesc,
+        direct_answer: genDirect,
+        content_markdown: genMd,
+        faq_schema_json: genFaq,
+        author_name: "Klaus Duailibi",
+      });
 
       const { data: blogPost, error: blogErr } = await supabase
         .from("blog_posts")
         .upsert(
           {
             slug,
-            title: String(generated.question_headline || item.topic),
-            question_headline: String(generated.question_headline || item.topic),
-            direct_answer: String(generated.direct_answer || ""),
-            content_markdown: String(generated.content_markdown || ""),
+            canonical_path: `/blog/${slug}`,
+            title: genTitle,
+            question_headline: genTitle,
+            direct_answer: genDirect,
+            content_markdown: genMd,
             pillar,
-            faq_schema_json: Array.isArray(generated.faq_schema) ? generated.faq_schema : [],
+            category: pillar === "news" ? "Notícias MTE/DOU" : pillar === "institutional" ? "Institucional & Cases" : "Guias Técnicos GEO",
+            faq_schema_json: genFaq,
             author_name: "Klaus Duailibi",
             author_role: "Diretor • Target Relocation",
             status: "ready_for_approval",
             technical_reviewed: false,
             scheduled_date: item.scheduled_date,
             utm_campaign: item.utm_campaign || `blog_${slug.slice(0, 24)}`,
-            seo_title: String(generated.seo_title || item.topic).slice(0, 60),
-            seo_description: String(generated.seo_description || generated.direct_answer || "").slice(0, 158),
+            seo_title: genSeoTitle,
+            seo_description: genSeoDesc,
+            focus_keyword: seoRes.focusKeyword,
+            word_count: seoRes.wordCount,
+            reading_time_min: seoRes.readingTimeMin,
+            seo_score: seoRes.seoScore,
+            readability_score: seoRes.readabilityScore,
+            seo_grade: seoRes.seoGrade,
+            seo_checks_json: seoRes.checks,
             updated_at: now,
           },
           { onConflict: "slug" }

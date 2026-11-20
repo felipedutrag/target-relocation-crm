@@ -696,8 +696,16 @@ export function CrmShell({
     </div>
   );
 
+  const isFullHeightTab = activeTab === "ai_chat";
+
   return (
-    <div className="flex min-h-screen bg-background text-foreground">
+    <div
+      className={
+        isFullHeightTab
+          ? "flex h-dvh overflow-hidden bg-background text-foreground"
+          : "flex min-h-screen bg-background text-foreground"
+      }
+    >
       {/* Desktop Sidebar */}
       <aside className="hidden w-64 shrink-0 border-r border-sidebar-border bg-sidebar lg:sticky lg:top-0 lg:block lg:h-screen">
         {SidebarContent}
@@ -714,9 +722,9 @@ export function CrmShell({
       </Sheet>
 
       {/* Main Content */}
-      <div className="flex min-w-0 flex-1 flex-col bg-background text-foreground">
+      <div className="flex min-w-0 min-h-0 flex-1 flex-col bg-background text-foreground">
         {/* Theme-aware Sticky Header Bar */}
-        <header className="sticky top-0 z-20 flex h-14 items-center justify-between gap-3 border-b border-border bg-background/95 backdrop-blur-md px-4 text-foreground lg:px-6">
+        <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between gap-3 border-b border-border bg-background/95 backdrop-blur-md px-4 text-foreground lg:px-6">
           <div className="flex min-w-0 items-center gap-3">
             <Button
               variant="outline"
@@ -823,8 +831,21 @@ export function CrmShell({
           </div>
         </header>
 
-        <main className="flex-1 p-4 lg:p-6">
-          <div className="mx-auto max-w-[1600px]" key={refreshTick}>
+        <main
+          className={
+            isFullHeightTab
+              ? "flex flex-1 flex-col h-[calc(100dvh-3.5rem)] min-h-0 overflow-hidden p-0"
+              : "flex-1 p-4 lg:p-6"
+          }
+        >
+          <div
+            className={
+              isFullHeightTab
+                ? "flex flex-1 flex-col min-h-0 h-full w-full overflow-hidden"
+                : "mx-auto max-w-[1600px]"
+            }
+            key={refreshTick}
+          >
             {activeTab === "overview" && (
               <OverviewView
                 onOpenDeal={setSelectedDealId}
@@ -890,7 +911,7 @@ export function CrmShell({
         onUpdated={() => setRefreshTick((v) => v + 1)}
       />
 
-      {/* Global Search CommandDialog (server-backed SQLite + workspace search) */}
+      {/* Global Search CommandDialog (server-backed Supabase + workspace search) */}
       <CommandDialog
         open={cmdOpen}
         onOpenChange={setCmdOpen}

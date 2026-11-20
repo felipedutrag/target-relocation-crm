@@ -48,6 +48,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import type { ServiceCatalogItem } from "@/components/crm/types";
+import type { LandingBlogPreview } from "@/lib/blog-queries";
 import { formatMoney } from "@/components/crm/utils";
 import { CATALOG_SERVICES_SEED } from "@/lib/catalog-seed";
 import {
@@ -59,6 +60,7 @@ import {
 interface TargetLandingPageProps {
   onEnterCrm: (initialDealId?: number) => void;
   onOpenLogin: () => void;
+  latestBlogPosts?: LandingBlogPreview[];
 }
 
 const PILLAR_ICONS = [BadgeCheck, Globe2, HeartHandshake] as const;
@@ -132,7 +134,7 @@ function LanguageSwitcher({
   );
 }
 
-export function TargetLandingPage({ onEnterCrm, onOpenLogin }: TargetLandingPageProps) {
+export function TargetLandingPage({ onEnterCrm, onOpenLogin, latestBlogPosts = [] }: TargetLandingPageProps) {
   const [locale, setLocale] = useState<LandingLocale>("en");
   const [heroIndex, setHeroIndex] = useState(0);
   const [openFaq, setOpenFaq] = useState<number>(0);
@@ -750,7 +752,7 @@ export function TargetLandingPage({ onEnterCrm, onOpenLogin }: TargetLandingPage
               </h2>
             </div>
             <a
-              href="/blog"
+              href={locale === "en" ? "/en/blog" : locale === "es" ? "/es/blog" : "/blog"}
               className="text-xs font-medium text-zinc-900 underline underline-offset-4 hover:text-zinc-600"
             >
               {t.blog.viewAll}
@@ -758,35 +760,81 @@ export function TargetLandingPage({ onEnterCrm, onOpenLogin }: TargetLandingPage
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
-            {t.blog.posts.map((post) => (
-              <div
-                key={post.title}
-                className="flex flex-col justify-between rounded-xl border border-zinc-200/80 bg-[#FAFAFA] p-5 hover:border-zinc-300 transition-colors"
-              >
-                <div className="space-y-2.5">
-                  <div className="flex items-center justify-between text-[11px]">
-                    <Badge variant="outline" className="bg-white border-zinc-200 text-zinc-700">
-                      {post.tag}
-                    </Badge>
-                    <span className="font-mono text-zinc-400">{post.date}</span>
-                  </div>
-                  <h3 className="text-sm font-semibold text-zinc-950 leading-snug">{post.title}</h3>
-                  <p className="text-xs leading-relaxed text-zinc-600">{post.excerpt}</p>
-                </div>
-                <div className="mt-4 flex items-center justify-between border-t border-zinc-200/70 pt-3 text-[11px] text-zinc-500">
-                  <span className="inline-flex items-center gap-1">
-                    <BookOpen className="size-3" />
-                    {post.readTime}
-                  </span>
+            {latestBlogPosts.length > 0
+              ? latestBlogPosts.map((post) => (
                   <a
-                    href="/blog"
-                    className="font-medium text-zinc-900 hover:underline"
+                    key={post.id}
+                    href={post.href}
+                    className="group flex flex-col overflow-hidden rounded-xl border border-zinc-200/80 bg-[#FAFAFA] hover:border-zinc-400 transition-colors"
                   >
-                    {t.blog.readMore}
+                    {post.featured_image_url && (
+                      <div className="aspect-[16/9] w-full overflow-hidden bg-zinc-100 border-b border-zinc-200/60">
+                        <img
+                          src={post.featured_image_url}
+                          alt={post.title}
+                          loading="lazy"
+                          className="h-full w-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                        />
+                      </div>
+                    )}
+                    <div className="flex flex-1 flex-col justify-between p-5">
+                      <div className="space-y-2.5">
+                        <div className="flex items-center justify-between text-[11px]">
+                          <Badge variant="outline" className="bg-white border-zinc-200 text-zinc-700 truncate max-w-[155px]">
+                            {post.category}
+                          </Badge>
+                          <span className="font-mono text-zinc-400">
+                            {new Date(post.updated_at).toLocaleDateString("pt-BR")}
+                          </span>
+                        </div>
+                        <h3 className="text-sm font-semibold text-zinc-950 leading-snug group-hover:text-amber-700 line-clamp-2">
+                          {post.title}
+                        </h3>
+                        <p className="text-xs leading-relaxed text-zinc-600 line-clamp-3">
+                          {post.direct_answer}
+                        </p>
+                      </div>
+                      <div className="mt-4 flex items-center justify-between border-t border-zinc-200/70 pt-3 text-[11px] text-zinc-500">
+                        <span className="inline-flex items-center gap-1">
+                          <BookOpen className="size-3" />
+                          {post.reading_time_min} min
+                        </span>
+                        <span className="font-medium text-zinc-900 group-hover:underline">
+                          {t.blog.readMore}
+                        </span>
+                      </div>
+                    </div>
                   </a>
-                </div>
-              </div>
-            ))}
+                ))
+              : t.blog.posts.map((post) => (
+                  <div
+                    key={post.title}
+                    className="flex flex-col justify-between rounded-xl border border-zinc-200/80 bg-[#FAFAFA] p-5 hover:border-zinc-300 transition-colors"
+                  >
+                    <div className="space-y-2.5">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <Badge variant="outline" className="bg-white border-zinc-200 text-zinc-700">
+                          {post.tag}
+                        </Badge>
+                        <span className="font-mono text-zinc-400">{post.date}</span>
+                      </div>
+                      <h3 className="text-sm font-semibold text-zinc-950 leading-snug">{post.title}</h3>
+                      <p className="text-xs leading-relaxed text-zinc-600">{post.excerpt}</p>
+                    </div>
+                    <div className="mt-4 flex items-center justify-between border-t border-zinc-200/70 pt-3 text-[11px] text-zinc-500">
+                      <span className="inline-flex items-center gap-1">
+                        <BookOpen className="size-3" />
+                        {post.readTime}
+                      </span>
+                      <a
+                        href="/blog"
+                        className="font-medium text-zinc-900 hover:underline"
+                      >
+                        {t.blog.readMore}
+                      </a>
+                    </div>
+                  </div>
+                ))}
           </div>
         </div>
       </section>

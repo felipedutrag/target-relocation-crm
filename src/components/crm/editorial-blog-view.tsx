@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { BlogYoastSeoTab, type BlogPostYoastItem } from "@/components/crm/blog-yoast-seo-tab";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -60,19 +61,7 @@ interface EditorialItem {
   notes: string | null;
 }
 
-interface BlogPostItem {
-  id: number;
-  slug: string;
-  title: string;
-  question_headline: string;
-  direct_answer: string;
-  pillar: string;
-  status: string;
-  technical_reviewed: boolean;
-  youtube_embed_url: string | null;
-  author_name: string;
-  published_at: string | null;
-}
+type BlogPostItem = BlogPostYoastItem;
 
 const WEEKLY_MATRIX = [
   { day: "Segunda", blog: "News regulatória / DOU", linkedin: "Post do Klaus", target: "Repost", insta: "Stories", yt: "Short da notícia" },
@@ -266,7 +255,7 @@ export function EditorialBlogView({ onOpenAiSettings }: { onOpenAiSettings: () =
         <TabsList>
           <TabsTrigger value="calendar">24 Pautas & Produção ({items.length})</TabsTrigger>
           <TabsTrigger value="weekly">Grade Semanal Fixa (Seg–Sex)</TabsTrigger>
-          <TabsTrigger value="blog">Artigos Blog GEO ({posts.length})</TabsTrigger>
+          <TabsTrigger value="blog">Artigos Blog & Yoast SEO ({posts.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="calendar" className="space-y-4">
@@ -416,38 +405,13 @@ export function EditorialBlogView({ onOpenAiSettings }: { onOpenAiSettings: () =
           </Card>
         </TabsContent>
 
-        <TabsContent value="blog" className="grid gap-3 md:grid-cols-2">
-          {posts.map((p) => (
-            <Card key={p.id}>
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between gap-2">
-                  <Badge variant="outline" className="text-[10px]">{p.pillar}</Badge>
-                  <Badge variant={p.status === "published" ? "default" : "secondary"} className="text-[10px]">
-                    {p.status}
-                  </Badge>
-                </div>
-                <CardTitle className="text-sm leading-snug">{p.question_headline}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 text-xs">
-                <p className="text-muted-foreground line-clamp-3">{p.direct_answer}</p>
-                <div className="flex items-center justify-between pt-2 border-t border-border/60">
-                  <span className="text-[11px] text-muted-foreground">{p.author_name}</span>
-                  {p.status === "published" ? (
-                    <a
-                      href={`/blog/${p.slug}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-sky-500 hover:underline inline-flex items-center gap-1 font-medium"
-                    >
-                      Ver página GEO/FAQ Schema <ExternalLink className="size-3" />
-                    </a>
-                  ) : (
-                    <span className="text-[11px] font-mono text-amber-500">Aguardando aprovação/publicação</span>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+        <TabsContent value="blog">
+          <BlogYoastSeoTab
+            posts={posts}
+            aiConfigured={aiConfigured}
+            onOpenAiSettings={onOpenAiSettings}
+            onReload={loadData}
+          />
         </TabsContent>
       </Tabs>
 
