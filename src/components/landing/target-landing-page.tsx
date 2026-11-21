@@ -51,6 +51,9 @@ import type { ServiceCatalogItem } from "@/components/crm/types";
 import type { LandingBlogPreview } from "@/lib/blog-queries";
 import { formatMoney } from "@/components/crm/utils";
 import { CATALOG_SERVICES_SEED } from "@/lib/catalog-seed";
+
+// Faixa "empresas que confiam" oculta: os nomes atuais nao sao clientes reais. Trocar para true apos atualizar a lista.
+const SHOW_TRUSTED_COMPANIES = false;
 import {
   LANDING_COPY,
   LANDING_LOCALES,
@@ -444,7 +447,8 @@ export function TargetLandingPage({ onEnterCrm, onOpenLogin, latestBlogPosts = [
         </div>
       </section>
 
-      {/* TRUSTED COMPANIES STRIP */}
+      {/* TRUSTED COMPANIES STRIP (oculta ate definirmos os clientes reais: SHOW_TRUSTED_COMPANIES) */}
+      {SHOW_TRUSTED_COMPANIES && (
       <section className="border-b border-zinc-200/80 bg-[#FAFAFA] py-10">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
@@ -469,6 +473,7 @@ export function TargetLandingPage({ onEnterCrm, onOpenLogin, latestBlogPosts = [
           </div>
         </div>
       </section>
+      )}
 
       {/* BENTO PORTFOLIO OF 8 SOLUTIONS */}
       <section id="servicos" className="py-16 lg:py-20 bg-[#FAFAFA]">
