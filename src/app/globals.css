@@ -158,29 +158,29 @@ html.theme-switching *::after {
 
 .target-article-prose {
   color: #3f3f46;
-  font-size: 0.96875rem;
-  line-height: 1.75;
+  font-size: 0.875rem;
+  line-height: 1.7;
 }
 
 .target-article-prose > * + * {
-  margin-top: 1.125rem;
+  margin-top: 0.9rem;
 }
 
 .target-article-prose h2 {
-  margin-top: 2.25rem;
-  margin-bottom: 0.75rem;
+  margin-top: 1.75rem;
+  margin-bottom: 0.55rem;
   color: #09090b;
-  font-size: 1.375rem;
+  font-size: 1.125rem;
   font-weight: 600;
-  line-height: 1.3;
-  letter-spacing: -0.025em;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
 }
 
 .target-article-prose h3 {
-  margin-top: 1.65rem;
-  margin-bottom: 0.5rem;
+  margin-top: 1.3rem;
+  margin-bottom: 0.4rem;
   color: #18181b;
-  font-size: 1.0625rem;
+  font-size: 0.95rem;
   font-weight: 600;
   line-height: 1.4;
 }
@@ -231,8 +231,9 @@ html.theme-switching *::after {
   border-left: 3px solid #d97706;
   background-color: #fafafa;
   border-radius: 0 0.75rem 0.75rem 0;
-  padding: 1rem 1.25rem;
+  padding: 0.85rem 1.05rem;
   color: #18181b;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
@@ -272,8 +273,8 @@ html.theme-switching *::after {
 .target-article-prose table {
   width: 100%;
   border-collapse: collapse;
-  margin: 1.5rem 0;
-  font-size: 0.85rem;
+  margin: 1.25rem 0;
+  font-size: 0.8125rem;
   overflow-x: auto;
   display: block;
 }

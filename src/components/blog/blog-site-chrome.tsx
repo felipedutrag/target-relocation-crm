@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Globe2, LogIn, Menu, Phone, X } from "lucide-react";
+import { ArrowRight, Globe2, Menu, Phone, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import type { BlogLocale } from "@/lib/blog-queries";
@@ -16,8 +16,7 @@ const CHROME_COPY: Record<
     about: string;
     insights: string;
     faq: string;
-    login: string;
-    accessCrm: string;
+    ctaContact: string;
     blogIndexHref: string;
     tagline: string;
     contact: string;
@@ -31,8 +30,7 @@ const CHROME_COPY: Record<
     about: "Sobre & Parcerias",
     insights: "Blog",
     faq: "FAQ",
-    login: "Login",
-    accessCrm: "Abrir CRM",
+    ctaContact: "Falar com Especialista",
     blogIndexHref: "/blog",
     tagline:
       "Imigração corporativa, compliance regulatório e global mobility para multinacionais no Brasil e Américas.",
@@ -46,8 +44,7 @@ const CHROME_COPY: Record<
     about: "About & Partners",
     insights: "Blog",
     faq: "FAQ",
-    login: "Login",
-    accessCrm: "Open CRM",
+    ctaContact: "Speak with Specialist",
     blogIndexHref: "/en/blog",
     tagline:
       "Corporate immigration, regulatory compliance, and global mobility for multinationals across Brazil & Americas.",
@@ -61,8 +58,7 @@ const CHROME_COPY: Record<
     about: "Nosotros",
     insights: "Blog",
     faq: "FAQ",
-    login: "Ingresar",
-    accessCrm: "Abrir CRM",
+    ctaContact: "Hablar con Especialista",
     blogIndexHref: "/es/blog",
     tagline:
       "Inmigración corporativa, cumplimiento normativo y movilidad global para multinacionales en Brasil y Américas.",
@@ -155,17 +151,10 @@ export function BlogSiteChrome({ locale, alternateHrefs, children }: BlogSiteChr
             </div>
 
             <Link
-              href="/login"
-              className="hidden lg:inline-flex h-8 items-center rounded-lg px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950"
+              href="/#contato"
+              className="hidden sm:inline-flex h-8 items-center rounded-lg bg-zinc-950 px-3.5 text-xs font-medium text-white hover:bg-zinc-800 shadow-xs"
             >
-              <LogIn className="mr-1.5 size-3.5" />
-              {t.login}
-            </Link>
-            <Link
-              href="/crm"
-              className="hidden lg:inline-flex h-8 items-center rounded-lg bg-zinc-950 px-3.5 text-xs font-medium text-white hover:bg-zinc-800 shadow-xs"
-            >
-              <span>{t.accessCrm}</span>
+              <span>{t.ctaContact}</span>
               <ArrowRight className="ml-1.5 size-3.5" />
             </Link>
             <Button
@@ -222,11 +211,8 @@ export function BlogSiteChrome({ locale, alternateHrefs, children }: BlogSiteChr
               <Link href={locale === "en" ? "/privacy-policy" : "/politica-de-privacidade"} className="hover:text-zinc-950">
                 {locale === "en" ? "Privacy Policy" : locale === "es" ? "Política de Privacidad" : "Política de Privacidade"}
               </Link>
-              <Link href="/login" className="hidden lg:inline-flex hover:text-zinc-950">
-                {t.login}
-              </Link>
-              <Link href="/crm" className="hidden lg:inline-flex text-zinc-950 hover:underline">
-                {t.accessCrm}
+              <Link href="/#contato" className="text-zinc-950 hover:underline">
+                {t.ctaContact}
               </Link>
             </div>
           </div>

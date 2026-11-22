@@ -198,7 +198,7 @@ export function BlogArticleView({
               )}
             </div>
 
-            <h1 className="text-2xl sm:text-4xl font-semibold tracking-[-0.03em] text-zinc-950 leading-[1.18]">
+            <h1 className="text-xl sm:text-2xl lg:text-[1.75rem] font-semibold tracking-[-0.025em] text-zinc-950 leading-snug">
               {post.title}
             </h1>
 
@@ -232,11 +232,11 @@ export function BlogArticleView({
 
           {/* Direct GEO Answer box (shown when not already inside HTML .resposta-direta) */}
           {!htmlHasDirectBox && post.direct_answer && (
-            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-5 space-y-2">
+            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 sm:p-5 space-y-2">
               <div className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">
                 {ui.directBox}
               </div>
-              <p className="text-sm sm:text-[15px] leading-relaxed font-medium text-zinc-900">{post.direct_answer}</p>
+              <p className="text-xs sm:text-sm leading-relaxed font-medium text-zinc-900">{post.direct_answer}</p>
             </div>
           )}
 
@@ -266,18 +266,18 @@ export function BlogArticleView({
               dangerouslySetInnerHTML={{ __html: post.content_html! }}
             />
           ) : (
-            <div className="space-y-4 text-sm sm:text-[15px] leading-relaxed text-zinc-700">
+            <div className="space-y-3.5 text-sm leading-relaxed text-zinc-700">
               {blocks.map((b, i) => {
                 if (b.type === "h2") {
                   return (
-                    <h2 key={i} className="pt-4 text-xl font-semibold tracking-tight text-zinc-950">
+                    <h2 key={i} className="pt-3 text-lg font-semibold tracking-tight text-zinc-950">
                       {renderInlineBold(b.text)}
                     </h2>
                   );
                 }
                 if (b.type === "h3") {
                   return (
-                    <h3 key={i} className="pt-2 text-base font-semibold text-zinc-900">
+                    <h3 key={i} className="pt-2 text-[15px] font-semibold text-zinc-900">
                       {renderInlineBold(b.text)}
                     </h3>
                   );
@@ -310,7 +310,7 @@ export function BlogArticleView({
             <section className="pt-6 border-t border-zinc-200 space-y-4">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="size-4 text-zinc-900" />
-                <h2 className="text-lg font-semibold tracking-tight text-zinc-950">
+                <h2 className="text-base font-semibold tracking-tight text-zinc-950">
                   {ui.faqTitle}
                 </h2>
               </div>
@@ -332,7 +332,7 @@ export function BlogArticleView({
         {related.length > 0 && (
           <section className="space-y-4 pt-2">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold tracking-tight text-zinc-950">
+              <h2 className="text-base font-semibold tracking-tight text-zinc-950">
                 {ui.relatedTitle} ({post.category})
               </h2>
               <Link href={blogIndexPath} className="text-xs font-medium text-zinc-700 hover:text-zinc-950 underline">

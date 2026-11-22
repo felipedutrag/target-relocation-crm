@@ -83,10 +83,10 @@ export async function renderBlogIndexPage(locale: BlogLocale) {
             <ShieldCheck className="size-3.5 shrink-0 text-emerald-600" />
             <span className="truncate">{c.badge}</span>
           </div>
-          <h1 className="max-w-3xl text-3xl sm:text-4xl font-semibold tracking-[-0.03em] text-zinc-950">
+          <h1 className="max-w-3xl text-2xl sm:text-3xl font-semibold tracking-[-0.025em] text-zinc-950 leading-snug">
             {c.heading}
           </h1>
-          <p className="max-w-2xl text-sm leading-relaxed text-zinc-600">{c.subheading}</p>
+          <p className="max-w-2xl text-xs sm:text-sm leading-relaxed text-zinc-600">{c.subheading}</p>
         </div>
       </section>
 
