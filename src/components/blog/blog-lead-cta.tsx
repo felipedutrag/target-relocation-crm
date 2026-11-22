@@ -116,12 +116,12 @@ export function BlogLeadCta({
   }
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-zinc-950 p-6 sm:p-8 text-white space-y-4">
+    <div className="rounded-2xl border border-zinc-200 bg-zinc-950 p-5 sm:p-6 text-white space-y-4">
       <div className="space-y-1.5">
-        <span className="font-mono text-[11px] uppercase tracking-wider text-amber-400">
+        <span className="font-mono text-[10px] uppercase tracking-wider text-amber-400">
           {c.eyebrow}
         </span>
-        <h3 className="text-xl font-semibold tracking-tight">{c.heading}</h3>
+        <h3 className="text-base sm:text-lg font-semibold tracking-tight">{c.heading}</h3>
         <p className="text-xs leading-relaxed text-zinc-400">{c.sub}</p>
       </div>
 

@@ -175,10 +175,10 @@ export function BlogArticleView({
           <span className="truncate max-w-[260px] sm:max-w-md text-zinc-800 font-medium">{post.title}</span>
         </nav>
 
-        <article className="rounded-2xl border border-zinc-200/80 bg-white p-6 sm:p-10 shadow-[0_1px_2px_rgba(0,0,0,0.02)] space-y-7">
+        <article className="rounded-2xl border border-zinc-200/80 bg-white p-5 sm:p-8 shadow-[0_1px_2px_rgba(0,0,0,0.02)] space-y-6">
           {/* Header Metadata */}
-          <div className="space-y-4">
-            <div className="flex flex-wrap items-center gap-2.5 text-xs">
+          <div className="space-y-3.5">
+            <div className="flex flex-wrap items-center gap-2 text-xs">
               <Badge variant="outline" className="bg-zinc-50 border-zinc-200 text-zinc-700 max-w-full">
                 <span className="truncate">{post.category || "Guia Técnico GEO"}</span>
               </Badge>
@@ -198,7 +198,7 @@ export function BlogArticleView({
               )}
             </div>
 
-            <h1 className="text-xl sm:text-2xl lg:text-[1.75rem] font-semibold tracking-[-0.025em] text-zinc-950 leading-snug">
+            <h1 className="text-lg sm:text-xl lg:text-[1.375rem] font-semibold tracking-[-0.02em] text-zinc-950 leading-snug">
               {post.title}
             </h1>
 
@@ -232,11 +232,11 @@ export function BlogArticleView({
 
           {/* Direct GEO Answer box (shown when not already inside HTML .resposta-direta) */}
           {!htmlHasDirectBox && post.direct_answer && (
-            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 sm:p-5 space-y-2">
+            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 sm:p-5 space-y-1.5">
               <div className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">
                 {ui.directBox}
               </div>
-              <p className="text-xs sm:text-sm leading-relaxed font-medium text-zinc-900">{post.direct_answer}</p>
+              <p className="text-xs sm:text-[13px] leading-relaxed font-medium text-zinc-900">{post.direct_answer}</p>
             </div>
           )}
 
@@ -266,18 +266,18 @@ export function BlogArticleView({
               dangerouslySetInnerHTML={{ __html: post.content_html! }}
             />
           ) : (
-            <div className="space-y-3.5 text-sm leading-relaxed text-zinc-700">
+            <div className="space-y-3 text-[13px] leading-relaxed text-zinc-700">
               {blocks.map((b, i) => {
                 if (b.type === "h2") {
                   return (
-                    <h2 key={i} className="pt-3 text-lg font-semibold tracking-tight text-zinc-950">
+                    <h2 key={i} className="pt-3 text-base font-semibold tracking-tight text-zinc-950">
                       {renderInlineBold(b.text)}
                     </h2>
                   );
                 }
                 if (b.type === "h3") {
                   return (
-                    <h3 key={i} className="pt-2 text-[15px] font-semibold text-zinc-900">
+                    <h3 key={i} className="pt-2 text-sm font-semibold text-zinc-900">
                       {renderInlineBold(b.text)}
                     </h3>
                   );
@@ -310,15 +310,15 @@ export function BlogArticleView({
             <section className="pt-6 border-t border-zinc-200 space-y-4">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="size-4 text-zinc-900" />
-                <h2 className="text-base font-semibold tracking-tight text-zinc-950">
+                <h2 className="text-sm sm:text-[15px] font-semibold tracking-tight text-zinc-950">
                   {ui.faqTitle}
                 </h2>
               </div>
               <div className="grid gap-3">
                 {post.faq_schema_json.map((f, idx) => (
-                  <div key={idx} className="rounded-xl border border-zinc-200 bg-zinc-50/80 p-4 space-y-1.5">
-                    <h3 className="text-xs sm:text-sm font-semibold text-zinc-950">{f.question}</h3>
-                    <p className="text-xs sm:text-[13px] leading-relaxed text-zinc-600">{f.answer}</p>
+                  <div key={idx} className="rounded-xl border border-zinc-200 bg-zinc-50/80 p-3.5 sm:p-4 space-y-1">
+                    <h3 className="text-xs sm:text-[13px] font-semibold text-zinc-950">{f.question}</h3>
+                    <p className="text-xs leading-relaxed text-zinc-600">{f.answer}</p>
                   </div>
                 ))}
               </div>
@@ -332,7 +332,7 @@ export function BlogArticleView({
         {related.length > 0 && (
           <section className="space-y-4 pt-2">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-semibold tracking-tight text-zinc-950">
+              <h2 className="text-sm sm:text-[15px] font-semibold tracking-tight text-zinc-950">
                 {ui.relatedTitle} ({post.category})
               </h2>
               <Link href={blogIndexPath} className="text-xs font-medium text-zinc-700 hover:text-zinc-950 underline">

@@ -224,7 +224,7 @@ export function BlogListClient({
                 </span>
               </div>
 
-              <h2 className="text-lg sm:text-xl font-semibold tracking-tight text-zinc-950 leading-snug group-hover:text-amber-700 transition-colors">
+              <h2 className="text-base sm:text-lg font-semibold tracking-tight text-zinc-950 leading-snug group-hover:text-amber-700 transition-colors">
                 {featured.title}
               </h2>
 
@@ -299,11 +299,11 @@ export function BlogListClient({
                       </span>
                     </div>
 
-                    <h2 className="text-sm font-semibold tracking-tight text-zinc-950 leading-snug group-hover:text-amber-700 transition-colors line-clamp-2">
+                    <h2 className="text-[13px] font-semibold tracking-tight text-zinc-950 leading-snug group-hover:text-amber-700 transition-colors line-clamp-2">
                       {post.title}
                     </h2>
 
-                    <p className="text-xs leading-relaxed text-zinc-600 line-clamp-3">
+                    <p className="text-[11px] sm:text-xs leading-relaxed text-zinc-600 line-clamp-3">
                       {post.direct_answer}
                     </p>
                   </div>
