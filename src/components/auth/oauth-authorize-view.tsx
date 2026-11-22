@@ -119,7 +119,7 @@ export function OAuthAuthorizeView({ params }: { params: OAuthAuthorizeParams })
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="klaus@targetrelocation.com.br"
+                placeholder="seu.email@targetrelocation.com.br"
                 className="h-9 text-xs bg-white border-zinc-200"
               />
             </div>

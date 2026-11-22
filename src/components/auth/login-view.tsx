@@ -4,7 +4,6 @@ import { useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
-  CheckCircle2,
   Eye,
   EyeOff,
   Lock,
@@ -12,7 +11,6 @@ import {
   Radio,
   ShieldCheck,
   Sparkles,
-  UserCheck,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +18,6 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 
 export interface AuthenticatedUser {
   id?: string;
@@ -35,42 +32,8 @@ interface LoginViewProps {
   onBackToLanding: () => void;
 }
 
-const CRM_PROFILES: AuthenticatedUser[] = [
-  {
-    name: "Klaus Duailibi",
-    email: "klaus@targetrelocation.com.br",
-    role: "admin",
-    crmOwnerName: "Klaus",
-  },
-  {
-    name: "Áurea Azevedo",
-    email: "aureaazevedo@icloud.com",
-    role: "sdr_outbound",
-    crmOwnerName: "Aurea Azevedo",
-  },
-  {
-    name: "Anderley Nino",
-    email: "anderleynino007@gmail.com",
-    role: "sdr_inbound",
-    crmOwnerName: "Anderley Nino",
-  },
-  {
-    name: "Felipe (Boost)",
-    email: "felipe@targetrelocation.com.br",
-    role: "ops",
-    crmOwnerName: "Felipe",
-  },
-];
-
-const ROLE_LABELS: Record<string, string> = {
-  admin: "Admin • Diretoria",
-  sdr_outbound: "SDR • ICP & DOU",
-  sdr_inbound: "SDR • Inbound",
-  ops: "Ops & IA • Boost",
-};
-
 export function LoginView({ onSuccess, onBackToLanding }: LoginViewProps) {
-  const [username, setUsername] = useState("klaus@targetrelocation.com.br");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
@@ -277,7 +240,7 @@ export function LoginView({ onSuccess, onBackToLanding }: LoginViewProps) {
                   id="login-user"
                   type="email"
                   autoComplete="email"
-                  placeholder="klaus@targetrelocation.com.br"
+                  placeholder="seu.email@targetrelocation.com.br"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="h-10 pl-9 bg-white border-zinc-200 text-sm focus-visible:ring-zinc-900"
@@ -346,53 +309,6 @@ export function LoginView({ onSuccess, onBackToLanding }: LoginViewProps) {
               )}
             </Button>
           </form>
-
-          <div className="space-y-3">
-            <div className="relative flex items-center justify-center">
-              <Separator className="bg-zinc-200" />
-              <span className="absolute bg-white px-2.5 text-[11px] font-medium text-zinc-400 uppercase tracking-wider">
-                Contas Provisionadas da Equipe
-              </span>
-            </div>
-
-            <div className="grid gap-2">
-              {CRM_PROFILES.map((profile) => {
-                const selected = username.toLowerCase() === profile.email.toLowerCase();
-                return (
-                  <button
-                    key={profile.email}
-                    type="button"
-                    onClick={() => setUsername(profile.email)}
-                    className={`flex items-center justify-between rounded-lg border px-3 py-2 text-left transition-colors cursor-pointer ${
-                      selected
-                        ? "border-zinc-900 bg-zinc-50"
-                        : "border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50/60"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-zinc-100 text-zinc-700">
-                        <UserCheck className="size-3.5" />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="truncate text-xs font-medium text-zinc-900">
-                          {profile.name}
-                        </div>
-                        <div className="truncate font-mono text-[11px] text-zinc-500">
-                          {profile.email}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <span className="text-[10px] text-zinc-500 hidden sm:inline">
-                        {ROLE_LABELS[profile.role] || profile.role}
-                      </span>
-                      {selected && <CheckCircle2 className="size-3.5 text-zinc-900" />}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
         </div>
 
         <footer className="flex flex-wrap items-center justify-between gap-2 border-t border-zinc-100 pt-4 text-[11px] text-zinc-400">
