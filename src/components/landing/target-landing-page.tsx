@@ -371,12 +371,14 @@ export function TargetLandingPage({
             <button
               type="button"
               onClick={() => setHeroIndex((prev) => (prev + 1) % t.hero.modes.length)}
-              className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-medium text-zinc-700 hover:border-zinc-300 transition-colors cursor-pointer"
+              className="inline-flex max-w-full items-center justify-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] sm:text-xs font-medium text-zinc-700 hover:border-zinc-300 transition-colors cursor-pointer"
             >
-              <span className="size-1.5 rounded-full bg-amber-500" />
-              <span>{currentHero.tag}</span>
-              <span className="text-zinc-400">•</span>
-              <span className="font-mono text-[11px] text-zinc-500">{t.hero.locationTag}</span>
+              <span className="size-1.5 shrink-0 rounded-full bg-amber-500" />
+              <span className="truncate">{currentHero.tag}</span>
+              <span className="hidden sm:inline shrink-0 text-zinc-400">•</span>
+              <span className="hidden sm:inline shrink-0 font-mono text-[11px] text-zinc-500">
+                {t.hero.locationTag}
+              </span>
             </button>
 
             <h1 className="text-4xl font-semibold tracking-[-0.035em] text-zinc-950 sm:text-5xl lg:text-[3.5rem] lg:leading-[1.06]">
@@ -794,15 +796,15 @@ export function TargetLandingPage({
                     )}
                     <div className="flex flex-1 flex-col justify-between p-5">
                       <div className="space-y-2.5">
-                        <div className="flex items-center justify-between text-[11px]">
+                        <div className="flex items-center justify-between gap-2 text-[11px]">
                           <Badge
                             variant="outline"
                             title={post.category || undefined}
-                            className="bg-white border-zinc-300 text-zinc-800 max-w-[205px]"
+                            className="bg-white border-zinc-300 text-zinc-800 min-w-0 max-w-[70%]"
                           >
                             <span className="truncate">{post.category}</span>
                           </Badge>
-                          <span className="font-mono text-zinc-400">
+                          <span className="shrink-0 font-mono text-zinc-400">
                             {new Date(post.updated_at).toLocaleDateString("pt-BR")}
                           </span>
                         </div>

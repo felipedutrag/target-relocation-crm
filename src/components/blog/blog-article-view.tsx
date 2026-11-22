@@ -179,20 +179,20 @@ export function BlogArticleView({
           {/* Header Metadata */}
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-2.5 text-xs">
-              <Badge variant="outline" className="bg-zinc-50 border-zinc-200 text-zinc-700">
-                {post.category || "Guia Técnico GEO"}
+              <Badge variant="outline" className="bg-zinc-50 border-zinc-200 text-zinc-700 max-w-full">
+                <span className="truncate">{post.category || "Guia Técnico GEO"}</span>
               </Badge>
               <span className="inline-flex items-center gap-1 text-zinc-500 font-mono text-[11px]">
-                <Calendar className="size-3.5" />
+                <Calendar className="size-3.5 shrink-0" />
                 {ui.updated} {updatedStr}
               </span>
               <span className="inline-flex items-center gap-1 text-zinc-500 font-mono text-[11px]">
-                <Clock className="size-3.5" />
+                <Clock className="size-3.5 shrink-0" />
                 {post.reading_time_min} min
               </span>
               {post.technical_reviewed && (
-                <span className="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-0.5 text-[11px] font-medium">
-                  <CheckCircle2 className="size-3" />
+                <span className="inline-flex items-center gap-1 whitespace-nowrap text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-0.5 text-[11px] font-medium">
+                  <CheckCircle2 className="size-3 shrink-0" />
                   {ui.reviewed}
                 </span>
               )}

@@ -215,10 +215,10 @@ export function BlogListClient({
                 <Badge className="bg-amber-500/15 text-amber-800 border-amber-300/60 hover:bg-amber-500/20">
                   {t.featuredLabel}
                 </Badge>
-                <Badge variant="outline" className="border-zinc-200 bg-zinc-50 text-zinc-700">
-                  {featured.category}
+                <Badge variant="outline" className="border-zinc-200 bg-zinc-50 text-zinc-700 max-w-full">
+                  <span className="truncate">{featured.category}</span>
                 </Badge>
-                <span className="inline-flex items-center gap-1 font-mono text-zinc-400">
+                <span className="inline-flex items-center gap-1 font-mono text-zinc-400 shrink-0">
                   <Calendar className="size-3" />
                   {new Date(featured.updated_at || featured.published_at || Date.now()).toLocaleDateString("pt-BR")}
                 </span>
@@ -289,7 +289,7 @@ export function BlogListClient({
                       <Badge
                         variant="outline"
                         title={post.category || undefined}
-                        className="border-zinc-300 bg-zinc-50 text-zinc-800 text-[10px] max-w-[205px]"
+                        className="border-zinc-300 bg-zinc-50 text-zinc-800 text-[10px] min-w-0 max-w-[70%]"
                       >
                         <span className="truncate">{post.category}</span>
                       </Badge>

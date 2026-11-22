@@ -78,7 +78,7 @@ export function AdLandingPage({ config }: { config: AdLandingConfig }) {
           <div className="lg:col-span-7 space-y-6">
             <Badge
               variant="outline"
-              className="border-zinc-300 bg-zinc-50 text-zinc-800 font-mono text-[11px]"
+              className="h-auto whitespace-normal text-left leading-snug py-1 px-3 rounded-2xl sm:rounded-full border-zinc-300 bg-zinc-50 text-zinc-800 font-mono text-[11px]"
             >
               {config.badge}
             </Badge>

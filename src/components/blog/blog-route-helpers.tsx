@@ -23,7 +23,7 @@ const INDEX_COPY: Record<
   }
 > = {
   pt: {
-    badge: "Imigração Corporativa & Global Mobility • Base Histórica + Guias GEO",
+    badge: "Imigração Corporativa & Global Mobility",
     heading: "Guias técnicos e artigos para decisões de RH e mobilidade internacional.",
     subheading:
       "Acervo completo de artigos sobre vistos de trabalho (RN 02/2017, RN 03/2017, RN 11/2017), Residência Mercosul, Ministério do Trabalho (MTE), Polícia Federal, Relocation no Brasil e vistos corporativos globais.",
@@ -32,7 +32,7 @@ const INDEX_COPY: Record<
       "Artigos e guias técnicos sobre vistos de trabalho no Brasil, Residência Mercosul, MTE, Polícia Federal e Global Mobility assinados pela Target Relocation.",
   },
   en: {
-    badge: "Corporate Immigration & Global Mobility • Technical Library & GEO",
+    badge: "Corporate Immigration & Global Mobility",
     heading: "Technical guides for HR and Global Mobility decisions in Brazil and the Americas.",
     subheading:
       "Complete library covering work visas, Mercosur residency, Ministry of Labor (MTE), Federal Police (RNM), executive relocation in Brazil, and cross-border immigration compliance.",
@@ -41,7 +41,7 @@ const INDEX_COPY: Record<
       "Technical guides for multinationals covering Brazilian work visas, Mercosur residency, Federal Police registration, and executive relocation.",
   },
   es: {
-    badge: "Inmigración Corporativa y Movilidad Global • Biblioteca Técnica GEO",
+    badge: "Inmigración Corporativa y Movilidad Global",
     heading: "Guías técnicas para decisiones de RRHH y movilidad ejecutiva en Brasil y América.",
     subheading:
       "Biblioteca completa de artículos sobre visas de trabajo, Residencia Mercosur, Ministerio de Trabajo (MTE), Policía Federal y traslado corporativo de ejecutivos.",
@@ -79,9 +79,9 @@ export async function renderBlogIndexPage(locale: BlogLocale) {
     >
       <section className="border-b border-zinc-200/80 bg-white py-12 sm:py-14">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-medium text-zinc-700">
-            <ShieldCheck className="size-3.5 text-emerald-600" />
-            <span>{c.badge}</span>
+          <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] sm:text-xs font-medium text-zinc-700">
+            <ShieldCheck className="size-3.5 shrink-0 text-emerald-600" />
+            <span className="truncate">{c.badge}</span>
           </div>
           <h1 className="max-w-3xl text-3xl sm:text-4xl font-semibold tracking-[-0.03em] text-zinc-950">
             {c.heading}
