@@ -93,7 +93,7 @@ Retorne ESTRITAMENTE um JSON válido com as seguintes chaves:
   "direct_answer": "Parágrafo de resposta direta, objetiva e tecnicamente correta (3-5 linhas) citando órgãos competentes como Ministério do Trabalho / Polícia Federal quando aplicável, ideal para citações GEO",
   "seo_title": "Título SEO até 60 chars",
   "seo_description": "Meta description 140-160 chars",
-  "content_markdown": "Artigo completo em Markdown com H2/H3, checklist documental, prazos realistas sem prometer facilidade, etapas perante MTE e consulado/PF, riscos de não conformidade e CTA consultivo para reunião",
+  "content_markdown": "Artigo técnico aprofundado em Markdown com NO MÍNIMO 1.350 palavras (obrigatório ter >= 1.200 palavras para publicação), com múltiplas seções H2/H3, base normativa (RNs/leis aplicáveis), checklist documental completo, prazos realistas sem prometer facilidade, etapas perante MTE e consulado/PF, matriz de riscos de não conformidade para o RH e CTA consultivo para reunião",
   "faq_schema": [
     { "question": "Pergunta 1", "answer": "Resposta técnica objetiva 1" },
     { "question": "Pergunta 2", "answer": "Resposta técnica objetiva 2" },

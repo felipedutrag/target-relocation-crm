@@ -47,10 +47,9 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import type { ServiceCatalogItem } from "@/components/crm/types";
 import type { LandingBlogPreview } from "@/lib/blog-queries";
-import { formatMoney } from "@/components/crm/utils";
-import { CATALOG_SERVICES_SEED } from "@/lib/catalog-seed";
+import { PUBLIC_SERVICES_CATALOG } from "@/lib/public-services";
+import { fireLeadConversion } from "@/components/analytics/marketing-pixels";
 
 // Faixa "empresas que confiam" oculta: os nomes atuais nao sao clientes reais. Trocar para true apos atualizar a lista.
 const SHOW_TRUSTED_COMPANIES = false;
@@ -61,8 +60,8 @@ import {
 } from "@/components/landing/landing-translations";
 
 interface TargetLandingPageProps {
-  onEnterCrm: (initialDealId?: number) => void;
-  onOpenLogin: () => void;
+  onEnterCrm?: (initialDealId?: number) => void;
+  onOpenLogin?: () => void;
   latestBlogPosts?: LandingBlogPreview[];
 }
 
@@ -137,15 +136,25 @@ function LanguageSwitcher({
   );
 }
 
-export function TargetLandingPage({ onEnterCrm, onOpenLogin, latestBlogPosts = [] }: TargetLandingPageProps) {
-  const [locale, setLocale] = useState<LandingLocale>("en");
+export function TargetLandingPage({
+  onEnterCrm,
+  onOpenLogin,
+  latestBlogPosts = [],
+}: TargetLandingPageProps) {
+  const handleEnterCrm = (dealId?: number) => {
+    if (onEnterCrm) onEnterCrm(dealId);
+    else window.location.href = dealId ? `/crm?deal=${dealId}` : "/crm";
+  };
+  const handleOpenLogin = () => {
+    if (onOpenLogin) onOpenLogin();
+    else window.location.href = "/login";
+  };
+
+  const [locale, setLocale] = useState<LandingLocale>("pt");
   const [heroIndex, setHeroIndex] = useState(0);
   const [openFaq, setOpenFaq] = useState<number>(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [catalogCountry, setCatalogCountry] = useState("Brasil");
-  const [catalog] = useState<ServiceCatalogItem[]>(() =>
-    CATALOG_SERVICES_SEED.map((s, idx) => ({ id: idx + 1, ...s }))
-  );
 
   // CRM-integrated contact form state
   const [name, setName] = useState("");
@@ -208,12 +217,14 @@ export function TargetLandingPage({ onEnterCrm, onOpenLogin, latestBlogPosts = [
       if (!res.ok) {
         throw new Error(json.error || t.contact.submitErrorFallback);
       }
+      fireLeadConversion(t.contact.originTag);
       setCreatedDealId(json.lead?.deal_id ?? json.id ?? null);
       setName("");
       setCompany("");
       setEmail("");
       setPhone("");
       setMessage("");
+      window.location.href = `/obrigado?origem=${locale}`;
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : t.contact.submitErrorFallback);
     } finally {
@@ -221,14 +232,9 @@ export function TargetLandingPage({ onEnterCrm, onOpenLogin, latestBlogPosts = [
     }
   };
 
-  const countryServices = catalog
-    .filter((item) => {
-      if (catalogCountry === "Brasil") return item.country === "Brasil";
-      if (catalogCountry === "México / EUA")
-        return item.country.includes("México") || item.country.includes("EUA");
-      return item.country === catalogCountry;
-    })
-    .slice(0, 6);
+  const countryServices = PUBLIC_SERVICES_CATALOG[locale].filter(
+    (item) => item.countryKey === catalogCountry
+  );
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-zinc-900">
@@ -240,6 +246,8 @@ export function TargetLandingPage({ onEnterCrm, onOpenLogin, latestBlogPosts = [
               <img
                 src="/target-logo.png"
                 alt="Target Relocation"
+                width={276}
+                height={120}
                 className="h-9 w-auto object-contain"
               />
             </a>
@@ -284,16 +292,16 @@ export function TargetLandingPage({ onEnterCrm, onOpenLogin, latestBlogPosts = [
             <Button
               variant="ghost"
               size="sm"
-              onClick={onOpenLogin}
-              className="hidden sm:inline-flex h-8 rounded-lg px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950 cursor-pointer"
+              onClick={handleOpenLogin}
+              className="hidden lg:inline-flex h-8 rounded-lg px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950 cursor-pointer"
             >
               <LogIn className="mr-1.5 size-3.5" />
               {t.nav.login}
             </Button>
             <Button
               size="sm"
-              onClick={() => onEnterCrm()}
-              className="h-8 rounded-lg bg-zinc-950 px-3.5 text-xs font-medium text-white hover:bg-zinc-800 cursor-pointer shadow-xs"
+              onClick={() => handleEnterCrm()}
+              className="hidden lg:inline-flex h-8 rounded-lg bg-zinc-950 px-3.5 text-xs font-medium text-white hover:bg-zinc-800 cursor-pointer shadow-xs"
             >
               <span>{t.nav.accessCrm}</span>
               <ArrowRight className="ml-1.5 size-3.5" />
@@ -301,6 +309,7 @@ export function TargetLandingPage({ onEnterCrm, onOpenLogin, latestBlogPosts = [
             <Button
               size="icon"
               variant="ghost"
+              aria-label="Menu"
               className="lg:hidden size-8 text-zinc-700"
               onClick={() => setMobileMenuOpen((v) => !v)}
             >
@@ -324,18 +333,17 @@ export function TargetLandingPage({ onEnterCrm, onOpenLogin, latestBlogPosts = [
               ))}
             </div>
             <div className="flex items-center justify-between border-t border-zinc-100 pt-2.5">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  onOpenLogin();
-                }}
-                className="h-8 rounded-lg text-xs"
+              <a
+                href="#contato"
+                onClick={() => setMobileMenuOpen(false)}
+                className={buttonVariants({
+                  size: "sm",
+                  className: "h-8 rounded-lg bg-zinc-950 text-white hover:bg-zinc-800 text-xs px-3",
+                })}
               >
-                <LogIn className="mr-1.5 size-3.5" />
-                {t.nav.login}
-              </Button>
+                {t.services.cta}
+                <ArrowRight className="ml-1.5 size-3.5" />
+              </a>
               <LanguageSwitcher
                 locale={locale}
                 onChange={setLocale}
@@ -547,14 +555,17 @@ export function TargetLandingPage({ onEnterCrm, onOpenLogin, latestBlogPosts = [
               </h2>
               <p className="text-sm text-zinc-600">{t.catalog.subtitle}</p>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onEnterCrm()}
-              className="h-8 rounded-lg border-zinc-200 text-xs font-medium cursor-pointer"
+            <a
+              href="#contato"
+              className={buttonVariants({
+                variant: "outline",
+                size: "sm",
+                className: "h-8 rounded-lg border-zinc-200 text-xs font-medium",
+              })}
             >
               {t.catalog.openProposalsBtn}
-            </Button>
+              <ArrowRight className="ml-1.5 size-3.5" />
+            </a>
           </div>
 
           <Tabs
@@ -592,25 +603,24 @@ export function TargetLandingPage({ onEnterCrm, onOpenLogin, latestBlogPosts = [
                       className="flex flex-col justify-between rounded-xl border border-zinc-200/80 bg-[#FAFAFA] p-4 hover:border-zinc-300 transition-colors"
                     >
                       <div className="space-y-2">
-                        <div className="flex items-center justify-between gap-2">
-                          <Badge
-                            variant="secondary"
-                            className="bg-white border border-zinc-200 text-zinc-700 text-[10px]"
-                          >
-                            {item.category}
-                          </Badge>
-                          <span className="font-mono text-[11px] text-zinc-400">{item.code}</span>
-                        </div>
+                        <Badge
+                          variant="secondary"
+                          className="bg-white border border-zinc-200 text-zinc-700 text-[10px]"
+                        >
+                          {item.category}
+                        </Badge>
                         <h3 className="text-sm font-semibold text-zinc-950">{item.name}</h3>
-                        <p className="text-xs text-zinc-600 line-clamp-3">
-                          {item.description || item.scope}
-                        </p>
+                        <p className="text-xs text-zinc-600 line-clamp-3">{item.scope}</p>
                       </div>
-                      <div className="mt-4 flex items-center justify-between border-t border-zinc-200/80 pt-3">
-                        <span className="text-[11px] text-zinc-500">{item.unit}</span>
-                        <span className="font-mono text-xs font-semibold text-zinc-950 tabular-nums">
-                          {item.price ? formatMoney(item.price, item.currency) : t.catalog.onRequest}
-                        </span>
+                      <div className="mt-4 flex items-center justify-end border-t border-zinc-200/80 pt-3">
+                        <a
+                          href="#contato"
+                          onClick={() => setServiceId(item.serviceId)}
+                          className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-950 hover:text-amber-700 transition-colors"
+                        >
+                          <span>{t.catalog.onRequest}</span>
+                          <ArrowRight className="size-3.5" />
+                        </a>
                       </div>
                     </div>
                   ))}
@@ -684,8 +694,8 @@ export function TargetLandingPage({ onEnterCrm, onOpenLogin, latestBlogPosts = [
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={onOpenLogin}
-                  className="h-9 rounded-lg border-zinc-200 bg-white px-4 text-xs cursor-pointer"
+                  onClick={handleOpenLogin}
+                  className="hidden lg:inline-flex h-9 rounded-lg border-zinc-200 bg-white px-4 text-xs cursor-pointer"
                 >
                   {t.about.ctaPortal}
                 </Button>
@@ -765,7 +775,7 @@ export function TargetLandingPage({ onEnterCrm, onOpenLogin, latestBlogPosts = [
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
-            {latestBlogPosts.length > 0
+            {locale === "pt" && latestBlogPosts.length > 0
               ? latestBlogPosts.map((post) => (
                   <a
                     key={post.id}
@@ -836,7 +846,7 @@ export function TargetLandingPage({ onEnterCrm, onOpenLogin, latestBlogPosts = [
                         {post.readTime}
                       </span>
                       <a
-                        href="/blog"
+                        href={locale === "en" ? "/en/blog" : locale === "es" ? "/es/blog" : "/blog"}
                         className="font-medium text-zinc-900 hover:underline"
                       >
                         {t.blog.readMore}
@@ -968,8 +978,8 @@ export function TargetLandingPage({ onEnterCrm, onOpenLogin, latestBlogPosts = [
                   <div className="flex flex-wrap gap-2 pt-1">
                     <Button
                       size="sm"
-                      onClick={() => onEnterCrm(createdDealId)}
-                      className="h-9 rounded-lg bg-zinc-950 text-white text-xs cursor-pointer"
+                      onClick={() => handleEnterCrm(createdDealId)}
+                      className="hidden lg:inline-flex h-9 rounded-lg bg-zinc-950 text-white text-xs cursor-pointer"
                     >
                       <LayoutDashboard className="mr-1.5 size-3.5" />
                       {t.contact.openDealBtn(createdDealId)}
@@ -1108,6 +1118,8 @@ export function TargetLandingPage({ onEnterCrm, onOpenLogin, latestBlogPosts = [
               <img
                 src="/target-logo.png"
                 alt="Target Relocation"
+                width={276}
+                height={120}
                 className="h-8 w-auto object-contain"
               />
               <p className="text-xs text-zinc-500 max-w-md">{t.footer.tagline}</p>
@@ -1122,17 +1134,23 @@ export function TargetLandingPage({ onEnterCrm, onOpenLogin, latestBlogPosts = [
               <a href="#sobre" className="hover:text-zinc-950">
                 {t.footer.about}
               </a>
+              <a
+                href={locale === "en" ? "/privacy-policy" : "/politica-de-privacidade"}
+                className="hover:text-zinc-950"
+              >
+                {locale === "en" ? "Privacy Policy" : locale === "es" ? "Política de Privacidad" : "Política de Privacidade"}
+              </a>
               <button
                 type="button"
-                onClick={onOpenLogin}
-                className="hover:text-zinc-950 cursor-pointer"
+                onClick={handleOpenLogin}
+                className="hidden lg:inline-flex hover:text-zinc-950 cursor-pointer"
               >
                 {t.footer.login}
               </button>
               <button
                 type="button"
-                onClick={() => onEnterCrm()}
-                className="text-zinc-950 hover:underline cursor-pointer"
+                onClick={() => handleEnterCrm()}
+                className="hidden lg:inline-flex text-zinc-950 hover:underline cursor-pointer"
               >
                 {t.footer.crmPortal}
               </button>

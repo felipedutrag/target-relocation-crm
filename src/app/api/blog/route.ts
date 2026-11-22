@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createPublicClient, requireWorkspaceUser } from "@/lib/supabase/server";
 import { slugifyPt } from "@/lib/openai";
 import { analyzeArticleSeo } from "@/lib/seo-analyzer";
+import { findDuplicateBlogPost, MIN_PUBLISH_WORDS } from "@/lib/editorial-guardrails";
 
 export const dynamic = "force-dynamic";
 
@@ -73,6 +74,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (!body.force) {
+      const dup = await findDuplicateBlogPost(auth.supabase, title, slug);
+      if (dup.duplicate) {
+        return NextResponse.json(
+          { error: `${dup.reason} Edite o artigo existente em vez de duplicar o tema.` },
+          { status: 409 }
+        );
+      }
+    }
+
     const seoTitle = body.seo_title ? String(body.seo_title) : title.slice(0, 60);
     const seoDesc = body.seo_description ? String(body.seo_description) : directAnswer.slice(0, 155);
     const authorName = String(body.author_name || "Klaus Duailibi");
@@ -90,6 +101,15 @@ export async function POST(req: NextRequest) {
       faq_schema_json: faq,
       author_name: authorName,
     });
+
+    if (status === "published" && seoRes.wordCount < MIN_PUBLISH_WORDS) {
+      return NextResponse.json(
+        {
+          error: `Publicação bloqueada: artigo possui ${seoRes.wordCount} palavras. Mínimo exigido para SEO/GEO: ${MIN_PUBLISH_WORDS} palavras.`,
+        },
+        { status: 400 }
+      );
+    }
 
     const { data: post, error } = await auth.supabase
       .from("blog_posts")

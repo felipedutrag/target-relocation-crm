@@ -6,6 +6,42 @@ import { SITE_URL } from "@/lib/site-url";
 import { BlogLeadCta } from "@/components/blog/blog-lead-cta";
 import type { BlogLocale, PublicBlogArticle, PublicBlogIndexItem } from "@/lib/blog-queries";
 
+const ARTICLE_UI = {
+  pt: {
+    dateLocale: "pt-BR",
+    updated: "Atualizado em",
+    reviewed: "Revisado Tecnicamente",
+    directBox: "Resposta Direta • Escopo Legal e Órgãos Competentes",
+    videoLabel: "Explicação em Vídeo — Klaus Duailibi (YouTube)",
+    faqTitle: "Perguntas Frequentes (FAQ)",
+    relatedTitle: "Artigos Relacionados",
+    viewAll: "Ver todos os artigos",
+    readArticle: "Ler artigo",
+  },
+  en: {
+    dateLocale: "en-US",
+    updated: "Updated on",
+    reviewed: "Technically Reviewed",
+    directBox: "Direct Answer • Legal Scope & Competent Authorities",
+    videoLabel: "Video Briefing — Klaus Duailibi (YouTube)",
+    faqTitle: "Frequently Asked Questions (FAQ)",
+    relatedTitle: "Related Articles",
+    viewAll: "View all articles",
+    readArticle: "Read article",
+  },
+  es: {
+    dateLocale: "es-MX",
+    updated: "Actualizado el",
+    reviewed: "Revisado Técnicamente",
+    directBox: "Respuesta Directa • Alcance Legal y Autoridades Competentes",
+    videoLabel: "Explicación en Video — Klaus Duailibi (YouTube)",
+    faqTitle: "Preguntas Frecuentes (FAQ)",
+    relatedTitle: "Artículos Relacionados",
+    viewAll: "Ver todos los artículos",
+    readArticle: "Leer artículo",
+  },
+} as const;
+
 function getYoutubeEmbedUrl(url: string | null): string | null {
   if (!url) return null;
   const trimmed = url.trim();
@@ -54,11 +90,12 @@ export function BlogArticleView({
   related: PublicBlogIndexItem[];
   locale: BlogLocale;
 }) {
+  const ui = ARTICLE_UI[locale];
   const siteUrl = SITE_URL;
   const ptHref = post.canonical_path || `/${post.slug}`;
   const enHref = post.en_slug ? `/en/${post.en_slug}` : `/en/${post.slug}`;
   const esHref = post.es_slug ? `/es/${post.es_slug}` : `/es/${post.slug}`;
-  const updatedStr = new Date(post.updated_at || post.published_at || Date.now()).toLocaleDateString("pt-BR");
+  const updatedStr = new Date(post.updated_at || post.published_at || Date.now()).toLocaleDateString(ui.dateLocale);
   const embedUrl = getYoutubeEmbedUrl(post.youtube_embed_url);
 
   const hasHtml = Boolean(post.content_html && post.content_html.trim().length > 20);
@@ -147,7 +184,7 @@ export function BlogArticleView({
               </Badge>
               <span className="inline-flex items-center gap-1 text-zinc-500 font-mono text-[11px]">
                 <Calendar className="size-3.5" />
-                Atualizado em {updatedStr}
+                {ui.updated} {updatedStr}
               </span>
               <span className="inline-flex items-center gap-1 text-zinc-500 font-mono text-[11px]">
                 <Clock className="size-3.5" />
@@ -156,7 +193,7 @@ export function BlogArticleView({
               {post.technical_reviewed && (
                 <span className="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-0.5 text-[11px] font-medium">
                   <CheckCircle2 className="size-3" />
-                  Revisado Tecnicamente
+                  {ui.reviewed}
                 </span>
               )}
             </div>
@@ -179,13 +216,16 @@ export function BlogArticleView({
             </div>
           </div>
 
-          {/* Featured Cover Image (hosted on Supabase Storage) */}
+          {/* Featured Cover Image with fixed 16:9 box to eliminate CLS */}
           {post.featured_image_url && (
-            <figure className="overflow-hidden rounded-xl border border-zinc-200/80 bg-zinc-100">
+            <figure className="aspect-[16/9] w-full max-h-[460px] overflow-hidden rounded-xl border border-zinc-200/80 bg-zinc-100">
               <img
                 src={post.featured_image_url}
                 alt={post.featured_image_alt || post.title}
-                className="w-full max-h-[460px] object-cover"
+                width={1200}
+                height={675}
+                fetchPriority="high"
+                className="h-full w-full object-cover"
               />
             </figure>
           )}
@@ -194,7 +234,7 @@ export function BlogArticleView({
           {!htmlHasDirectBox && post.direct_answer && (
             <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-5 space-y-2">
               <div className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">
-                Resposta Direta • Escopo Legal e Órgãos Competentes
+                {ui.directBox}
               </div>
               <p className="text-sm sm:text-[15px] leading-relaxed font-medium text-zinc-900">{post.direct_answer}</p>
             </div>
@@ -205,7 +245,7 @@ export function BlogArticleView({
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-xs font-semibold text-zinc-700">
                 <PlayCircle className="size-4 text-rose-600" />
-                <span>Explicação em Vídeo — Klaus Duailibi (YouTube)</span>
+                <span>{ui.videoLabel}</span>
               </div>
               <div className="aspect-video w-full overflow-hidden rounded-xl border border-zinc-200 bg-zinc-950">
                 <iframe
@@ -271,7 +311,7 @@ export function BlogArticleView({
               <div className="flex items-center gap-2">
                 <ShieldCheck className="size-4 text-zinc-900" />
                 <h2 className="text-lg font-semibold tracking-tight text-zinc-950">
-                  Perguntas Frequentes (FAQ Schema)
+                  {ui.faqTitle}
                 </h2>
               </div>
               <div className="grid gap-3">
@@ -286,17 +326,17 @@ export function BlogArticleView({
           )}
         </article>
 
-        <BlogLeadCta articleTitle={post.title} utmCampaign={post.utm_campaign} />
+        <BlogLeadCta articleTitle={post.title} utmCampaign={post.utm_campaign} locale={locale} />
 
         {/* Related Articles Grid */}
         {related.length > 0 && (
           <section className="space-y-4 pt-2">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold tracking-tight text-zinc-950">
-                Artigos Relacionados ({post.category})
+                {ui.relatedTitle} ({post.category})
               </h2>
               <Link href={blogIndexPath} className="text-xs font-medium text-zinc-700 hover:text-zinc-950 underline">
-                Ver todos os artigos
+                {ui.viewAll}
               </Link>
             </div>
             <div className="grid gap-4 md:grid-cols-3">
@@ -311,6 +351,9 @@ export function BlogArticleView({
                       <img
                         src={r.featured_image_url}
                         alt={r.featured_image_alt || r.title}
+                        width={800}
+                        height={450}
+                        loading="lazy"
                         className="h-full w-full object-cover group-hover:scale-[1.03] transition-transform"
                       />
                     </div>
@@ -320,7 +363,7 @@ export function BlogArticleView({
                       {r.title}
                     </h3>
                     <span className="inline-flex items-center gap-1 text-[11px] font-medium text-zinc-600">
-                      Ler artigo <ArrowRight className="size-3" />
+                      {ui.readArticle} <ArrowRight className="size-3" />
                     </span>
                   </div>
                 </Link>

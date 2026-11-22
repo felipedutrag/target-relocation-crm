@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireWorkspaceUser } from "@/lib/supabase/server";
 import { generateOmnichannelPack, resolveOpenAiClient, slugifyPt } from "@/lib/openai";
 import { analyzeArticleSeo } from "@/lib/seo-analyzer";
+import { findDuplicateBlogPost, MIN_PUBLISH_WORDS } from "@/lib/editorial-guardrails";
 
 export const dynamic = "force-dynamic";
 
@@ -79,6 +80,16 @@ export async function POST(req: NextRequest) {
       const itemId = Number(body.id);
       const { data: item } = await supabase.from("editorial_items").select("*").eq("id", itemId).maybeSingle();
       if (!item) return NextResponse.json({ error: "Item editorial não encontrado" }, { status: 404 });
+
+      if (!body.force) {
+        const dup = await findDuplicateBlogPost(supabase, String(item.topic), slugifyPt(String(item.topic)));
+        if (dup.duplicate) {
+          return NextResponse.json(
+            { error: `${dup.reason} Atualize o guia existente em vez de duplicar o tema.` },
+            { status: 409 }
+          );
+        }
+      }
 
       const ai = await resolveOpenAiClient(supabase);
       if (!ai.client) {
@@ -279,6 +290,21 @@ export async function POST(req: NextRequest) {
       }
 
       if (item.blog_post_id) {
+        const { data: postCheck } = await supabase
+          .from("blog_posts")
+          .select("id, word_count")
+          .eq("id", item.blog_post_id)
+          .maybeSingle();
+
+        if (postCheck && Number(postCheck.word_count || 0) < MIN_PUBLISH_WORDS) {
+          return NextResponse.json(
+            {
+              error: `Publicação bloqueada: artigo possui apenas ${postCheck.word_count || 0} palavras. Mínimo exigido para qualidade SEO/GEO: ${MIN_PUBLISH_WORDS} palavras.`,
+            },
+            { status: 400 }
+          );
+        }
+
         await supabase
           .from("blog_posts")
           .update({

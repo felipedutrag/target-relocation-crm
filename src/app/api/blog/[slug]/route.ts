@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createPublicClient, requireWorkspaceUser } from "@/lib/supabase/server";
 import { resolveOpenAiClient, TARGET_COMPLIANCE_SYSTEM_PROMPT } from "@/lib/openai";
 import { analyzeArticleSeo } from "@/lib/seo-analyzer";
+import { MIN_PUBLISH_WORDS } from "@/lib/editorial-guardrails";
 
 export const dynamic = "force-dynamic";
 
@@ -120,6 +121,15 @@ export async function PATCH(
     updates.readability_score = seoRes.readabilityScore;
     updates.seo_grade = seoRes.seoGrade;
     updates.seo_checks_json = seoRes.checks;
+
+    if (updates.status === "published" && seoRes.wordCount < MIN_PUBLISH_WORDS) {
+      return NextResponse.json(
+        {
+          error: `Publicação bloqueada: artigo possui ${seoRes.wordCount} palavras. Mínimo exigido para publicar: ${MIN_PUBLISH_WORDS} palavras.`,
+        },
+        { status: 400 }
+      );
+    }
 
     const { data, error } = await auth.supabase
       .from("blog_posts")

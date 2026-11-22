@@ -37,7 +37,7 @@ const CHROME_COPY: Record<
     tagline:
       "Imigração corporativa, compliance regulatório e global mobility para multinacionais no Brasil e Américas.",
     contact: "Contato",
-    stackNote: "Target Relocation • Portal Técnico GEO/SEO & CRM",
+    stackNote: "Target Relocation • Portal Técnico GEO/SEO",
   },
   en: {
     solutions: "Solutions",
@@ -52,7 +52,7 @@ const CHROME_COPY: Record<
     tagline:
       "Corporate immigration, regulatory compliance, and global mobility for multinationals across Brazil & Americas.",
     contact: "Contact",
-    stackNote: "Target Relocation • GEO/SEO Technical Portal & CRM",
+    stackNote: "Target Relocation • GEO/SEO Technical Portal",
   },
   es: {
     solutions: "Soluciones",
@@ -67,7 +67,7 @@ const CHROME_COPY: Record<
     tagline:
       "Inmigración corporativa, cumplimiento normativo y movilidad global para multinacionales en Brasil y Américas.",
     contact: "Contacto",
-    stackNote: "Target Relocation • Portal Técnico GEO/SEO y CRM",
+    stackNote: "Target Relocation • Portal Técnico GEO/SEO",
   },
 };
 
@@ -98,7 +98,7 @@ export function BlogSiteChrome({ locale, alternateHrefs, children }: BlogSiteChr
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
           <div className="flex items-center gap-6">
             <Link href="/" className="flex items-center shrink-0">
-              <img src="/target-logo.png" alt="Target Relocation" className="h-9 w-auto object-contain" />
+              <img src="/target-logo.png" alt="Target Relocation" width={276} height={120} className="h-9 w-auto object-contain" />
             </Link>
             <Separator orientation="vertical" className="hidden md:block h-5 bg-zinc-200" />
             <nav className="hidden lg:flex items-center gap-5 text-[13px] font-medium text-zinc-600">
@@ -156,14 +156,14 @@ export function BlogSiteChrome({ locale, alternateHrefs, children }: BlogSiteChr
 
             <Link
               href="/login"
-              className="hidden sm:inline-flex h-8 items-center rounded-lg px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950"
+              className="hidden lg:inline-flex h-8 items-center rounded-lg px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950"
             >
               <LogIn className="mr-1.5 size-3.5" />
               {t.login}
             </Link>
             <Link
               href="/crm"
-              className="inline-flex h-8 items-center rounded-lg bg-zinc-950 px-3.5 text-xs font-medium text-white hover:bg-zinc-800 shadow-xs"
+              className="hidden lg:inline-flex h-8 items-center rounded-lg bg-zinc-950 px-3.5 text-xs font-medium text-white hover:bg-zinc-800 shadow-xs"
             >
               <span>{t.accessCrm}</span>
               <ArrowRight className="ml-1.5 size-3.5" />
@@ -206,7 +206,7 @@ export function BlogSiteChrome({ locale, alternateHrefs, children }: BlogSiteChr
         <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-2">
-              <img src="/target-logo.png" alt="Target Relocation" className="h-8 w-auto object-contain" />
+              <img src="/target-logo.png" alt="Target Relocation" width={276} height={120} className="h-8 w-auto object-contain" />
               <p className="text-xs text-zinc-500 max-w-md">{t.tagline}</p>
             </div>
             <div className="flex flex-wrap items-center gap-5 text-xs font-medium text-zinc-600">
@@ -219,10 +219,13 @@ export function BlogSiteChrome({ locale, alternateHrefs, children }: BlogSiteChr
               <Link href="/blog/rss.xml" className="hover:text-zinc-950">
                 RSS
               </Link>
-              <Link href="/login" className="hover:text-zinc-950">
+              <Link href={locale === "en" ? "/privacy-policy" : "/politica-de-privacidade"} className="hover:text-zinc-950">
+                {locale === "en" ? "Privacy Policy" : locale === "es" ? "Política de Privacidad" : "Política de Privacidade"}
+              </Link>
+              <Link href="/login" className="hidden lg:inline-flex hover:text-zinc-950">
                 {t.login}
               </Link>
-              <Link href="/crm" className="text-zinc-950 hover:underline">
+              <Link href="/crm" className="hidden lg:inline-flex text-zinc-950 hover:underline">
                 {t.accessCrm}
               </Link>
             </div>
