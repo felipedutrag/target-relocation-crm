@@ -37,9 +37,8 @@ export async function updateSession(request: NextRequest, customHeaders?: Header
   const claims = data?.claims;
 
   if (!claims && request.nextUrl.pathname.startsWith("/crm")) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = "/login";
-    loginUrl.searchParams.set("redirect", request.nextUrl.pathname + request.nextUrl.search);
+    const loginUrl = new URL("/login", request.nextUrl.origin);
+    loginUrl.searchParams.set("redirect", "/crm");
     return NextResponse.redirect(loginUrl);
   }
 

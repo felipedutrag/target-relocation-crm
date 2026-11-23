@@ -17,6 +17,13 @@ function detectHtmlLang(pathname: string): string {
 }
 
 export async function proxy(request: NextRequest) {
+  // If a browser navigation loads a URL containing internal _rsc query parameter, strip it
+  if (request.nextUrl.searchParams.has("_rsc") && !request.headers.get("rsc")) {
+    const cleanUrl = request.nextUrl.clone();
+    cleanUrl.searchParams.delete("_rsc");
+    return NextResponse.redirect(cleanUrl);
+  }
+
   const pathname = request.nextUrl.pathname;
   const htmlLang = detectHtmlLang(pathname);
 
@@ -36,7 +43,15 @@ export async function proxy(request: NextRequest) {
     });
   }
 
-  return await updateSession(request, requestHeaders);
+  const response = await updateSession(request, requestHeaders);
+
+  // Never cache sensitive or dynamic auth and CRM routes
+  if (pathname.startsWith("/login") || pathname.startsWith("/crm") || pathname.startsWith("/oauth")) {
+    response.headers.set("Cache-Control", "private, no-cache, no-store, max-age=0, must-revalidate");
+    response.headers.set("Pragma", "no-cache");
+  }
+
+  return response;
 }
 
 export const config = {
