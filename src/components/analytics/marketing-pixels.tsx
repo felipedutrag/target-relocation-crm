@@ -17,7 +17,7 @@ declare global {
 }
 
 /** Fires conversion events across GA4, Google Ads, and Meta Pixel when a lead completes submission. */
-export function fireLeadConversion(origin?: string) {
+export function fireLeadConversion(origin?: string, { googleAds = true } = {}) {
   if (typeof window === "undefined") return;
   try {
     if (typeof window.gtag === "function") {
@@ -27,9 +27,11 @@ export function fireLeadConversion(origin?: string) {
           event_label: origin || "website",
         });
       }
-      if (GOOGLE_ADS_ID && GOOGLE_ADS_LABEL) {
+      if (googleAds && GOOGLE_ADS_ID && GOOGLE_ADS_LABEL) {
         window.gtag("event", "conversion", {
           send_to: `${GOOGLE_ADS_ID}/${GOOGLE_ADS_LABEL}`,
+          value: 1.0,
+          currency: "BRL",
         });
       }
     }
