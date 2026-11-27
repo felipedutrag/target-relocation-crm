@@ -16,6 +16,19 @@ declare global {
   }
 }
 
+export function fireGoogleAdsConversion() {
+  if (typeof window === "undefined" || !GOOGLE_ADS_ID || !GOOGLE_ADS_LABEL) return;
+  try {
+    window.gtag?.("event", "conversion", {
+      send_to: `${GOOGLE_ADS_ID}/${GOOGLE_ADS_LABEL}`,
+      value: 1.0,
+      currency: "BRL",
+    });
+  } catch {
+    // Tracking must not interrupt navigation or form submission.
+  }
+}
+
 /** Fires conversion events across GA4, Google Ads, and Meta Pixel when a lead completes submission. */
 export function fireLeadConversion(origin?: string, { googleAds = true } = {}) {
   if (typeof window === "undefined") return;
@@ -27,13 +40,7 @@ export function fireLeadConversion(origin?: string, { googleAds = true } = {}) {
           event_label: origin || "website",
         });
       }
-      if (googleAds && GOOGLE_ADS_ID && GOOGLE_ADS_LABEL) {
-        window.gtag("event", "conversion", {
-          send_to: `${GOOGLE_ADS_ID}/${GOOGLE_ADS_LABEL}`,
-          value: 1.0,
-          currency: "BRL",
-        });
-      }
+      if (googleAds) fireGoogleAdsConversion();
     }
     if (typeof window.fbq === "function" && META_PIXEL_ID) {
       window.fbq("track", "Lead", { content_name: origin || "Target Relocation" });
