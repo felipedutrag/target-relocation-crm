@@ -1,10 +1,13 @@
 import { redirect } from "next/navigation";
 import { AppEntry } from "@/components/app-entry";
 import { createClient } from "@/lib/supabase/server";
+import { buildCrmUser } from "@/lib/account-profile";
 
 export const dynamic = "force-dynamic";
 
-export default async function CrmPage() {
+export default async function CrmPage({ searchParams }: {
+  searchParams: Promise<{ tab?: string; notice?: string }>;
+}) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -25,16 +28,13 @@ export default async function CrmPage() {
     redirect("/login");
   }
 
+  const params = await searchParams;
   return (
     <AppEntry
       initialMode="crm"
-      initialUser={{
-        id: user.id,
-        name: member.full_name,
-        email: member.email,
-        role: member.role,
-        crmOwnerName: member.crm_owner_name,
-      }}
+      initialUser={buildCrmUser(user, member)}
+      initialTab={params.tab === "account" ? "account" : undefined}
+      emailConfirmationFailed={params.notice === "email-confirmation-failed"}
     />
   );
 }

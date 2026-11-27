@@ -7,6 +7,8 @@ import { LoginView, type AuthenticatedUser } from "@/components/auth/login-view"
 import { CrmShell } from "@/components/crm/crm-shell";
 import { TargetLandingPage } from "@/components/landing/target-landing-page";
 import type { LandingBlogPreview } from "@/lib/blog-queries";
+import { buildCrmUser } from "@/lib/account-profile";
+import type { CrmTab } from "@/components/crm/types";
 
 export type AppViewMode = "landing" | "login" | "crm";
 
@@ -14,10 +16,14 @@ export function AppEntry({
   initialMode = "landing",
   initialUser = null,
   latestBlogPosts = [],
+  initialTab,
+  emailConfirmationFailed = false,
 }: {
   initialMode?: AppViewMode;
   initialUser?: AuthenticatedUser | null;
   latestBlogPosts?: LandingBlogPreview[];
+  initialTab?: CrmTab;
+  emailConfirmationFailed?: boolean;
 }) {
   const router = useRouter();
   const [mode, setMode] = useState<AppViewMode>(initialMode);
@@ -39,13 +45,7 @@ export function AppEntry({
         .eq("is_active", true)
         .maybeSingle();
       if (member) {
-        setCurrentUser({
-          id: data.user.id,
-          name: member.full_name,
-          email: member.email,
-          role: member.role,
-          crmOwnerName: member.crm_owner_name,
-        });
+        setCurrentUser(buildCrmUser(data.user, member));
       }
     });
   }, [initialMode, initialUser, router]);
@@ -81,7 +81,10 @@ export function AppEntry({
     return (
       <CrmShell
         initialDealId={initialDealId}
+        initialTab={initialTab}
+        emailConfirmationFailed={emailConfirmationFailed}
         currentUser={currentUser}
+        onAccountChange={setCurrentUser}
         onOpenLanding={() => {
           router.push("/");
           setMode("landing");

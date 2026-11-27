@@ -13,6 +13,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { buildCrmUser, type AccountPreferences } from "@/lib/account-profile";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -25,6 +26,8 @@ export interface AuthenticatedUser {
   email: string;
   role: string;
   crmOwnerName?: string | null;
+  pendingEmail?: string | null;
+  preferences?: AccountPreferences;
 }
 
 interface LoginViewProps {
@@ -79,13 +82,7 @@ export function LoginView({ onSuccess, onBackToLanding }: LoginViewProps) {
         return;
       }
 
-      onSuccess({
-        id: data.user.id,
-        name: member.full_name,
-        email: member.email,
-        role: member.role,
-        crmOwnerName: member.crm_owner_name,
-      });
+      onSuccess(buildCrmUser(data.user, member));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro inesperado ao conectar ao Supabase Auth.");
     } finally {

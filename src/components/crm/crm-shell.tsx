@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import {
-  Activity,
   ArrowRight,
   BarChart3,
   BookOpen,
@@ -26,6 +25,7 @@ import {
   Search,
   Sparkles,
   Sun,
+  UserRound,
   Users,
   X,
 } from "lucide-react";
@@ -64,6 +64,8 @@ import { EmailMarketingView } from "./email-marketing-view";
 import { AnalyticsView } from "./analytics-view";
 import { AiSettingsDialog } from "./ai-settings-dialog";
 import { PromptStudioView } from "./prompt-studio-view";
+import { AccountView } from "./account-view";
+import { ACCOUNT_ACCENTS, accountInitials } from "@/lib/account-profile";
 
 interface SearchOrg {
   id: number;
@@ -180,6 +182,13 @@ const NAV_ITEMS: NavItem[] = [
     icon: Sparkles,
   },
   {
+    id: "account",
+    label: "Minha conta",
+    subtitle: "Perfil, acesso e preferências",
+    keywords: "minha conta perfil email senha tema avatar preferencias configuração segurança",
+    icon: UserRound,
+  },
+  {
     id: "editorial",
     label: "Blog & Editorial",
     subtitle: "GEO/SEO + 24 pautas + 1→4 canais",
@@ -256,18 +265,27 @@ const GLOBAL_SCOPES: { id: GlobalSearchScope; label: string }[] = [
 
 export interface CrmShellProps {
   initialDealId?: number | null;
+  initialTab?: CrmTab;
+  emailConfirmationFailed?: boolean;
   currentUser?: AuthenticatedUser | null;
+  onAccountChange?: (user: AuthenticatedUser) => void;
   onOpenLanding?: () => void;
   onLogout?: () => void;
 }
 
 export function CrmShell({
   initialDealId = null,
+  initialTab,
+  emailConfirmationFailed = false,
   currentUser = null,
+  onAccountChange,
   onOpenLanding,
   onLogout,
 }: CrmShellProps) {
-  const [activeTab, setActiveTab] = useState<CrmTab>("overview");
+  const [activeTab, setActiveTab] = useState<CrmTab>(initialTab ?? currentUser?.preferences?.startTab ?? "overview");
+  const accountTheme = currentUser?.preferences?.theme;
+  const accountName = currentUser?.preferences?.displayName || currentUser?.name || "Minha conta";
+  const accountAccent = ACCOUNT_ACCENTS[currentUser?.preferences?.accent ?? "amber"];
   const [selectedDealId, setSelectedDealId] = useState<number | null>(initialDealId);
   const [selectedOrgId, setSelectedOrgId] = useState<number | null>(null);
   const [selectedPersonId, setSelectedPersonId] = useState<number | null>(null);
@@ -317,6 +335,17 @@ export function CrmShell({
   }, []);
 
   useEffect(() => {
+    if (accountTheme === "system") {
+      const system = window.matchMedia("(prefers-color-scheme: dark)");
+      const update = () => applyTheme(system.matches);
+      update();
+      system.addEventListener("change", update);
+      return () => system.removeEventListener("change", update);
+    }
+    if (accountTheme === "dark" || accountTheme === "light") {
+      applyTheme(accountTheme === "dark");
+      return;
+    }
     try {
       const saved = localStorage.getItem("target_crm_theme");
       if (saved === "dark" || saved === "light") {
@@ -327,7 +356,7 @@ export function CrmShell({
       // ignore
     }
     setIsDark(document.documentElement.classList.contains("dark"));
-  }, [applyTheme]);
+  }, [accountTheme, applyTheme]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -692,15 +721,17 @@ export function CrmShell({
       <Separator />
 
       <div className="flex items-center justify-between gap-2 p-3">
-        <div className="min-w-0">
-          <div className="flex items-center gap-1.5 text-xs font-medium text-foreground truncate">
-            <Activity className="size-3 text-emerald-500 shrink-0" />
-            <span className="truncate">{currentUser?.name || "Klaus Müller"}</span>
-          </div>
-          <div className="truncate font-mono text-[10px] text-muted-foreground">
-            {currentUser?.role || "24.534 registros"}
-          </div>
-        </div>
+        <button type="button" className="flex min-w-0 flex-1 items-center gap-2 rounded-md p-1 text-left transition-colors hover:bg-muted"
+          onClick={() => handleNavigate("account")} aria-label="Abrir Minha conta">
+          <span className="grid size-7 shrink-0 place-items-center rounded-md text-[10px] font-semibold"
+            style={{ backgroundColor: accountAccent.color, color: accountAccent.darkText ? "#171717" : "#fff" }}>
+            {accountInitials(accountName)}
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate text-xs font-medium">{accountName}</span>
+            <span className="block truncate text-[10px] text-muted-foreground">Minha conta</span>
+          </span>
+        </button>
         <div className="flex items-center gap-1 shrink-0">
           {onLogout && (
             <Button
@@ -914,6 +945,9 @@ export function CrmShell({
               <AiChatView onOpenAiSettings={() => setAiSettingsOpen(true)} />
             )}
             {activeTab === "ai_prompts" && <PromptStudioView />}
+            {activeTab === "account" && currentUser && onAccountChange && (
+              <AccountView key={currentUser.id} user={currentUser} onChange={onAccountChange} emailConfirmationFailed={emailConfirmationFailed} />
+            )}
             {activeTab === "editorial" && (
               <EditorialBlogView onOpenAiSettings={() => setAiSettingsOpen(true)} />
             )}
