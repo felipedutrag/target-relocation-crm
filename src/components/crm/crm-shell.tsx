@@ -10,7 +10,6 @@ import {
   Building2,
   CalendarClock,
   FileSpreadsheet,
-  Flag,
   FolderUp,
   Globe,
   Kanban,
@@ -59,7 +58,6 @@ import { DealDossierSheet } from "./deal-dossier-sheet";
 import { AiChatView } from "./ai-chat-view";
 import { EditorialBlogView } from "./editorial-blog-view";
 import { SdrOperationsView } from "./sdr-operations-view";
-import { GrowthPlanView } from "./growth-plan-view";
 import { EmailMarketingView } from "./email-marketing-view";
 import { AnalyticsView } from "./analytics-view";
 import { AiSettingsDialog } from "./ai-settings-dialog";
@@ -223,15 +221,6 @@ const NAV_ITEMS: NavItem[] = [
     badge: "40/8",
     section: "growth",
     icon: PhoneCall,
-  },
-  {
-    id: "growth_plan",
-    label: "Plano 30d & GEO",
-    subtitle: "Cronograma 30d, Checklist, Ads & KPIs",
-    keywords: "plano 30 dias checklist google ads negativas linkedin abm geo 10 perguntas kpis",
-    badge: "30d",
-    section: "growth",
-    icon: Flag,
   },
 ];
 
@@ -960,9 +949,6 @@ export function CrmShell({
                 onOpenDeal={setSelectedDealId}
                 onOpenAiSettings={() => setAiSettingsOpen(true)}
               />
-            )}
-            {activeTab === "growth_plan" && (
-              <GrowthPlanView onOpenAiSettings={() => setAiSettingsOpen(true)} />
             )}
           </div>
         </main>

@@ -13,8 +13,7 @@ export type CrmTab =
   | "editorial"
   | "email_marketing"
   | "analytics"
-  | "sdr_ops"
-  | "growth_plan";
+  | "sdr_ops";
 
 export interface Pipeline {
   id: number;
