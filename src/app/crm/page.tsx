@@ -33,7 +33,7 @@ export default async function CrmPage({ searchParams }: {
     <AppEntry
       initialMode="crm"
       initialUser={buildCrmUser(user, member)}
-      initialTab={params.tab === "account" ? "account" : params.tab === "whatsapp-demo" ? "whatsapp_demo" : undefined}
+      initialTab={params.tab === "account" ? "account" : ["whatsapp", "whatsapp-demo"].includes(params.tab ?? "") ? "whatsapp_inbox" : undefined}
       emailConfirmationFailed={params.notice === "email-confirmation-failed"}
     />
   );

@@ -64,7 +64,7 @@ import { AnalyticsView } from "./analytics-view";
 import { AiSettingsDialog } from "./ai-settings-dialog";
 import { PromptStudioView } from "./prompt-studio-view";
 import { AccountView } from "./account-view";
-import { WhatsAppDemoView } from "./whatsapp-demo-view";
+import { WhatsAppInboxView } from "./whatsapp-inbox-view";
 import { ACCOUNT_ACCENTS, accountInitials } from "@/lib/account-profile";
 
 interface SearchOrg {
@@ -189,10 +189,10 @@ const NAV_ITEMS: NavItem[] = [
     icon: UserRound,
   },
   {
-    id: "whatsapp_demo",
-    label: "WhatsApp · Demonstração",
-    subtitle: "Conversas fictícias da Sara e do Anderley",
-    keywords: "whatsapp demonstracao sara anderley atendimento historico chat simulacao",
+    id: "whatsapp_inbox",
+    label: "WhatsApp",
+    subtitle: "Conversas do Anderley",
+    keywords: "whatsapp anderley atendimento historico chat",
     section: "growth",
     icon: MessageCircle,
   },
@@ -757,7 +757,7 @@ export function CrmShell({
     </div>
   );
 
-  const isFullHeightTab = activeTab === "ai_chat";
+  const isFullHeightTab = activeTab === "ai_chat" || activeTab === "whatsapp_inbox";
 
   return (
     <div
@@ -944,7 +944,7 @@ export function CrmShell({
               <AiChatView onOpenAiSettings={() => setAiSettingsOpen(true)} />
             )}
             {activeTab === "ai_prompts" && <PromptStudioView />}
-            {activeTab === "whatsapp_demo" && <WhatsAppDemoView />}
+            {activeTab === "whatsapp_inbox" && <WhatsAppInboxView />}
             {activeTab === "account" && currentUser && onAccountChange && (
               <AccountView key={currentUser.id} user={currentUser} onChange={onAccountChange} emailConfirmationFailed={emailConfirmationFailed} />
             )}

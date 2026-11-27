@@ -9,7 +9,7 @@ export type CrmTab =
   | "import"
   | "ai_chat"
   | "ai_prompts"
-  | "whatsapp_demo"
+  | "whatsapp_inbox"
   | "account"
   | "editorial"
   | "email_marketing"
