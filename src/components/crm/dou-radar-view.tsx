@@ -51,6 +51,13 @@ interface DouRadarViewProps {
 }
 
 export function DouRadarView({ onOpenDeal }: DouRadarViewProps) {
+  const [researchQuery, setResearchQuery] = useState("");
+  const [researching, setResearching] = useState(false);
+  const [researchResult, setResearchResult] = useState<{
+    answer: string;
+    sources: Array<{ url: string; title: string }>;
+  } | null>(null);
+  const [researchError, setResearchError] = useState("");
   const [search, setSearch] = useState("");
   const [minScore, setMinScore] = useState("all");
   const [stageId, setStageId] = useState("all");
@@ -98,6 +105,27 @@ export function DouRadarView({ onOpenDeal }: DouRadarViewProps) {
     return () => clearTimeout(t);
   }, [loadDou]);
 
+  async function researchDou(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setResearching(true);
+    setResearchError("");
+    setResearchResult(null);
+    try {
+      const response = await fetch("/api/dou/research", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: researchQuery }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Não foi possível pesquisar.");
+      setResearchResult(result);
+    } catch (error) {
+      setResearchError(error instanceof Error ? error.message : "Não foi possível pesquisar.");
+    } finally {
+      setResearching(false);
+    }
+  }
+
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -111,6 +139,45 @@ export function DouRadarView({ onOpenDeal }: DouRadarViewProps) {
           </p>
         </div>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Otávio · Pesquisa no DOU</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <form onSubmit={researchDou} className="flex flex-wrap gap-2">
+            <Input
+              className="min-w-52 flex-1"
+              aria-label="Consulta ao Diário Oficial"
+              placeholder="Empresa, tipo de ato ou período"
+              maxLength={250}
+              value={researchQuery}
+              onChange={(event) => setResearchQuery(event.target.value)}
+            />
+            <Button type="submit" disabled={researching}>
+              {researching ? "Pesquisando…" : "Pesquisar no DOU"}
+            </Button>
+          </form>
+          {researching && <p role="status" className="text-sm text-muted-foreground">Consultando fontes oficiais.</p>}
+          {researchError && <p role="alert" className="text-sm text-destructive">{researchError}</p>}
+          {researchResult && (
+            <div className="space-y-3 text-sm" aria-live="polite">
+              <p className="whitespace-pre-wrap">{researchResult.answer}</p>
+              {researchResult.sources.length > 0 && (
+                <ul className="space-y-1">
+                  {researchResult.sources.map((source) => (
+                    <li key={source.url}>
+                      <a href={source.url} target="_blank" rel="noreferrer" className="underline">
+                        {source.title}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
