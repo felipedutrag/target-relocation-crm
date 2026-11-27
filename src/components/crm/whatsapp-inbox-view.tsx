@@ -5,6 +5,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { WhatsAppConnectionDialog } from "./whatsapp-connection-dialog";
 
 type Conversation = { id: string; body: string; timestamp: number };
 type Message = { id: string; role: "contact" | "anderley"; body: string; timestamp: number };
@@ -77,6 +78,7 @@ export function WhatsAppInboxView() {
               <RefreshCw className="size-4" />
             </Button>
           </div>
+          <WhatsAppConnectionDialog />
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input className="pl-9" aria-label="Buscar conversas" placeholder="Buscar conversas" value={query} onChange={event => setQuery(event.target.value)} />
