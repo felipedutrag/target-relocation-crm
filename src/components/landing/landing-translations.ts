@@ -16,7 +16,6 @@ export interface LandingCopy {
     insights: string;
     faq: string;
     login: string;
-    accessCrm: string;
     languageLabel: string;
     mobileLinks: [string, string][];
   };
@@ -190,7 +189,6 @@ export const LANDING_COPY: Record<LandingLocale, LandingCopy> = {
       insights: "Insights",
       faq: "FAQ",
       login: "Login",
-      accessCrm: "Open CRM",
       languageLabel: "Language",
       mobileLinks: [
         ["#servicos", "Corporate Solutions"],
@@ -613,7 +611,6 @@ export const LANDING_COPY: Record<LandingLocale, LandingCopy> = {
       insights: "Insights",
       faq: "FAQ",
       login: "Login",
-      accessCrm: "Abrir CRM",
       languageLabel: "Idioma",
       mobileLinks: [
         ["#servicos", "Soluciones Corporativas"],
@@ -1036,7 +1033,6 @@ export const LANDING_COPY: Record<LandingLocale, LandingCopy> = {
       insights: "Insights",
       faq: "FAQ",
       login: "Login",
-      accessCrm: "Acessar CRM",
       languageLabel: "Idioma",
       mobileLinks: [
         ["#servicos", "Soluções Corporativas"],

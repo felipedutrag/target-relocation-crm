@@ -299,14 +299,6 @@ export function TargetLandingPage({
               {t.nav.login}
             </Button>
             <Button
-              size="sm"
-              onClick={() => handleEnterCrm()}
-              className="hidden lg:inline-flex h-8 rounded-lg bg-zinc-950 px-3.5 text-xs font-medium text-white hover:bg-zinc-800 cursor-pointer shadow-xs"
-            >
-              <span>{t.nav.accessCrm}</span>
-              <ArrowRight className="ml-1.5 size-3.5" />
-            </Button>
-            <Button
               size="icon"
               variant="ghost"
               aria-label="Menu"
