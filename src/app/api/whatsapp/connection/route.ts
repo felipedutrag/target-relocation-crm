@@ -1,3 +1,4 @@
+import { isWhatsAppAgent } from "@/lib/whatsapp-agents";
 import { requireWorkspaceUser } from "@/lib/supabase/server";
 
 async function connection(request: Request) {
@@ -10,13 +11,17 @@ async function connection(request: Request) {
     return Response.json({ error: "Solicitação de pareamento inválida." }, { status: 403 });
   }
 
+  const agent = new URL(request.url).searchParams.get("agent") ?? "anderley";
+  if (!isWhatsAppAgent(agent)) return Response.json({ error: "Agente inválido." }, { status: 400 });
   const syncUrl = process.env.ANDERLEY_PROMPT_SYNC_URL;
   const secret = process.env.ANDERLEY_PROMPT_SYNC_SECRET;
-  const unavailable = () => Response.json({ error: "A conexão do Anderley está indisponível. Tente novamente." }, { status: 503 });
+  const unavailable = () => Response.json({ error: "A conexão do WhatsApp está indisponível. Tente novamente." }, { status: 503 });
   if (!syncUrl || !secret) return unavailable();
 
   try {
-    const response = await fetch(new URL("/internal/connection", syncUrl), {
+    const url = new URL("/internal/connection", syncUrl);
+    url.searchParams.set("agent", agent);
+    const response = await fetch(url, {
       method: request.method,
       headers: { Authorization: secret },
       cache: "no-store",

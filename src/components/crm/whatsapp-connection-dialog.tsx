@@ -5,11 +5,13 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
+import { WHATSAPP_AGENTS, type WhatsAppAgent } from "@/lib/whatsapp-agents";
+
 type Status = "open" | "connecting" | "close";
 type Connection = { state: Status; qr?: string | null; error?: string };
 
-async function readConnection(signal: AbortSignal, pair = false): Promise<Connection> {
-  const response = await fetch("/api/whatsapp/connection", {
+async function readConnection(agent: WhatsAppAgent, signal: AbortSignal, pair = false): Promise<Connection> {
+  const response = await fetch("/api/whatsapp/connection?agent=" + agent, {
     method: pair ? "POST" : "GET",
     headers: pair ? { "X-Target-Action": "pair-whatsapp" } : {},
     cache: "no-store",
@@ -20,7 +22,7 @@ async function readConnection(signal: AbortSignal, pair = false): Promise<Connec
   return result;
 }
 
-export function WhatsAppConnectionDialog() {
+export function WhatsAppConnectionDialog({ agent }: { agent: WhatsAppAgent }) {
   const [open, setOpen] = useState(false);
   const [state, setState] = useState<Status | null>(null);
   const [qr, setQr] = useState<string | null>(null);
@@ -35,7 +37,7 @@ export function WhatsAppConnectionDialog() {
     let timer: ReturnType<typeof setTimeout>;
     async function poll() {
       try {
-        const connection = await readConnection(abort.signal);
+        const connection = await readConnection(agent, abort.signal);
         if (abort.signal.aborted) return;
         setState(connection.state);
         setCanPair(true);
@@ -51,7 +53,7 @@ export function WhatsAppConnectionDialog() {
     }
     void poll();
     return () => { abort.abort(); clearTimeout(timer); pairing.current?.abort(); };
-  }, [open]);
+  }, [agent, open]);
 
   function changeOpen(next: boolean) {
     if (!next) {
@@ -71,7 +73,7 @@ export function WhatsAppConnectionDialog() {
     setError("");
     setQr(null);
     try {
-      const connection = await readConnection(abort.signal, true);
+      const connection = await readConnection(agent, abort.signal, true);
       if (abort.signal.aborted) return;
       setState(connection.state);
       setQr(connection.qr ?? null);
@@ -95,7 +97,7 @@ export function WhatsAppConnectionDialog() {
       </DialogTrigger>
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>WhatsApp do Anderley</DialogTitle>
+          <DialogTitle>WhatsApp · {WHATSAPP_AGENTS[agent]}</DialogTitle>
           <DialogDescription>
             Abra o WhatsApp no celular e acesse Aparelhos conectados → Conectar um aparelho.
           </DialogDescription>
@@ -109,7 +111,7 @@ export function WhatsAppConnectionDialog() {
             {qr && (
               <div className="mx-auto w-full max-w-[250px] rounded-xl bg-white p-3">
                 {/* eslint-disable-next-line @next/next/no-img-element -- a Evolution fornece um PNG temporário como data URL. */}
-                <img src={qr} width={226} height={226} className="block h-auto w-full" alt="Código QR para conectar o WhatsApp do Anderley" />
+                <img src={qr} width={226} height={226} className="block h-auto w-full" alt={"Código QR para conectar o WhatsApp · " + WHATSAPP_AGENTS[agent]} />
               </div>
             )}
             {error && <p role="alert" className="text-sm text-destructive">{error}</p>}

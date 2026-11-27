@@ -193,8 +193,8 @@ const NAV_ITEMS: NavItem[] = [
   {
     id: "whatsapp_inbox",
     label: "WhatsApp",
-    subtitle: "Conversas do Anderley",
-    keywords: "whatsapp anderley atendimento historico chat",
+    subtitle: "Conversas por número",
+    keywords: "whatsapp anderley aurea sara atendimento historico chat",
     section: "growth",
     icon: MessageCircle,
   },

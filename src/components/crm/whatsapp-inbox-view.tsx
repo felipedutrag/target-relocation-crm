@@ -5,10 +5,11 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { isWhatsAppAgent, WHATSAPP_AGENTS, type WhatsAppAgent } from "@/lib/whatsapp-agents";
 import { WhatsAppConnectionDialog } from "./whatsapp-connection-dialog";
 
 type Conversation = { id: string; body: string; timestamp: number };
-type Message = { id: string; role: "contact" | "anderley"; body: string; timestamp: number };
+type Message = { id: string; role: "contact" | "anderley" | "agent"; body: string; timestamp: number };
 type Feed<T> = { path: string | null; items: T[]; error: string };
 
 const time = new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" });
@@ -47,13 +48,15 @@ function useFeed<T>(path: string | null, refresh: number) {
 }
 
 export function WhatsAppInboxView() {
+  const [agent, setAgent] = useState<WhatsAppAgent>("anderley");
   const [selection, setSelection] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [refresh, setRefresh] = useState(0);
   const scroll = useRef<HTMLDivElement>(null);
   const follow = useRef(true);
-  const list = useFeed<Conversation>("/api/whatsapp/conversations", refresh);
-  const detail = useFeed<Message>(selection ? "/api/whatsapp/conversations?conversation=" + encodeURIComponent(selection) : null, refresh);
+  const feedUrl = "/api/whatsapp/conversations?agent=" + agent;
+  const list = useFeed<Conversation>(feedUrl, refresh);
+  const detail = useFeed<Message>(selection ? feedUrl + "&conversation=" + encodeURIComponent(selection) : null, refresh);
   const lastMessage = detail.items.at(-1)?.id;
   const search = query.trim().toLowerCase();
   const filtered = list.items.filter(item => (contactName(item.id) + " " + item.body).toLowerCase().includes(search));
@@ -73,12 +76,27 @@ export function WhatsAppInboxView() {
         selection ? "hidden" : "flex")}>
         <div className="shrink-0 space-y-3 border-b border-border/60 p-4">
           <div className="flex items-center justify-between gap-2">
-            <h2 className="text-sm font-semibold">Conversas do Anderley</h2>
+            <h2 className="text-sm font-semibold">Conversas</h2>
             <Button variant="ghost" size="icon" aria-label="Atualizar conversas" onClick={() => setRefresh(value => value + 1)}>
               <RefreshCw className="size-4" />
             </Button>
           </div>
-          <WhatsAppConnectionDialog />
+          <div className="grid grid-cols-3 gap-1 rounded-lg bg-muted p-1" role="group" aria-label="Canal de WhatsApp">
+            {Object.entries(WHATSAPP_AGENTS).map(([key, label]) => (
+              <button key={key} type="button" aria-pressed={agent === key}
+                className={cn("rounded-md px-1 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground",
+                  agent === key && "bg-background text-foreground shadow-sm")}
+                onClick={() => {
+                  if (!isWhatsAppAgent(key) || agent === key) return;
+                  setAgent(key);
+                  openConversation(null);
+                  setQuery("");
+                }}>
+                {label}
+              </button>
+            ))}
+          </div>
+          <WhatsAppConnectionDialog key={agent} agent={agent} />
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input className="pl-9" aria-label="Buscar conversas" placeholder="Buscar conversas" value={query} onChange={event => setQuery(event.target.value)} />
@@ -123,7 +141,7 @@ export function WhatsAppInboxView() {
                 {detail.loading && <p role="status" className="text-sm text-muted-foreground">Carregando histórico…</p>}
                 {!detail.loading && !detail.error && !detail.items.length && <p className="text-sm text-muted-foreground">Nenhuma mensagem no histórico.</p>}
                 {detail.items.map((message, index) => {
-                  const fromAnderley = message.role === "anderley";
+                  const fromAgent = message.role !== "contact";
                   const day = date.format(message.timestamp);
                   const previous = detail.items[index - 1];
                   return (
@@ -131,10 +149,10 @@ export function WhatsAppInboxView() {
                       {(!previous || date.format(previous.timestamp) !== day) && (
                         <div className="mb-5 text-center text-xs text-muted-foreground">{day}</div>
                       )}
-                      <div className={cn("flex items-start gap-2", !fromAnderley && "justify-end")}>
-                        {fromAnderley && <span className="grid size-7 shrink-0 place-items-center rounded-full bg-muted"><Bot className="size-4" /></span>}
-                        <div className={cn("min-w-0 max-w-[85%] rounded-2xl px-3.5 py-2.5", fromAnderley ? "border border-border/60" : "bg-muted")}>
-                          {fromAnderley && <p className="mb-1 text-xs font-semibold">Anderley</p>}
+                      <div className={cn("flex items-start gap-2", !fromAgent && "justify-end")}>
+                        {fromAgent && <span className="grid size-7 shrink-0 place-items-center rounded-full bg-muted"><Bot className="size-4" /></span>}
+                        <div className={cn("min-w-0 max-w-[85%] rounded-2xl px-3.5 py-2.5", fromAgent ? "border border-border/60" : "bg-muted")}>
+                          {fromAgent && <p className="mb-1 text-xs font-semibold">{WHATSAPP_AGENTS[agent]}</p>}
                           <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">{message.body}</p>
                           <time className="mt-1 block text-right text-[11px] text-muted-foreground">{time.format(message.timestamp)}</time>
                         </div>
