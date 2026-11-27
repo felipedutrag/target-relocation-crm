@@ -1,5 +1,7 @@
 "use client";
 
+import { useCrmFetch, useCrmRead } from "@/lib/crm-cache";
+
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ChevronLeft,
@@ -66,6 +68,8 @@ interface PeopleViewProps {
 }
 
 export function PeopleView({ onOpenDeal, initialSelectedId = null }: PeopleViewProps) {
+  const crmFetch = useCrmFetch();
+  const readCrm = useCrmRead();
   const [search, setSearch] = useState("");
   const [label, setLabel] = useState("all");
   const [page, setPage] = useState(1);
@@ -99,15 +103,15 @@ export function PeopleView({ onOpenDeal, initialSelectedId = null }: PeopleViewP
     try {
       const qs = new URLSearchParams({ page: String(page), limit: "30", label });
       if (search.trim()) qs.set("search", search.trim());
-      const res = await fetch(`/api/people?${qs.toString()}`);
-      const json = await res.json();
-      setPeople(json.people || []);
-      setTotal(json.total || 0);
-      setTotalPages(json.totalPages || 1);
+      await readCrm(`/api/people?${qs.toString()}`, json => {
+        setPeople(json.people || []);
+        setTotal(json.total || 0);
+        setTotalPages(json.totalPages || 1);
+      });
     } finally {
       setLoading(false);
     }
-  }, [search, label, page]);
+  }, [readCrm, search, label, page]);
 
   useEffect(() => {
     const t = setTimeout(loadPeople, 160);
@@ -119,14 +123,14 @@ export function PeopleView({ onOpenDeal, initialSelectedId = null }: PeopleViewP
       setDetail(null);
       return;
     }
-    fetch(`/api/people/${selectedId}`)
+    crmFetch(`/api/people/${selectedId}`)
       .then((r) => r.json())
       .then((d) => setDetail(d));
   }, [selectedId]);
 
   async function handleCreate() {
     if (!newName.trim()) return;
-    await fetch("/api/people", {
+    await crmFetch("/api/people", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: newName, email: newEmail, phone: newPhone, org_name: newOrg }),

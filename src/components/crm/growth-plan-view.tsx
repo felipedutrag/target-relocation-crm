@@ -1,5 +1,7 @@
 "use client";
 
+import { useCrmFetch, useCrmRead } from "@/lib/crm-cache";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
@@ -118,6 +120,8 @@ function getMilestoneBadgeProps(status: string, dueDay: number) {
 }
 
 export function GrowthPlanView({ onOpenAiSettings }: { onOpenAiSettings: () => void }) {
+  const crmFetch = useCrmFetch();
+  const readCrm = useCrmRead();
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [campaigns, setCampaigns] = useState<AdsCampaign[]>([]);
   const [geoTests, setGeoTests] = useState<GeoTest[]>([]);
@@ -143,18 +147,18 @@ export function GrowthPlanView({ onOpenAiSettings }: { onOpenAiSettings: () => v
 
   const loadData = useCallback(async () => {
     try {
-      const res = await fetch("/api/growth");
-      const json = await res.json();
-      setMilestones(json.milestones || []);
-      setCampaigns(json.campaigns || []);
-      setGeoTests(json.geoTests || []);
-      setKpis(json.kpis || []);
-      setPublishedPostsCount(json.publishedPostsCount || 0);
-      if (json.checklistMetrics) setMetrics(json.checklistMetrics);
+      await readCrm("/api/growth", json => {
+        setMilestones(json.milestones || []);
+        setCampaigns(json.campaigns || []);
+        setGeoTests(json.geoTests || []);
+        setKpis(json.kpis || []);
+        setPublishedPostsCount(json.publishedPostsCount || 0);
+        if (json.checklistMetrics) setMetrics(json.checklistMetrics);
+      });
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [readCrm]);
 
   useEffect(() => {
     loadData();
@@ -162,7 +166,7 @@ export function GrowthPlanView({ onOpenAiSettings }: { onOpenAiSettings: () => v
 
   async function cycleMilestoneStatus(m: Milestone) {
     const next = m.status === "completed" ? "pending" : m.status === "in_progress" ? "completed" : "in_progress";
-    await fetch("/api/growth", {
+    await crmFetch("/api/growth", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "toggle_milestone", id: m.id, status: next }),
@@ -171,7 +175,7 @@ export function GrowthPlanView({ onOpenAiSettings }: { onOpenAiSettings: () => v
   }
 
   async function toggleAdsField(action: "toggle_ads_approval" | "toggle_conversion", id: number) {
-    await fetch("/api/growth", {
+    await crmFetch("/api/growth", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action, id }),
@@ -182,7 +186,7 @@ export function GrowthPlanView({ onOpenAiSettings }: { onOpenAiSettings: () => v
   async function addNegative(id: number) {
     const kw = (newNegative[id] || "").trim();
     if (!kw) return;
-    await fetch("/api/growth", {
+    await crmFetch("/api/growth", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "add_negative_keyword", id, keyword: kw }),
@@ -195,7 +199,7 @@ export function GrowthPlanView({ onOpenAiSettings }: { onOpenAiSettings: () => v
     setAuditingAds(true);
     setBanner(null);
     try {
-      const res = await fetch("/api/growth", {
+      const res = await crmFetch("/api/growth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "audit_ads_ai", search_terms: searchTermsAuditInput }),
@@ -213,7 +217,7 @@ export function GrowthPlanView({ onOpenAiSettings }: { onOpenAiSettings: () => v
   }
 
   async function toggleGeoPlatform(id: number, field: string, currentVal: boolean) {
-    await fetch("/api/growth", {
+    await crmFetch("/api/growth", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "update_geo_platforms", id, [field]: !currentVal }),
@@ -225,7 +229,7 @@ export function GrowthPlanView({ onOpenAiSettings }: { onOpenAiSettings: () => v
     setRunningGeoId(id);
     setBanner(null);
     try {
-      const res = await fetch("/api/growth", {
+      const res = await crmFetch("/api/growth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "run_geo_test", id }),

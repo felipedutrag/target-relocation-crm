@@ -1,5 +1,7 @@
 "use client";
 
+import { useCrmFetch, useCrmRead } from "@/lib/crm-cache";
+
 import { useCallback, useEffect, useState } from "react";
 import {
   Award,
@@ -86,6 +88,8 @@ export function SdrOperationsView({
   onOpenDeal: (dealId: number) => void;
   onOpenAiSettings: () => void;
 }) {
+  const crmFetch = useCrmFetch();
+  const readCrm = useCrmRead();
   const [today, setToday] = useState("");
   const [logs, setLogs] = useState<SdrDailyLog[]>([]);
   const [audits, setAudits] = useState<CallAudit[]>([]);
@@ -113,22 +117,22 @@ export function SdrOperationsView({
   const [savingMeet, setSavingMeet] = useState(false);
 
   const loadData = useCallback(async () => {
-    const res = await fetch("/api/sdr");
-    const json = await res.json();
-    setToday(json.today || new Date().toISOString().slice(0, 10));
-    setLogs(json.logs || []);
-    setAudits(json.audits || []);
-    setMeetings(json.meetings || []);
-    setDouQueue(json.douQueue || []);
-    setInboundQueue(json.inboundQueue || []);
-  }, []);
+    await readCrm("/api/sdr", json => {
+      setToday(json.today || new Date().toISOString().slice(0, 10));
+      setLogs(json.logs || []);
+      setAudits(json.audits || []);
+      setMeetings(json.meetings || []);
+      setDouQueue(json.douQueue || []);
+      setInboundQueue(json.inboundQueue || []);
+    });
+  }, [readCrm]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
 
   async function incrementScore(sdrName: string, field: string, delta = 1) {
-    await fetch("/api/sdr", {
+    await crmFetch("/api/sdr", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "increment_log", log_date: today, sdr_name: sdrName, field, delta }),
@@ -142,7 +146,7 @@ export function SdrOperationsView({
     setCapturing(true);
     setBanner(null);
     try {
-      const res = await fetch("/api/sdr", {
+      const res = await crmFetch("/api/sdr", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -173,7 +177,7 @@ export function SdrOperationsView({
     setAuditing(true);
     setBanner(null);
     try {
-      const res = await fetch("/api/sdr", {
+      const res = await crmFetch("/api/sdr", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -202,7 +206,7 @@ export function SdrOperationsView({
     e.preventDefault();
     setSavingMeet(true);
     try {
-      await fetch("/api/sdr", {
+      await crmFetch("/api/sdr", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

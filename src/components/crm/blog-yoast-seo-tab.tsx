@@ -1,5 +1,7 @@
 "use client";
 
+import { useCrmFetch } from "@/lib/crm-cache";
+
 import { useMemo, useState } from "react";
 import {
   CheckCircle2,
@@ -133,6 +135,7 @@ export function BlogYoastSeoTab({
   onOpenAiSettings: () => void;
   onReload: () => Promise<void>;
 }) {
+  const crmFetch = useCrmFetch();
   const [search, setSearch] = useState("");
   const [gradeFilter, setGradeFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -234,7 +237,7 @@ export function BlogYoastSeoTab({
     setFaqSchema([]);
 
     try {
-      const res = await fetch(`/api/blog/${encodeURIComponent(post.slug)}?scope=all`);
+      const res = await crmFetch(`/api/blog/${encodeURIComponent(post.slug)}?scope=all`);
       const json = await res.json();
       if (res.ok && json.post) {
         const full = json.post as FullBlogPost;
@@ -284,7 +287,7 @@ export function BlogYoastSeoTab({
     setOptimizingAi(true);
     setModalNotice(null);
     try {
-      const res = await fetch(`/api/blog/${encodeURIComponent(editingPost.slug)}`, {
+      const res = await crmFetch(`/api/blog/${encodeURIComponent(editingPost.slug)}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "optimize_seo" }),
@@ -312,7 +315,7 @@ export function BlogYoastSeoTab({
     setSaving(true);
     setModalNotice(null);
     try {
-      const res = await fetch(`/api/blog/${encodeURIComponent(editingPost.slug)}`, {
+      const res = await crmFetch(`/api/blog/${encodeURIComponent(editingPost.slug)}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

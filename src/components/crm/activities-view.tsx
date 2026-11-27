@@ -1,5 +1,7 @@
 "use client";
 
+import { useCrmFetch, useCrmRead } from "@/lib/crm-cache";
+
 import React, { useCallback, useEffect, useState } from "react";
 import {
   Calendar,
@@ -35,6 +37,8 @@ interface ActivitiesViewProps {
 }
 
 export function ActivitiesView({ onOpenDeal }: ActivitiesViewProps) {
+  const crmFetch = useCrmFetch();
+  const readCrm = useCrmRead();
   const [doneFilter, setDoneFilter] = useState("0");
   const [typeFilter, setTypeFilter] = useState("all");
   const [periodFilter, setPeriodFilter] = useState("all");
@@ -74,16 +78,16 @@ export function ActivitiesView({ onOpenDeal }: ActivitiesViewProps) {
         limit: "35",
       });
       if (search.trim()) qs.set("search", search.trim());
-      const res = await fetch(`/api/activities?${qs.toString()}`);
-      const json = await res.json();
-      setActivities(json.activities || []);
-      if (json.summary) setSummary(json.summary);
-      setTotal(json.total || 0);
-      setTotalPages(json.totalPages || 1);
+      await readCrm(`/api/activities?${qs.toString()}`, json => {
+        setActivities(json.activities || []);
+        if (json.summary) setSummary(json.summary);
+        setTotal(json.total || 0);
+        setTotalPages(json.totalPages || 1);
+      });
     } finally {
       setLoading(false);
     }
-  }, [doneFilter, typeFilter, periodFilter, ownerFilter, search, page]);
+  }, [readCrm, doneFilter, typeFilter, periodFilter, ownerFilter, search, page]);
 
   useEffect(() => {
     const t = setTimeout(loadActivities, 150);
@@ -91,7 +95,7 @@ export function ActivitiesView({ onOpenDeal }: ActivitiesViewProps) {
   }, [loadActivities]);
 
   async function toggleDone(act: ActivityRecord) {
-    await fetch("/api/activities", {
+    await crmFetch("/api/activities", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: act.id, done: !act.done }),
@@ -101,7 +105,7 @@ export function ActivitiesView({ onOpenDeal }: ActivitiesViewProps) {
 
   async function handleCreate() {
     if (!subject.trim()) return;
-    await fetch("/api/activities", {
+    await crmFetch("/api/activities", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ subject, type: actType, due_date: dueDate, owner_name: ownerName, note }),

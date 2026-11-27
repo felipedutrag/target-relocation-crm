@@ -1,5 +1,7 @@
 "use client";
 
+import { useCrmFetch, useCrmRead } from "@/lib/crm-cache";
+
 import React, { useCallback, useEffect, useState } from "react";
 import {
   Building2,
@@ -51,6 +53,8 @@ interface DouRadarViewProps {
 }
 
 export function DouRadarView({ onOpenDeal }: DouRadarViewProps) {
+  const crmFetch = useCrmFetch();
+  const readCrm = useCrmRead();
   const [researchQuery, setResearchQuery] = useState("");
   const [researching, setResearching] = useState(false);
   const [researchResult, setResearchResult] = useState<{
@@ -88,17 +92,17 @@ export function DouRadarView({ onOpenDeal }: DouRadarViewProps) {
       if (stageId !== "all") qs.set("stage_id", stageId);
       if (rn !== "all") qs.set("rn", rn);
 
-      const res = await fetch(`/api/dou?${qs.toString()}`);
-      const json = await res.json();
-      setItems(json.items || []);
-      setStages(json.stages || []);
-      if (json.stats) setStats(json.stats);
-      setTotal(json.total || 0);
-      setTotalPages(json.totalPages || 1);
+      await readCrm(`/api/dou?${qs.toString()}`, json => {
+        setItems(json.items || []);
+        setStages(json.stages || []);
+        if (json.stats) setStats(json.stats);
+        setTotal(json.total || 0);
+        setTotalPages(json.totalPages || 1);
+      });
     } finally {
       setLoading(false);
     }
-  }, [search, minScore, stageId, rn, page]);
+  }, [readCrm, search, minScore, stageId, rn, page]);
 
   useEffect(() => {
     const t = setTimeout(loadDou, 160);
@@ -111,7 +115,7 @@ export function DouRadarView({ onOpenDeal }: DouRadarViewProps) {
     setResearchError("");
     setResearchResult(null);
     try {
-      const response = await fetch("/api/dou/research", {
+      const response = await crmFetch("/api/dou/research", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: researchQuery }),

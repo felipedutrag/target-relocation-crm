@@ -1,5 +1,7 @@
 "use client";
 
+import { useCrmFetch, useCrmRead } from "@/lib/crm-cache";
+
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowDown,
@@ -150,6 +152,8 @@ function formatCompactSessionDate(iso: string): string {
 }
 
 export function AiChatView({ onOpenAiSettings }: { onOpenAiSettings: () => void }) {
+  const crmFetch = useCrmFetch();
+  const readCrm = useCrmRead();
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -168,17 +172,17 @@ export function AiChatView({ onOpenAiSettings }: { onOpenAiSettings: () => void 
     setLoading(true);
     try {
       const qs = sessionId ? `?session_id=${encodeURIComponent(sessionId)}` : "";
-      const res = await fetch(`/api/ai/chat${qs}`);
-      const json = await res.json();
-      setSessions(json.sessions || []);
-      setActiveSessionId(json.activeSessionId || null);
-      setMessages(json.messages || []);
-      setAiConfigured(Boolean(json.aiConfigured));
-      if (json.aiModel) setAiModel(json.aiModel);
+      await readCrm(`/api/ai/chat${qs}`, json => {
+        setSessions(json.sessions || []);
+        setActiveSessionId(json.activeSessionId || null);
+        setMessages(json.messages || []);
+        setAiConfigured(Boolean(json.aiConfigured));
+        if (json.aiModel) setAiModel(json.aiModel);
+      });
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [readCrm]);
 
   useEffect(() => {
     loadChat();
@@ -214,7 +218,7 @@ export function AiChatView({ onOpenAiSettings }: { onOpenAiSettings: () => void 
   }
 
   async function createNewSession() {
-    const res = await fetch("/api/ai/chat", {
+    const res = await crmFetch("/api/ai/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "new_session" }),
@@ -241,7 +245,7 @@ export function AiChatView({ onOpenAiSettings }: { onOpenAiSettings: () => void 
     setMessages((prev) => [...prev, tempUser]);
 
     try {
-      const res = await fetch("/api/ai/chat", {
+      const res = await crmFetch("/api/ai/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ session_id: activeSessionId, message: content }),

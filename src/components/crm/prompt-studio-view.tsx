@@ -1,5 +1,7 @@
 "use client";
 
+import { useCrmFetch, useCrmRead } from "@/lib/crm-cache";
+
 import { useEffect, useState } from "react";
 import { ArrowUpRight, Bot, Check, Clock3, FlaskConical, LoaderCircle, RotateCcw, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +14,8 @@ import { cn } from "@/lib/utils";
 const dateFormat = new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" });
 
 export function PromptStudioView() {
+  const crmFetch = useCrmFetch();
+  const readCrm = useCrmRead();
   const [selected, select] = useState<PromptKey>("copilot");
   const [query, setQuery] = useState("");
   const [rows, setRows] = useState<Partial<Record<PromptKey, PromptRow>>>({});
@@ -29,12 +33,13 @@ export function PromptStudioView() {
     const abort = new AbortController();
     async function load() {
       try {
-        const response = await fetch("/api/settings/prompts", { signal: abort.signal });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error || "Não foi possível carregar os prompts.");
-        setRows(Object.fromEntries((result.rows as PromptRow[]).map(row => [row.key, row])));
-        setCanEdit(result.canEdit);
-        setStoragePending(result.storagePending);
+        const loaded = await readCrm("/api/settings/prompts", result => {
+          if (abort.signal.aborted) return;
+          setRows(Object.fromEntries((result.rows as PromptRow[]).map(row => [row.key, row])));
+          setCanEdit(result.canEdit);
+          setStoragePending(result.storagePending);
+        });
+        if (!loaded && !abort.signal.aborted) setError("Não foi possível carregar os prompts.");
       } catch (err) {
         if (!abort.signal.aborted) setError(err instanceof Error ? err.message : "Não foi possível carregar os prompts.");
       } finally {
@@ -43,7 +48,7 @@ export function PromptStudioView() {
     }
     void load();
     return () => abort.abort();
-  }, []);
+  }, [readCrm]);
 
   const prompt = PROMPTS[selected];
   const saved = rows[selected];
@@ -67,7 +72,7 @@ export function PromptStudioView() {
     setError("");
     setNotice("");
     try {
-      const response = await fetch("/api/settings/prompts", {
+      const response = await crmFetch("/api/settings/prompts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action, key: selected, text: draft, sample, revision: saved?.revision ?? 0 }),

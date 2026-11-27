@@ -1,5 +1,7 @@
 "use client";
 
+import { useCrmRead } from "@/lib/crm-cache";
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity,
@@ -352,6 +354,7 @@ function ThermalHeatmapCanvas({
 }
 
 export function AnalyticsView() {
+  const readCrm = useCrmRead();
   const [days, setDays] = useState("30");
   const [deviceFilter, setDeviceFilter] = useState("all");
   const [pathFilter, setPathFilter] = useState("all");
@@ -410,27 +413,27 @@ export function AnalyticsView() {
       });
       if (pathFilter !== "all") qs.set("path", pathFilter);
 
-      const res = await fetch(`/api/analytics?${qs.toString()}`);
-      const json = await res.json();
-      const d = json.dashboard || {};
-      if (d.summary) setSummary(d.summary);
-      setDaily(d.timeseries_daily || []);
-      setHourly(d.by_hour || []);
-      setWeekdayHour(d.by_weekday_hour || []);
-      setTopPages(d.top_pages || []);
-      setTopBlogs(d.top_blog_articles || []);
-      setByDevice(d.by_device || []);
-      setByBrowser(d.by_browser || []);
-      setByOs(d.by_os || []);
-      setByRegion(d.by_region || []);
-      setByTracking(d.by_tracking || []);
-      setTopClicks(d.top_clicked_elements || []);
-      setRecentEvents(d.recent_events || []);
-      if (json.heatmap) setHeatmap(json.heatmap);
+      await readCrm(`/api/analytics?${qs.toString()}`, json => {
+        const d = json.dashboard || {};
+        if (d.summary) setSummary(d.summary);
+        setDaily(d.timeseries_daily || []);
+        setHourly(d.by_hour || []);
+        setWeekdayHour(d.by_weekday_hour || []);
+        setTopPages(d.top_pages || []);
+        setTopBlogs(d.top_blog_articles || []);
+        setByDevice(d.by_device || []);
+        setByBrowser(d.by_browser || []);
+        setByOs(d.by_os || []);
+        setByRegion(d.by_region || []);
+        setByTracking(d.by_tracking || []);
+        setTopClicks(d.top_clicked_elements || []);
+        setRecentEvents(d.recent_events || []);
+        if (json.heatmap) setHeatmap(json.heatmap);
+      });
     } finally {
       setLoading(false);
     }
-  }, [days, deviceFilter, pathFilter, heatmapPath, heatmapInteraction]);
+  }, [readCrm, days, deviceFilter, pathFilter, heatmapPath, heatmapInteraction]);
 
   useEffect(() => {
     loadAnalytics();

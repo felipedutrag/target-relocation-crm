@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { LoginView, type AuthenticatedUser } from "@/components/auth/login-view";
 import { CrmShell } from "@/components/crm/crm-shell";
+import { CrmCacheProvider } from "@/lib/crm-cache";
 import { TargetLandingPage } from "@/components/landing/target-landing-page";
 import type { LandingBlogPreview } from "@/lib/blog-queries";
 import { buildCrmUser } from "@/lib/account-profile";
@@ -79,25 +80,27 @@ export function AppEntry({
 
   if (mode === "crm") {
     return (
-      <CrmShell
-        initialDealId={initialDealId}
-        initialTab={initialTab}
-        emailConfirmationFailed={emailConfirmationFailed}
-        currentUser={currentUser}
-        onAccountChange={setCurrentUser}
-        onOpenLanding={() => {
-          router.push("/");
-          setMode("landing");
-        }}
-        onLogout={async () => {
-          const supabase = createClient();
-          await supabase.auth.signOut();
-          setCurrentUser(null);
-          router.push("/login");
-          router.refresh();
-          setMode("login");
-        }}
-      />
+      <CrmCacheProvider key={JSON.stringify([currentUser?.id ?? currentUser?.email, currentUser?.role])}>
+        <CrmShell
+          initialDealId={initialDealId}
+          initialTab={initialTab}
+          emailConfirmationFailed={emailConfirmationFailed}
+          currentUser={currentUser}
+          onAccountChange={setCurrentUser}
+          onOpenLanding={() => {
+            router.push("/");
+            setMode("landing");
+          }}
+          onLogout={async () => {
+            const supabase = createClient();
+            await supabase.auth.signOut();
+            setCurrentUser(null);
+            router.push("/login");
+            router.refresh();
+            setMode("login");
+          }}
+        />
+      </CrmCacheProvider>
     );
   }
 

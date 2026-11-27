@@ -1,5 +1,7 @@
 "use client";
 
+import { useCrmFetch, useCrmRead } from "@/lib/crm-cache";
+
 import { useCallback, useEffect, useState } from "react";
 import {
   BookOpen,
@@ -72,6 +74,8 @@ const WEEKLY_MATRIX = [
 ];
 
 export function EditorialBlogView({ onOpenAiSettings }: { onOpenAiSettings: () => void }) {
+  const crmFetch = useCrmFetch();
+  const readCrm = useCrmRead();
   const [items, setItems] = useState<EditorialItem[]>([]);
   const [posts, setPosts] = useState<BlogPostItem[]>([]);
   const [aiConfigured, setAiConfigured] = useState(false);
@@ -90,15 +94,15 @@ export function EditorialBlogView({ onOpenAiSettings }: { onOpenAiSettings: () =
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/editorial");
-      const json = await res.json();
-      setItems(json.items || []);
-      setPosts(json.posts || []);
-      setAiConfigured(Boolean(json.aiConfigured));
+      await readCrm("/api/editorial", json => {
+        setItems(json.items || []);
+        setPosts(json.posts || []);
+        setAiConfigured(Boolean(json.aiConfigured));
+      });
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [readCrm]);
 
   useEffect(() => {
     loadData();
@@ -108,7 +112,7 @@ export function EditorialBlogView({ onOpenAiSettings }: { onOpenAiSettings: () =
     setGeneratingId(item.id);
     setBanner(null);
     try {
-      const res = await fetch("/api/editorial", {
+      const res = await crmFetch("/api/editorial", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "generate_ai", id: item.id }),
@@ -128,7 +132,7 @@ export function EditorialBlogView({ onOpenAiSettings }: { onOpenAiSettings: () =
   }
 
   async function approveItem(id: number) {
-    const res = await fetch("/api/editorial", {
+    const res = await crmFetch("/api/editorial", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "approve", id }),
@@ -140,7 +144,7 @@ export function EditorialBlogView({ onOpenAiSettings }: { onOpenAiSettings: () =
   }
 
   async function approveBatch() {
-    const res = await fetch("/api/editorial", {
+    const res = await crmFetch("/api/editorial", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "approve_batch" }),
@@ -151,7 +155,7 @@ export function EditorialBlogView({ onOpenAiSettings }: { onOpenAiSettings: () =
   }
 
   async function publishItem(id: number) {
-    const res = await fetch("/api/editorial", {
+    const res = await crmFetch("/api/editorial", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "publish", id }),
@@ -167,7 +171,7 @@ export function EditorialBlogView({ onOpenAiSettings }: { onOpenAiSettings: () =
 
   async function createPauta() {
     if (!newTopic.trim()) return;
-    await fetch("/api/editorial", {
+    await crmFetch("/api/editorial", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -185,7 +189,7 @@ export function EditorialBlogView({ onOpenAiSettings }: { onOpenAiSettings: () =
 
   async function saveSelectedDetails() {
     if (!selectedItem) return;
-    await fetch("/api/editorial", {
+    await crmFetch("/api/editorial", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

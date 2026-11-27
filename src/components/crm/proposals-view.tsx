@@ -1,5 +1,7 @@
 "use client";
 
+import { useCrmFetch, useCrmRead } from "@/lib/crm-cache";
+
 import React, { useEffect, useState } from "react";
 import {
   Download,
@@ -34,6 +36,8 @@ interface ProposalsViewProps {
 }
 
 export function ProposalsView({ onOpenDeal }: ProposalsViewProps) {
+  const crmFetch = useCrmFetch();
+  const readCrm = useCrmRead();
   const [services, setServices] = useState<ServiceCatalogItem[]>([]);
   const [proposals, setProposals] = useState<ProposalRecord[]>([]);
   const [countryFilter, setCountryFilter] = useState("all");
@@ -57,10 +61,10 @@ export function ProposalsView({ onOpenDeal }: ProposalsViewProps) {
   const [selectedItems, setSelectedItems] = useState<ProposalItem[]>([]);
 
   async function loadData() {
-    const res = await fetch("/api/proposals");
-    const json = await res.json();
-    setServices(json.services || []);
-    setProposals(json.proposals || []);
+    await readCrm("/api/proposals", json => {
+      setServices(json.services || []);
+      setProposals(json.proposals || []);
+    });
   }
 
   useEffect(() => {
@@ -102,7 +106,7 @@ export function ProposalsView({ onOpenDeal }: ProposalsViewProps) {
 
   async function saveProposal() {
     if (!propTitle.trim() || selectedItems.length === 0) return;
-    const res = await fetch("/api/proposals", {
+    const res = await crmFetch("/api/proposals", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

@@ -1,5 +1,7 @@
 "use client";
 
+import { useCrmRead } from "@/lib/crm-cache";
+
 import React, { useEffect, useState } from "react";
 import {
   Activity,
@@ -68,17 +70,19 @@ interface OverviewViewProps {
 }
 
 export function OverviewView({ onOpenDeal, onNavigate }: OverviewViewProps) {
+  const readCrm = useCrmRead();
   const [data, setData] = useState<OverviewData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/overview")
-      .then((r) => r.json())
-      .then((d) => setData(d))
-      .finally(() => setLoading(false));
-  }, []);
+    void readCrm("/api/overview", setData).finally(() => setLoading(false));
+  }, [readCrm]);
 
-  if (loading || !data) {
+  if (!data && !loading) {
+    return <p role="alert" className="py-6 text-sm text-muted-foreground">Não foi possível carregar a Visão Geral.</p>;
+  }
+
+  if (!data) {
     return (
       <div className="space-y-5">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">

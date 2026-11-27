@@ -1,5 +1,7 @@
 "use client";
 
+import { useCrmFetch, useCrmRead } from "@/lib/crm-cache";
+
 import React, { useCallback, useEffect, useState } from "react";
 import {
   Building2,
@@ -65,6 +67,8 @@ interface OrganizationsViewProps {
 }
 
 export function OrganizationsView({ onOpenDeal, initialSelectedId = null }: OrganizationsViewProps) {
+  const crmFetch = useCrmFetch();
+  const readCrm = useCrmRead();
   const [search, setSearch] = useState("");
   const [label, setLabel] = useState("all");
   const [page, setPage] = useState(1);
@@ -97,15 +101,15 @@ export function OrganizationsView({ onOpenDeal, initialSelectedId = null }: Orga
     try {
       const qs = new URLSearchParams({ page: String(page), limit: "30", label });
       if (search.trim()) qs.set("search", search.trim());
-      const res = await fetch(`/api/organizations?${qs.toString()}`);
-      const json = await res.json();
-      setOrgs(json.organizations || []);
-      setTotal(json.total || 0);
-      setTotalPages(json.totalPages || 1);
+      await readCrm(`/api/organizations?${qs.toString()}`, json => {
+        setOrgs(json.organizations || []);
+        setTotal(json.total || 0);
+        setTotalPages(json.totalPages || 1);
+      });
     } finally {
       setLoading(false);
     }
-  }, [search, label, page]);
+  }, [readCrm, search, label, page]);
 
   useEffect(() => {
     const t = setTimeout(loadOrgs, 160);
@@ -117,14 +121,14 @@ export function OrganizationsView({ onOpenDeal, initialSelectedId = null }: Orga
       setDetail(null);
       return;
     }
-    fetch(`/api/organizations/${selectedId}`)
+    crmFetch(`/api/organizations/${selectedId}`)
       .then((r) => r.json())
       .then((d) => setDetail(d));
   }, [selectedId]);
 
   async function handleCreate() {
     if (!newName.trim()) return;
-    await fetch("/api/organizations", {
+    await crmFetch("/api/organizations", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: newName, address: newAddress, website: newWebsite }),

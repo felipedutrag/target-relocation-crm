@@ -1,5 +1,7 @@
 "use client";
 
+import { useCrmFetch } from "@/lib/crm-cache";
+
 import { useEffect, useState } from "react";
 import {
   Check,
@@ -36,6 +38,7 @@ interface AiSettingsDialogProps {
 }
 
 export function AiSettingsDialog({ open, onOpenChange, onSaved }: AiSettingsDialogProps) {
+  const crmFetch = useCrmFetch();
   const [configured, setConfigured] = useState(false);
   const [source, setSource] = useState("none");
   const [maskedKey, setMaskedKey] = useState<string | null>(null);
@@ -65,7 +68,7 @@ export function AiSettingsDialog({ open, onOpenChange, onSaved }: AiSettingsDial
     setMcpFeedback(null);
     setMcpPassword("");
     setIssuedToken(null);
-    fetch("/api/settings/ai")
+    crmFetch("/api/settings/ai")
       .then((r) => r.json())
       .then((d) => {
         setConfigured(Boolean(d.configured));
@@ -82,7 +85,7 @@ export function AiSettingsDialog({ open, onOpenChange, onSaved }: AiSettingsDial
     setSaving(true);
     setFeedback(null);
     try {
-      const res = await fetch("/api/settings/ai", {
+      const res = await crmFetch("/api/settings/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -110,7 +113,7 @@ export function AiSettingsDialog({ open, onOpenChange, onSaved }: AiSettingsDial
     setTesting(true);
     setFeedback(null);
     try {
-      const res = await fetch("/api/settings/ai", {
+      const res = await crmFetch("/api/settings/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "test", apiKey: apiKey.trim() || undefined, model }),
@@ -133,7 +136,7 @@ export function AiSettingsDialog({ open, onOpenChange, onSaved }: AiSettingsDial
     setIssuingToken(true);
     setMcpFeedback(null);
     try {
-      const res = await fetch("/api/oauth/personal-token", {
+      const res = await crmFetch("/api/oauth/personal-token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password: mcpPassword, label: "OpenAI Cloud / API Playground Read-Only" }),

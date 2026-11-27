@@ -1,5 +1,7 @@
 "use client";
 
+import { useCrmFetch } from "@/lib/crm-cache";
+
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import {
   ArrowRight,
@@ -281,6 +283,7 @@ export function CrmShell({
   onOpenLanding,
   onLogout,
 }: CrmShellProps) {
+  const crmFetch = useCrmFetch();
   const [activeTab, setActiveTab] = useState<CrmTab>(initialTab ?? currentUser?.preferences?.startTab ?? "overview");
   const accountTheme = currentUser?.preferences?.theme;
   const accountName = currentUser?.preferences?.displayName || currentUser?.name || "Minha conta";
@@ -373,9 +376,9 @@ export function CrmShell({
     try {
       const encoded = encodeURIComponent(q.trim());
       const [dealsRes, orgsRes, peopleRes] = await Promise.all([
-        fetch(`/api/deals?search=${encoded}&limit=10`),
-        fetch(`/api/organizations?search=${encoded}&limit=10`),
-        fetch(`/api/people?search=${encoded}&limit=10`),
+        crmFetch(`/api/deals?search=${encoded}&limit=10`),
+        crmFetch(`/api/organizations?search=${encoded}&limit=10`),
+        crmFetch(`/api/people?search=${encoded}&limit=10`),
       ]);
       const [dealsJson, orgsJson, peopleJson] = await Promise.all([
         dealsRes.json(),

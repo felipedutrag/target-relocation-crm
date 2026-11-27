@@ -1,5 +1,7 @@
 "use client";
 
+import { useCrmFetch, useCrmRead } from "@/lib/crm-cache";
+
 import React, { useEffect, useRef, useState } from "react";
 import {
   CheckCircle2,
@@ -70,6 +72,9 @@ interface ImportCenterViewProps {
 }
 
 export function ImportCenterView({ onOpenDeal }: ImportCenterViewProps) {
+  const crmFetch = useCrmFetch();
+  const readImport = useCrmRead();
+  const readFiles = useCrmRead();
   const [data, setData] = useState<ImportPayload | null>(null);
   const [localFiles, setLocalFiles] = useState<FileRecord[]>([]);
   const [syncing, setSyncing] = useState(false);
@@ -79,12 +84,10 @@ export function ImportCenterView({ onOpenDeal }: ImportCenterViewProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   async function loadAll() {
-    const [impRes, filesRes] = await Promise.all([
-      fetch("/api/import").then((r) => r.json()),
-      fetch("/api/files?only_local=true&limit=100").then((r) => r.json()),
+    await Promise.all([
+      readImport("/api/import", setData),
+      readFiles("/api/files?only_local=true&limit=100", data => setLocalFiles(data.files || [])),
     ]);
-    setData(impRes);
-    setLocalFiles(filesRes.files || []);
   }
 
   useEffect(() => {
@@ -95,7 +98,7 @@ export function ImportCenterView({ onOpenDeal }: ImportCenterViewProps) {
     setSyncing(true);
     setBanner(null);
     try {
-      const res = await fetch("/api/import", { method: "POST" });
+      const res = await crmFetch("/api/import", { method: "POST" });
       const json = await res.json();
       if (json.success && json.summary) {
         const c = json.summary.counts;
@@ -118,7 +121,7 @@ export function ImportCenterView({ onOpenDeal }: ImportCenterViewProps) {
       for (const f of Array.from(filesList)) {
         fd.append("files", f);
       }
-      const res = await fetch("/api/import", { method: "POST", body: fd });
+      const res = await crmFetch("/api/import", { method: "POST", body: fd });
       const json = await res.json();
       if (json.success && Array.isArray(json.results)) {
         setBanner(json.results.map((r: { details: string }) => r.details).join(" | "));

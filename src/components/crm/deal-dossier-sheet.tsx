@@ -1,5 +1,7 @@
 "use client";
 
+import { useCrmFetch } from "@/lib/crm-cache";
+
 import React, { useEffect, useState } from "react";
 import {
   Activity,
@@ -95,6 +97,7 @@ interface DealDetailPayload {
 }
 
 export function DealDossierSheet({ dealId, onClose, onUpdated }: DealDossierSheetProps) {
+  const crmFetch = useCrmFetch();
   const [data, setData] = useState<DealDetailPayload | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -108,7 +111,7 @@ export function DealDossierSheet({ dealId, onClose, onUpdated }: DealDossierShee
   async function loadDetail(id: number) {
     setLoading(true);
     try {
-      const res = await fetch(`/api/deals/${id}`);
+      const res = await crmFetch(`/api/deals/${id}`);
       if (res.ok) {
         const json = (await res.json()) as DealDetailPayload;
         setData(json);
@@ -131,7 +134,7 @@ export function DealDossierSheet({ dealId, onClose, onUpdated }: DealDossierShee
     if (!dealId) return;
     setSaving(true);
     try {
-      const res = await fetch(`/api/deals/${dealId}`, {
+      const res = await crmFetch(`/api/deals/${dealId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -146,7 +149,7 @@ export function DealDossierSheet({ dealId, onClose, onUpdated }: DealDossierShee
   }
 
   async function toggleActivity(act: ActivityRecord) {
-    await fetch("/api/activities", {
+    await crmFetch("/api/activities", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: act.id, done: !act.done }),

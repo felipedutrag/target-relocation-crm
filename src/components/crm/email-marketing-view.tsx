@@ -1,5 +1,7 @@
 "use client";
 
+import { useCrmFetch, useCrmRead } from "@/lib/crm-cache";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
@@ -148,6 +150,8 @@ function getEmailStatusBadge(status: string): { label: string; className: string
 }
 
 export function EmailMarketingView({ onOpenAiSettings }: { onOpenAiSettings: () => void }) {
+  const crmFetch = useCrmFetch();
+  const readCrm = useCrmRead();
   const [loading, setLoading] = useState(true);
   const [configured, setConfigured] = useState(false);
   const [maskedKey, setMaskedKey] = useState<string | null>(null);
@@ -225,31 +229,31 @@ export function EmailMarketingView({ onOpenAiSettings }: { onOpenAiSettings: () 
 
   const loadData = useCallback(async () => {
     try {
-      const res = await fetch("/api/email-marketing");
-      const json = await res.json();
-      setConfigured(Boolean(json.configured));
-      setMaskedKey(json.maskedKey || null);
-      setFromEmail(json.fromEmail || "Target Relocation <onboarding@resend.dev>");
-      setComposerFrom((prev) => prev || json.fromEmail || "Target Relocation <onboarding@resend.dev>");
-      setCfgFromEmail((prev) => prev || json.fromEmail || "Target Relocation <onboarding@resend.dev>");
-      setIsSandbox(Boolean(json.isSandbox));
-      setIsAdmin(Boolean(json.isAdmin));
-      setResendError(json.resendError || null);
-      setDomains(json.domains || []);
-      setAudiences(json.audiences || []);
-      setBroadcasts(json.broadcasts || []);
-      setTemplates(json.templates || []);
-      setLogs(json.logs || []);
-      setCrmContacts(json.crmContacts || []);
-      if (json.stats) setStats(json.stats);
-      if (Array.isArray(json.audiences) && json.audiences.length > 0) {
-        setActiveAudienceId((prev) => prev || json.audiences[0].id);
-        setBcastAudienceId((prev) => prev || json.audiences[0].id);
-      }
+      await readCrm("/api/email-marketing", json => {
+        setConfigured(Boolean(json.configured));
+        setMaskedKey(json.maskedKey || null);
+        setFromEmail(json.fromEmail || "Target Relocation <onboarding@resend.dev>");
+        setComposerFrom((prev) => prev || json.fromEmail || "Target Relocation <onboarding@resend.dev>");
+        setCfgFromEmail((prev) => prev || json.fromEmail || "Target Relocation <onboarding@resend.dev>");
+        setIsSandbox(Boolean(json.isSandbox));
+        setIsAdmin(Boolean(json.isAdmin));
+        setResendError(json.resendError || null);
+        setDomains(json.domains || []);
+        setAudiences(json.audiences || []);
+        setBroadcasts(json.broadcasts || []);
+        setTemplates(json.templates || []);
+        setLogs(json.logs || []);
+        setCrmContacts(json.crmContacts || []);
+        if (json.stats) setStats(json.stats);
+        if (Array.isArray(json.audiences) && json.audiences.length > 0) {
+          setActiveAudienceId((prev) => prev || json.audiences[0].id);
+          setBcastAudienceId((prev) => prev || json.audiences[0].id);
+        }
+      });
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [readCrm]);
 
   useEffect(() => {
     loadData();
@@ -259,7 +263,7 @@ export function EmailMarketingView({ onOpenAiSettings }: { onOpenAiSettings: () 
     if (!audId) return;
     setLoadingContacts(true);
     try {
-      const res = await fetch("/api/email-marketing", {
+      const res = await crmFetch("/api/email-marketing", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "list_contacts", audienceId: audId }),
@@ -296,7 +300,7 @@ export function EmailMarketingView({ onOpenAiSettings }: { onOpenAiSettings: () 
     setGeneratingAi(true);
     setNotice(null);
     try {
-      const res = await fetch("/api/email-marketing", {
+      const res = await crmFetch("/api/email-marketing", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "generate_ai_email", goal: aiGoal }),
@@ -320,7 +324,7 @@ export function EmailMarketingView({ onOpenAiSettings }: { onOpenAiSettings: () 
     setNotice(null);
     try {
       if (sendMode === "single") {
-        const res = await fetch("/api/email-marketing", {
+        const res = await crmFetch("/api/email-marketing", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -350,7 +354,7 @@ export function EmailMarketingView({ onOpenAiSettings }: { onOpenAiSettings: () 
         const recipients = crmContacts
           .filter((c) => selectedBatchEmails.includes(c.primary_email))
           .map((c) => ({ email: c.primary_email, name: c.name, company: c.org_name || "sua empresa" }));
-        const res = await fetch("/api/email-marketing", {
+        const res = await crmFetch("/api/email-marketing", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -378,7 +382,7 @@ export function EmailMarketingView({ onOpenAiSettings }: { onOpenAiSettings: () 
     setBusyBcast(true);
     setNotice(null);
     try {
-      const res = await fetch("/api/email-marketing", {
+      const res = await crmFetch("/api/email-marketing", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -405,7 +409,7 @@ export function EmailMarketingView({ onOpenAiSettings }: { onOpenAiSettings: () 
 
   async function handleBroadcastAction(action: "send_broadcast" | "delete_broadcast", broadcastId: string) {
     setNotice(null);
-    const res = await fetch("/api/email-marketing", {
+    const res = await crmFetch("/api/email-marketing", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action, broadcastId }),
@@ -424,7 +428,7 @@ export function EmailMarketingView({ onOpenAiSettings }: { onOpenAiSettings: () 
 
   async function handleCreateAudience() {
     if (!newAudienceName.trim()) return;
-    const res = await fetch("/api/email-marketing", {
+    const res = await crmFetch("/api/email-marketing", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "create_audience", name: newAudienceName }),
@@ -438,7 +442,7 @@ export function EmailMarketingView({ onOpenAiSettings }: { onOpenAiSettings: () 
 
   async function handleAddContact() {
     if (!activeAudienceId || !contactEmail.trim()) return;
-    const res = await fetch("/api/email-marketing", {
+    const res = await crmFetch("/api/email-marketing", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -462,7 +466,7 @@ export function EmailMarketingView({ onOpenAiSettings }: { onOpenAiSettings: () 
     if (!activeAudienceId) return;
     setSyncingCrm(true);
     try {
-      const res = await fetch("/api/email-marketing", {
+      const res = await crmFetch("/api/email-marketing", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "sync_crm_contacts", audienceId: activeAudienceId, limit: 25 }),
@@ -479,7 +483,7 @@ export function EmailMarketingView({ onOpenAiSettings }: { onOpenAiSettings: () 
   async function handleSaveTemplate() {
     setSavingTpl(true);
     try {
-      const res = await fetch("/api/email-marketing", {
+      const res = await crmFetch("/api/email-marketing", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -504,7 +508,7 @@ export function EmailMarketingView({ onOpenAiSettings }: { onOpenAiSettings: () 
 
   async function handleDomainAction(action: "add_domain" | "verify_domain" | "delete_domain", domainId?: string) {
     setNotice(null);
-    const res = await fetch("/api/email-marketing", {
+    const res = await crmFetch("/api/email-marketing", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -524,7 +528,7 @@ export function EmailMarketingView({ onOpenAiSettings }: { onOpenAiSettings: () 
   async function handleSaveSettings() {
     setSavingCfg(true);
     try {
-      const res = await fetch("/api/email-marketing", {
+      const res = await crmFetch("/api/email-marketing", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "save_settings", apiKey: cfgApiKey, fromEmail: cfgFromEmail }),
@@ -540,7 +544,7 @@ export function EmailMarketingView({ onOpenAiSettings }: { onOpenAiSettings: () 
   }
 
   async function handleRefreshEmail(emailId: string) {
-    const res = await fetch("/api/email-marketing", {
+    const res = await crmFetch("/api/email-marketing", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "refresh_email", emailId }),
@@ -549,7 +553,7 @@ export function EmailMarketingView({ onOpenAiSettings }: { onOpenAiSettings: () 
   }
 
   async function handleCancelEmail(emailId: string) {
-    const res = await fetch("/api/email-marketing", {
+    const res = await crmFetch("/api/email-marketing", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "cancel_email", emailId }),

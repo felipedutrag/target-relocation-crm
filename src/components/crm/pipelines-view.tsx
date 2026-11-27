@@ -1,5 +1,7 @@
 "use client";
 
+import { useCrmFetch, useCrmRead } from "@/lib/crm-cache";
+
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ArrowRight,
@@ -58,6 +60,8 @@ interface KanbanColumn extends Stage {
 }
 
 export function PipelinesView({ onOpenDeal }: PipelinesViewProps) {
+  const crmFetch = useCrmFetch();
+  const readCrm = useCrmRead();
   const [viewMode, setViewMode] = useState<"kanban" | "table">("kanban");
   const [pipelineId, setPipelineId] = useState<string>("1");
   const [status, setStatus] = useState<string>("open");
@@ -99,21 +103,21 @@ export function PipelinesView({ onOpenDeal }: PipelinesViewProps) {
       if (search.trim()) qs.set("search", search.trim());
       if (onlyValued) qs.set("only_valued", "true");
 
-      const res = await fetch(`/api/deals?${qs.toString()}`);
-      const json = await res.json();
-      setPipelines(json.pipelines || []);
-      setStages(json.stages || []);
-      if (viewMode === "kanban") {
-        setColumns(json.columns || []);
-      } else {
-        setDeals(json.deals || []);
-        setTotal(json.total || 0);
-        setTotalPages(json.totalPages || 1);
-      }
+      await readCrm(`/api/deals?${qs.toString()}`, json => {
+        setPipelines(json.pipelines || []);
+        setStages(json.stages || []);
+        if (viewMode === "kanban") {
+          setColumns(json.columns || []);
+        } else {
+          setDeals(json.deals || []);
+          setTotal(json.total || 0);
+          setTotalPages(json.totalPages || 1);
+        }
+      });
     } finally {
       setLoading(false);
     }
-  }, [viewMode, pipelineId, status, owner, search, onlyValued, sort, page]);
+  }, [readCrm, viewMode, pipelineId, status, owner, search, onlyValued, sort, page]);
 
   useEffect(() => {
     const t = setTimeout(fetchDeals, 150);
@@ -121,7 +125,7 @@ export function PipelinesView({ onOpenDeal }: PipelinesViewProps) {
   }, [fetchDeals]);
 
   async function moveDealToStage(dealId: number, stageId: number) {
-    await fetch("/api/deals", {
+    await crmFetch("/api/deals", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "move_stage", deal_id: dealId, stage_id: stageId }),
@@ -131,7 +135,7 @@ export function PipelinesView({ onOpenDeal }: PipelinesViewProps) {
 
   async function handleCreateDeal() {
     if (!newTitle.trim()) return;
-    await fetch("/api/deals", {
+    await crmFetch("/api/deals", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
