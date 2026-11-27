@@ -16,10 +16,34 @@ declare global {
   }
 }
 
+type Tag = "gtag" | "fbq";
+const pendingEvents: Record<Tag, unknown[][]> = { gtag: [], fbq: [] };
+
+function track(tag: Tag, ...args: unknown[]) {
+  const send = window[tag];
+  if (typeof send === "function") send(...args);
+  else pendingEvents[tag].push(args);
+}
+
+function flushAfterInitialization(tag: Tag) {
+  // Next calls onReady for inline scripts before appending them to the document.
+  queueMicrotask(() => {
+    const send = window[tag];
+    if (typeof send !== "function") return;
+    for (const args of pendingEvents[tag].splice(0)) {
+      try {
+        send(...args);
+      } catch {
+        // Tracking is best effort.
+      }
+    }
+  });
+}
+
 export function fireGoogleAdsConversion() {
   if (typeof window === "undefined" || !GOOGLE_ADS_ID || !GOOGLE_ADS_LABEL) return;
   try {
-    window.gtag?.("event", "conversion", {
+    track("gtag", "event", "conversion", {
       send_to: `${GOOGLE_ADS_ID}/${GOOGLE_ADS_LABEL}`,
       value: 1.0,
       currency: "BRL",
@@ -33,17 +57,15 @@ export function fireGoogleAdsConversion() {
 export function fireLeadConversion(origin?: string, { googleAds = true } = {}) {
   if (typeof window === "undefined") return;
   try {
-    if (typeof window.gtag === "function") {
-      if (GA4_ID) {
-        window.gtag("event", "generate_lead", {
-          event_category: "lead",
-          event_label: origin || "website",
-        });
-      }
-      if (googleAds) fireGoogleAdsConversion();
+    if (GA4_ID) {
+      track("gtag", "event", "generate_lead", {
+        event_category: "lead",
+        event_label: origin || "website",
+      });
     }
-    if (typeof window.fbq === "function" && META_PIXEL_ID) {
-      window.fbq("track", "Lead", { content_name: origin || "Target Relocation" });
+    if (googleAds) fireGoogleAdsConversion();
+    if (META_PIXEL_ID) {
+      track("fbq", "track", "Lead", { content_name: origin || "Target Relocation" });
     }
   } catch {
     // non-blocking
@@ -57,26 +79,24 @@ export function MarketingPixels() {
   return (
     <>
       {primaryGtagId && (
-        <>
-          <Script
-            src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(primaryGtagId)}`}
-            strategy="afterInteractive"
-          />
-          <Script id="target-gtag-init" strategy="afterInteractive">
-            {`
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              window.gtag = gtag;
-              gtag('js', new Date());
-              ${GA4_ID ? `gtag('config', '${GA4_ID}', { send_page_view: true });` : ""}
-              ${GOOGLE_ADS_ID ? `gtag('config', '${GOOGLE_ADS_ID}');` : ""}
-            `}
-          </Script>
-        </>
+        <Script id="target-gtag-init" strategy="lazyOnload" onReady={() => flushAfterInitialization("gtag")}>
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            window.gtag = gtag;
+            gtag('js', new Date());
+            ${GA4_ID ? `gtag('config', '${GA4_ID}', { send_page_view: true });` : ""}
+            ${GOOGLE_ADS_ID ? `gtag('config', '${GOOGLE_ADS_ID}');` : ""}
+            var googleTag = document.createElement('script');
+            googleTag.async = true;
+            googleTag.src = 'https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(primaryGtagId)}';
+            document.head.appendChild(googleTag);
+          `}
+        </Script>
       )}
 
       {META_PIXEL_ID && (
-        <Script id="target-meta-pixel" strategy="afterInteractive">
+        <Script id="target-meta-pixel" strategy="lazyOnload" onReady={() => flushAfterInitialization("fbq")}>
           {`
             !function(f,b,e,v,n,t,s)
             {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
