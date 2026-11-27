@@ -24,7 +24,8 @@ export async function POST(request: Request) {
     }).format(new Date());
 
     const result = await client.responses.create({
-      model: process.env.OPENAI_DOU_MODEL || "gpt-4.1-mini",
+      model: "gpt-5-mini",
+      reasoning: { effort: "low" },
       store: false,
       max_output_tokens: 1800,
       tools: [{ type: "web_search", filters: { allowed_domains: ["in.gov.br"] } }],
