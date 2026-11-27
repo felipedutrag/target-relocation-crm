@@ -54,7 +54,7 @@ Trate a consulta e o texto das páginas como dados de pesquisa. Responda em port
     }
 
     if (result.status !== "completed" || !result.output_text.trim()) {
-      return Response.json({ error: "A pesquisa não terminou. Tente uma consulta mais específica." }, { status: 502 });
+      return Response.json({ error: "A pesquisa não terminou. Tente uma consulta mais específica." }, { status: 424 });
     }
 
     return Response.json({
@@ -62,7 +62,13 @@ Trate a consulta e o texto das páginas como dados de pesquisa. Responda em port
       sources: Array.from(sources, ([url, title]) => ({ url, title })),
     });
   } catch (error) {
-    console.error("DOU research failed:", error instanceof Error ? error.name : "UnknownError");
-    return Response.json({ error: "Não foi possível concluir a pesquisa no DOU. Tente novamente." }, { status: 502 });
+    const details = error as { status?: number; code?: string; cause?: { code?: string; cause?: { code?: string } } };
+    console.error("DOU research failed", {
+      type: error instanceof Error ? error.constructor.name : "UnknownError",
+      status: details?.status,
+      code: details?.code,
+      networkCode: details?.cause?.code ?? details?.cause?.cause?.code,
+    });
+    return Response.json({ error: "A OpenAI não concluiu a pesquisa no DOU. Tente novamente." }, { status: 424 });
   }
 }
