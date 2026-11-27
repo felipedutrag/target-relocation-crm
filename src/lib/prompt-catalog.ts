@@ -62,10 +62,16 @@ export const PROMPTS = {
     sample: "Minha empresa precisa trazer três técnicos ao Brasil e ainda não sabe por onde começar.",
   },
   anderley: {
-    name: "Anderley", area: "Atendimento", connected: false,
-    purpose: "Rascunho da demonstração de SDR. A instância no LegalFunnel tem configuração própria.",
+    name: "Anderley", area: "Atendimento", connected: true,
+    purpose: "Personaliza as próximas respostas do Anderley no WhatsApp da Target.",
     text: "Apresente-se como SDR virtual da Target. Continue o assunto de onde parou, evite perguntas repetidas e qualifique sem pedir documentos sensíveis.",
     sample: "A demanda é pessoal, para trabalhar no Brasil. O que você precisa saber primeiro?",
+  },
+  aurea: {
+    name: "Áurea", area: "Atendimento", connected: false,
+    purpose: "Prepare as instruções de atendimento da Áurea para o WhatsApp da Target.",
+    text: "Responda de forma cordial e objetiva. Use o contexto da conversa para esclarecer dúvidas e combine o próximo passo com o contato.",
+    sample: "Já conversei sobre o visto de trabalho da minha equipe. Como posso seguir?",
   },
 } as const;
 

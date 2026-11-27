@@ -79,7 +79,11 @@ export function PromptStudioView() {
       } else {
         setRows(previous => ({ ...previous, [selected]: result.row }));
         setDrafts(previous => ({ ...previous, [selected]: undefined }));
-        setNotice(prompt.connected ? "Nova versão ativada no fluxo." : "Rascunho salvo na central.");
+        if (result.syncPending) {
+          setError("Prompt salvo no CRM. Clique em Salvar e ativar novamente para sincronizar com o WhatsApp.");
+        } else {
+          setNotice(prompt.connected ? "Versão ativa no fluxo." : "Rascunho salvo na central.");
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Não foi possível concluir a ação.");

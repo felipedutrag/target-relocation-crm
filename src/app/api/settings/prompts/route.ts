@@ -3,6 +3,26 @@ import { resolveOpenAiClient, TARGET_COMPLIANCE_SYSTEM_PROMPT } from "@/lib/open
 import { isPromptKey, OTAVIO_SOURCE_RULES, PROMPTS, PROMPT_KEYS, PROMPT_LIMIT } from "@/lib/prompt-catalog";
 import { withPromptInstructions, type PromptRow } from "@/lib/prompt-store";
 
+async function savedPrompt(row: PromptRow) {
+  if (row.key !== "anderley") return Response.json({ row });
+  const url = process.env.ANDERLEY_PROMPT_SYNC_URL;
+  const secret = process.env.ANDERLEY_PROMPT_SYNC_SECRET;
+  if (url && secret) {
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: secret },
+        body: JSON.stringify({ text: row.text, revision: row.revision }),
+        signal: AbortSignal.timeout(5000),
+      });
+      if (response.ok) return Response.json({ row });
+    } catch {
+      // Supabase keeps the revision even if the worker cannot receive it.
+    }
+  }
+  return Response.json({ row, syncPending: true });
+}
+
 export async function GET() {
   const auth = await requireWorkspaceUser();
   if (auth.errorResponse) return auth.errorResponse;
@@ -75,7 +95,7 @@ export async function POST(request: Request) {
   const previous = data as PromptRow | null;
   const conflict = () => Response.json({ error: "Este prompt mudou em outra sessão. Atualize a central antes de salvar." }, { status: 409 });
   if (body.revision !== (previous?.revision ?? 0)) return conflict();
-  if (previous?.text === text) return Response.json({ row: previous });
+  if (previous?.text === text) return savedPrompt(previous);
 
   const entry = {
     key,
@@ -95,5 +115,5 @@ export async function POST(request: Request) {
   const { data: saved, error: saveError } = await write.select("*").maybeSingle();
   if (saveError?.code === "23505" || (!saveError && !saved)) return conflict();
   if (saveError) return Response.json({ error: `Não foi possível salvar o prompt de ${PROMPTS[key].name}.` }, { status: 500 });
-  return Response.json({ row: saved });
+  return savedPrompt(saved as PromptRow);
 }
