@@ -2,6 +2,19 @@
 
 import { Suspense, useEffect, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
+import { fireGoogleAdsConversion } from "./marketing-pixels";
+
+function isWhatsAppLink(href: string): boolean {
+  const url = URL.parse(href);
+  return !!url && (
+    url.protocol === "whatsapp:" ||
+    (url.protocol === "https:" && (
+      url.hostname === "wa.me" ||
+      url.hostname === "whatsapp.com" ||
+      url.hostname.endsWith(".whatsapp.com")
+    ))
+  );
+}
 
 function getOrCreateVisitorId(): string {
   try {
@@ -220,6 +233,8 @@ function SiteTrackerInner() {
       const tag = target?.tagName?.toLowerCase() || "body";
       const anchor = target?.closest("a");
       const href = anchor?.getAttribute("href") || "";
+      const whatsAppLink = isWhatsAppLink(anchor?.href || "");
+      if (whatsAppLink && !e.defaultPrevented) fireGoogleAdsConversion();
       const txt = (target?.textContent || target?.getAttribute("aria-label") || "").replace(/\s+/g, " ").trim().slice(0, 140);
       const selector = buildSelector(target);
 
@@ -237,7 +252,7 @@ function SiteTrackerInner() {
       if (isRage) {
         eventType = "rage_click";
         eventName = "rage_click";
-      } else if (href.includes("wa.me") || href.includes("whatsapp")) {
+      } else if (whatsAppLink) {
         eventType = "whatsapp_click";
         eventName = "whatsapp_cta";
       } else if (href.startsWith("http") && !href.includes(window.location.hostname)) {
