@@ -63,6 +63,7 @@ import { GrowthPlanView } from "./growth-plan-view";
 import { EmailMarketingView } from "./email-marketing-view";
 import { AnalyticsView } from "./analytics-view";
 import { AiSettingsDialog } from "./ai-settings-dialog";
+import { PromptStudioView } from "./prompt-studio-view";
 
 interface SearchOrg {
   id: number;
@@ -169,6 +170,14 @@ const NAV_ITEMS: NavItem[] = [
     badge: "GPT",
     section: "growth",
     icon: Bot,
+  },
+  {
+    id: "ai_prompts",
+    label: "Central de prompts",
+    subtitle: "Instruções, testes e versões das IAs",
+    keywords: "central prompt sistema editar versões agentes sara otavio anderley ia",
+    section: "growth",
+    icon: Sparkles,
   },
   {
     id: "editorial",
@@ -904,6 +913,7 @@ export function CrmShell({
             {activeTab === "ai_chat" && (
               <AiChatView onOpenAiSettings={() => setAiSettingsOpen(true)} />
             )}
+            {activeTab === "ai_prompts" && <PromptStudioView />}
             {activeTab === "editorial" && (
               <EditorialBlogView onOpenAiSettings={() => setAiSettingsOpen(true)} />
             )}

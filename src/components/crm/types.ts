@@ -8,6 +8,7 @@ export type CrmTab =
   | "proposals"
   | "import"
   | "ai_chat"
+  | "ai_prompts"
   | "editorial"
   | "email_marketing"
   | "analytics"

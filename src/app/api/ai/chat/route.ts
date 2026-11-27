@@ -1,3 +1,4 @@
+import { readPrompt, withPromptInstructions } from "@/lib/prompt-store";
 import { NextRequest, NextResponse } from "next/server";
 import type OpenAI from "openai";
 import { requireWorkspaceUser } from "@/lib/supabase/server";
@@ -252,7 +253,7 @@ export async function POST(req: NextRequest) {
     const conversation: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
       {
         role: "system",
-        content: `${TARGET_COMPLIANCE_SYSTEM_PROMPT}\n\nUsuário ativo no momento: ${member.full_name} (${member.role} / ${member.email}). Data de hoje: ${now.slice(0, 10)}.\nVocê tem ferramentas para consultar e gravar dados reais no Supabase CRM da Target Relocation (negócios, DOU, tarefas para SDRs, pautas no calendário editorial, placar SDR e negativas no Ads). Sempre use as ferramentas antes de responder sobre números do CRM ou executar ações solicitadas pelo usuário, e confirme com precisão os IDs/nomes alterados.`,
+        content: `${withPromptInstructions(TARGET_COMPLIANCE_SYSTEM_PROMPT, await readPrompt(supabase, "copilot"))}\n\nUsuário ativo no momento: ${member.full_name} (${member.role} / ${member.email}). Data de hoje: ${now.slice(0, 10)}.\nVocê tem ferramentas para consultar e gravar dados reais no Supabase CRM da Target Relocation (negócios, DOU, tarefas para SDRs, pautas no calendário editorial, placar SDR e negativas no Ads). Sempre use as ferramentas antes de responder sobre números do CRM ou executar ações solicitadas pelo usuário, e confirme com precisão os IDs/nomes alterados.`,
       },
       ...orderedHistory.map((m) => ({
         role: (m.role === "assistant" ? "assistant" : "user") as "assistant" | "user",

@@ -1,3 +1,4 @@
+import { readPrompt, withPromptInstructions } from "@/lib/prompt-store";
 import { NextRequest, NextResponse } from "next/server";
 import { requireWorkspaceUser } from "@/lib/supabase/server";
 import { resolveOpenAiClient, TARGET_COMPLIANCE_SYSTEM_PROMPT } from "@/lib/openai";
@@ -207,7 +208,7 @@ export async function POST(req: NextRequest) {
         messages: [
           {
             role: "system",
-            content: `${TARGET_COMPLIANCE_SYSTEM_PROMPT}\nVocê agora é o Auditor de Ligações (Boost / Felipe). Avalie ligações de prospecção B2B para Target Relocation cujo objetivo único é agendar uma reunião qualificada com RH/Global Mobility.`,
+            content: `${withPromptInstructions(TARGET_COMPLIANCE_SYSTEM_PROMPT, await readPrompt(supabase, "call_audit"))}\nVocê agora é o Auditor de Ligações (Boost / Felipe). Avalie ligações de prospecção B2B para Target Relocation cujo objetivo único é agendar uma reunião qualificada com RH/Global Mobility.`,
           },
           {
             role: "user",
@@ -251,7 +252,7 @@ export async function POST(req: NextRequest) {
           model: ai.model,
           temperature: 0.3,
           messages: [
-            { role: "system", content: TARGET_COMPLIANCE_SYSTEM_PROMPT },
+            { role: "system", content: withPromptInstructions(TARGET_COMPLIANCE_SYSTEM_PROMPT, await readPrompt(supabase, "meeting_summary")) },
             {
               role: "user",
               content: `Gere um resumo executivo direto (máximo 5 linhas) da Reunião Semanal de 30 min (Segunda, 9h) com Klaus, Áurea, Anderley e Felipe.\nReuniões agendadas na semana: ${meetingsWeek}\nTravas: ${blockers || "Nenhuma"}\nDecisões: ${decisions || "Padrão"}\nCalendário aprovado pelo Klaus: ${calendarApproved ? "Sim" : "Pendente"}`,

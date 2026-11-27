@@ -1,3 +1,4 @@
+import { readPrompt, withPromptInstructions } from "@/lib/prompt-store";
 import { NextRequest, NextResponse } from "next/server";
 import { requireWorkspaceUser } from "@/lib/supabase/server";
 import { resolveOpenAiClient, TARGET_COMPLIANCE_SYSTEM_PROMPT } from "@/lib/openai";
@@ -144,7 +145,7 @@ export async function POST(req: NextRequest) {
         response_format: { type: "json_object" },
         temperature: 0.2,
         messages: [
-          { role: "system", content: TARGET_COMPLIANCE_SYSTEM_PROMPT },
+          { role: "system", content: withPromptInstructions(TARGET_COMPLIANCE_SYSTEM_PROMPT, await readPrompt(supabase, "ads_audit")) },
           {
             role: "user",
             content: `Audite os termos de busca / campanhas abaixo seguindo a revisão semanal do Plano de Ação Target Relocation.\nRegra rígida: vistos temporários/agrícolas EUA (H2A/H2B), visto turismo B1/B2 isolado, mudanças residenciais comuns e transporte de pets ficam NEGATIVADOS.\nCampanhas: ${JSON.stringify(campaigns)}\nTermos informados: ${searchTerms || "Gerar recomendações preventivas de negativas e estrutura exata/frase"}\n\nRetorne JSON:\n{"recommended_negatives": ["termo 1", "..."], "audit_summary": "Análise objetiva", "campaign_actions": ["ação 1", "ação 2"]}`,
@@ -188,7 +189,7 @@ export async function POST(req: NextRequest) {
         messages: [
           {
             role: "system",
-            content: `${TARGET_COMPLIANCE_SYSTEM_PROMPT}\nVocê atua como avaliador especialista em GEO (Generative Engine Optimization). Analise se o acervo atual de artigos publicados da Target Relocation responde diretamente à pergunta do RH no 1º parágrafo, possui FAQ Schema sólido e atende rigor regulatório (MTE / Polícia Federal).`,
+            content: `${withPromptInstructions(TARGET_COMPLIANCE_SYSTEM_PROMPT, await readPrompt(supabase, "geo_audit"))}\nVocê atua como avaliador especialista em GEO (Generative Engine Optimization). Analise se o acervo atual de artigos publicados da Target Relocation responde diretamente à pergunta do RH no 1º parágrafo, possui FAQ Schema sólido e atende rigor regulatório (MTE / Polícia Federal).`,
           },
           {
             role: "user",

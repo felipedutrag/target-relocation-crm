@@ -1,3 +1,4 @@
+import { readPrompt, withPromptInstructions } from "@/lib/prompt-store";
 import { NextRequest, NextResponse } from "next/server";
 import { requireWorkspaceUser } from "@/lib/supabase/server";
 import { resolveOpenAiClient, TARGET_COMPLIANCE_SYSTEM_PROMPT, slugifyPt } from "@/lib/openai";
@@ -172,7 +173,7 @@ export async function POST(req: NextRequest) {
         messages: [
           {
             role: "system",
-            content: `${TARGET_COMPLIANCE_SYSTEM_PROMPT}\nCrie um e-mail marketing HTML responsivo (inline CSS elegante, largura máxima 600px, tipografia limpa sem spamwords). Suporte as variáveis {{nome}} e {{empresa}} se fizer sentido.`,
+            content: `${withPromptInstructions(TARGET_COMPLIANCE_SYSTEM_PROMPT, await readPrompt(supabase, "email"))}\nCrie um e-mail marketing HTML responsivo (inline CSS elegante, largura máxima 600px, tipografia limpa sem spamwords). Suporte as variáveis {{nome}} e {{empresa}} se fizer sentido.`,
           },
           {
             role: "user",

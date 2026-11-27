@@ -1,3 +1,4 @@
+import { withPromptInstructions } from "./prompt-store";
 import OpenAI from "openai";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -74,6 +75,7 @@ export async function generateOmnichannelPack(params: {
   videoPlan: string;
   scheduledDate: string;
   extraInstructions?: string;
+  promptInstructions?: string;
 }) {
   const { openai, model, topic, format, videoPlan, scheduledDate, extraInstructions } = params;
   const utmCampaign = `blog_${scheduledDate.replace(/-/g, "")}_${slugifyPt(topic).slice(0, 28)}`;
@@ -132,7 +134,7 @@ Retorne ESTRITAMENTE um JSON válido com as seguintes chaves:
     response_format: { type: "json_object" },
     temperature: 0.4,
     messages: [
-      { role: "system", content: TARGET_COMPLIANCE_SYSTEM_PROMPT },
+      { role: "system", content: params.promptInstructions ? withPromptInstructions(TARGET_COMPLIANCE_SYSTEM_PROMPT, params.promptInstructions) : TARGET_COMPLIANCE_SYSTEM_PROMPT },
       { role: "user", content: prompt },
     ],
   });

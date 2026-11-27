@@ -1,3 +1,4 @@
+import { readPrompt } from "@/lib/prompt-store";
 import { NextRequest, NextResponse } from "next/server";
 import { requireWorkspaceUser } from "@/lib/supabase/server";
 import { generateOmnichannelPack, resolveOpenAiClient, slugifyPt } from "@/lib/openai";
@@ -110,6 +111,7 @@ export async function POST(req: NextRequest) {
         videoPlan: String(item.video_plan),
         scheduledDate: String(item.scheduled_date),
         extraInstructions: body.instructions ? String(body.instructions) : undefined,
+        promptInstructions: await readPrompt(supabase, "editorial"),
       });
 
       const slug = slugifyPt(String(generated.slug || item.topic)) || `artigo-${item.id}`;

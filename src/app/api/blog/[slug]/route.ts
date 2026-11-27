@@ -1,3 +1,4 @@
+import { readPrompt, withPromptInstructions } from "@/lib/prompt-store";
 import { NextRequest, NextResponse } from "next/server";
 import { createPublicClient, requireWorkspaceUser } from "@/lib/supabase/server";
 import { resolveOpenAiClient, TARGET_COMPLIANCE_SYSTEM_PROMPT } from "@/lib/openai";
@@ -183,7 +184,7 @@ export async function POST(
       response_format: { type: "json_object" },
       temperature: 0.3,
       messages: [
-        { role: "system", content: TARGET_COMPLIANCE_SYSTEM_PROMPT },
+        { role: "system", content: withPromptInstructions(TARGET_COMPLIANCE_SYSTEM_PROMPT, await readPrompt(auth.supabase, "blog_seo")) },
         {
           role: "user",
           content: `Otimize os metadados Yoast SEO & GEO (SEM alterar o slug /${post.slug}) para este artigo da Target Relocation:
