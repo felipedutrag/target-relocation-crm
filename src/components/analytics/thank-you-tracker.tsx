@@ -5,7 +5,8 @@ import { fireLeadConversion } from "@/components/analytics/marketing-pixels";
 
 export function ThankYouTracker({ origin }: { origin?: string }) {
   useEffect(() => {
-    fireLeadConversion(origin || "obrigado");
+    // Google Ads is recorded by the successful form submission.
+    fireLeadConversion(origin || "obrigado", { googleAds: false });
   }, [origin]);
 
   return null;
